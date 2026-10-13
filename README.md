@@ -31,6 +31,11 @@ transitions never show a seam:
 (`CONTENT`) and the styles (`EXTRA_CSS`), and writes the page out. Edit the
 builder, run it, copy the result over `index.html`.
 
+`build/patches/` holds the 95 scripts the builder was changed by, one per
+revision. Each one asserts on the text it expects to find before replacing it,
+so a patch applied against a builder that has moved on fails loudly rather than
+corrupting it. They are history, not a pipeline — you don't re-run them.
+
 Two notes on the builder:
 
 - Its output path is absolute to the machine it was written on
@@ -55,6 +60,12 @@ blue. The shared `wisemonk-ui.js` is included for the composer's behaviour
 only. The linter will flag the fonts and colours here; that is expected.
 
 ## Assets
+
+`assets-source/mira-mark.svg` is the Mira mark the closing animation is drawn
+from. The page inlines it as a data URI inside the SVG that masks the metallic
+gradient, so the file is kept here as the source it came from rather than as
+something the page fetches.
+
 
 `face-candidate.png` and `face-interviewer.png` are photographs supplied for
 the interview panel. Check the licence before this page goes anywhere public.

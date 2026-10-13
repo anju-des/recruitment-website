@@ -82,6 +82,20 @@
     html, body { overflow-x:clip; }
     body { background:#FFFFFF; }
     .rec-hero { position:relative; }
+    /* sand over the foot of the section: the grain is centred on mid-grey, so
+       `overlay` disturbs the value without touching the hue underneath, and the
+       mask keeps it to the bottom where the violet gathers */
+    .rec-hero::after { content:""; position:absolute; inset:auto 0 0 0;
+                       height:62%; z-index:0; pointer-events:none;
+                       opacity:.62; mix-blend-mode:overlay;
+                       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 -0.275 0.33 0.33 0.33 0 -0.275 0.33 0.33 0.33 0 -0.275 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23s)'/%3E%3C/svg%3E");
+                       background-size:150px 150px;
+                       -webkit-mask-image:linear-gradient(to top,
+                         #000 0%, rgba(0,0,0,.72) 38%, transparent 100%);
+                       mask-image:linear-gradient(to top,
+                         #000 0%, rgba(0,0,0,.72) 38%, transparent 100%); }
+    /* the hero's own content stays above the grain */
+    .rec-hero-inner { position:relative; z-index:1; }
     .rec-sky { position:fixed; inset:0; z-index:-1; pointer-events:none;
                background:linear-gradient(180deg,
                  var(--sky-a, #FFFFFF) 0%, var(--sky-a, #FFFFFF) 34%,

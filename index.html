@@ -1,0 +1,2218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recruitment Support — Wisemonk</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@700,500,400&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="wisemonk-ui/wisemonk-ui.css">
+  <script src="wisemonk-ui/wisemonk-ui.js" defer></script>
+  <style>
+    :root {
+      --primary-50:#E8F2FF; --primary-100:#C5DCFF; --primary-300:#9DC4FF; --primary-400:#72ABFF; --primary-500:#2684FF; --primary-700:#1059BD; --primary-800:#09449A; --primary-900:#03307A; --success-500:#12B76A; --primary-600:#1A6FE0; --primary-700:#1059BD;
+      --accent-500:#2684FF; --accent-tint:rgba(38,132,255,0.10);
+      --neutral-0:#FFFFFF; --neutral-50:#F7F8FA; --neutral-100:#EEF0F4; --neutral-200:#DDE1E9; --neutral-300:#C4CAD6; --neutral-400:#9AA2B2; --neutral-900:#121620; --rec-chrome:0px;
+      --grey-300:#9AA2B2; --grey-700:#222733; --bg-subtle:#F1F8FF; --border:#EEF0F4; --text-primary:#222733; --text-secondary:#363D4D; --text-muted:#9AA2B2;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root { interpolate-size:allow-keywords; }
+    body { font-family:'Satoshi',sans-serif; background:var(--bg-subtle); color:var(--text-primary); min-height:100vh; }
+    a { text-decoration:none; color:inherit; }
+    .app { display:flex; min-height:100vh; }
+
+    /* Sidebar */
+    .sidebar { width:240px; flex-shrink:0; background:var(--neutral-0); padding:30px 20px; display:flex; flex-direction:column; gap:22px; }
+    .sidebar-logo { display:flex; align-items:center; gap:10px; padding:0 4px; height:32px; overflow:hidden; }
+    .sidebar-logo img { height:56px; width:auto; margin-top:-30px; display:block; }
+    .nav-section { display:flex; flex-direction:column; }
+    .nav-title { font-weight:300; font-size:12px; letter-spacing:0.6px; color:var(--grey-300); padding:8px; margin-bottom:2px; }
+    .nav-link, .nav-parent { display:flex; align-items:center; gap:12px; height:40px; padding:0 10px; border-radius:8px; font-family:'Satoshi',sans-serif; font-weight:500; font-size:15px; color:var(--grey-700); transition:background .15s,color .15s; background:none; border:none; cursor:pointer; width:100%; text-align:left; }
+    .nav-link:hover, .nav-parent:hover { background:var(--neutral-50); }
+    .nav-link.active { background:var(--accent-tint); color:var(--accent-500); }
+    .nav-link.active .nav-icon { color:var(--accent-500); }
+    .nav-icon { width:20px; height:20px; display:flex; align-items:center; justify-content:center; color:var(--grey-700); flex-shrink:0; }
+    .nav-icon svg { width:100%; height:100%; }
+    .nav-chev { margin-left:auto; width:14px; height:14px; color:var(--neutral-400); transition:transform .2s; transform:rotate(-90deg); }
+    .nav-group.open .nav-parent .nav-chev { transform:rotate(0deg); }
+    .nav-children { display:none; flex-direction:column; gap:2px; margin-top:2px; padding-left:32px; }
+    .nav-group.open .nav-children { display:flex; }
+    .nav-child { display:flex; align-items:center; height:36px; padding:0 10px; border-radius:8px; font-weight:500; font-size:14.5px; color:var(--grey-700); transition:background .15s,color .15s; }
+    .nav-child:hover { background:var(--neutral-50); }
+
+    /* Main + header */
+    .main-col { flex:1; display:flex; flex-direction:column; min-width:0; }
+    .header { display:flex; align-items:center; justify-content:space-between; height:80px; padding:0 40px; background:var(--bg-subtle); }
+    .header h1 { font-weight:700; font-size:23px; color:#222733; }
+    .header-right { display:flex; align-items:center; gap:16px; }
+    .bell-btn { width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:transparent; border:none; color:#363D4D; cursor:pointer; }
+    .bell-btn:hover { background:rgba(0,0,0,0.04); }
+    .bell-btn svg { width:22px; height:22px; }
+    .user-chip { display:flex; align-items:center; gap:8px; cursor:pointer; padding:4px 8px 4px 4px; border-radius:100px; flex-shrink:0; }
+    .user-avatar { width:32px; height:32px; min-width:32px; border-radius:50%; background:var(--accent-500); color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; }
+    .user-name { font-weight:500; font-size:16px; color:var(--grey-700); white-space:nowrap; }
+    .user-chev { width:16px; height:16px; color:#9AA2B2; flex-shrink:0; }
+    .content { flex:1; padding:8px 0 0; }
+
+    /* Page layout */
+    .rec-wrap { width:100%; display:flex; flex-direction:column; gap:20px; }
+
+    @media (max-width:1000px) {
+      .content { padding:8px 20px 0; }
+    }
+
+
+    /* ---- type ------------------------------------------------------------ */
+    /* Geist by request, in place of the system's Satoshi */
+    body, .wm-btn, input, textarea, select, button {
+      font-family:'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif; }
+
+    /* ---- the sky --------------------------------------------------------- */
+    /* The whole backdrop is this one fixed layer: the violet wash at rest and
+       the dark later on are the same colours travelling, set from script.
+       Nothing is ever laid over the content, so the text never greys, and
+       because it is fixed there is no seam between one section and the next. */
+    /* The row of windows reaches well past the viewport before it assembles,
+       which was making the document wider than the window -- and everything
+       centred, the header included, centres on the document, not the screen.
+       `clip` rather than `hidden`: hidden would make this a scroll container
+       and break every sticky section inside it. */
+    html, body { overflow-x:clip; }
+    body { background:#FFFFFF; }
+    .rec-hero { position:relative; }
+    .rec-sky { position:fixed; inset:0; z-index:-1; pointer-events:none;
+               background:linear-gradient(180deg,
+                 var(--sky-a, #FFFFFF) 0%, var(--sky-a, #FFFFFF) 34%,
+                 var(--sky-b, #E6DFFA) 100%); }
+    /* the drifting blob rides on the sky now, and fades as it darkens */
+    .rec-sky::before {
+      content:""; position:absolute; left:50%; bottom:-140px;
+      width:min(1100px, 90%); height:460px; translate:-50% 0; border-radius:50%;
+      filter:blur(50px); opacity:var(--sky-glow, 1);
+      background:radial-gradient(closest-side,
+                 rgba(139,92,246,.40) 0%, rgba(124,131,246,.22) 45%,
+                 rgba(139,92,246,0) 78%);
+      animation:rec-glow 14s ease-in-out infinite;
+    }
+    @keyframes rec-glow {
+      0%, 100% { transform:translateX(-90px) scale(1); }
+      50%      { transform:translateX(90px) scale(1.14); }
+    }
+    @media (prefers-reduced-motion: reduce) { .rec-sky::before { animation:none; } }
+
+    /* content sits above the sky; the header rides above it and stays */
+    .rec-head { position:sticky; top:0; z-index:5; }
+    .rec-wrap { position:relative; z-index:1; }
+    .rec-hero-inner { display:flex; flex-direction:column; align-items:center;
+                      width:100%;
+                      transform:translateY(calc(var(--rec-lift, 0) * -1px));
+                      opacity:var(--rec-fade, 1);
+                      will-change:transform, opacity; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-hero-inner { transform:none; opacity:1; }
+    }
+
+    /* ---- header ---------------------------------------------------------- */
+    .rec-head { padding:10px 24px; }
+    .rec-head-inner { position:relative; max-width:1240px; margin-inline:auto;
+                      display:flex; align-items:center; justify-content:space-between;
+                      height:60px; padding:0 24px; border-radius:14px;
+                      transition:background .3s, box-shadow .3s, backdrop-filter .3s; }
+    /* the glass only appears once the page has moved */
+    /* thinner glass: most of the legibility comes from the blur, not from a
+       white fill, so what is behind it still shows through */
+    .rec-head.is-stuck .rec-head-inner {
+      background:rgba(255,255,255,.40);
+      -webkit-backdrop-filter:saturate(180%) blur(22px);
+      backdrop-filter:saturate(180%) blur(22px);
+      box-shadow:0 8px 26px rgba(18,22,32,.07), inset 0 0 0 1px rgba(255,255,255,.45); }
+    /* after dark the same bar flips: dark glass, light type */
+    .rec-head.is-stuck.is-night .rec-head-inner {
+      background:rgba(16,19,32,.34);
+      box-shadow:0 8px 26px rgba(0,0,0,.28), inset 0 0 0 1px rgba(255,255,255,.08); }
+    .rec-head.is-night .rec-nav-item { color:#E8EAF2; }
+    .rec-head.is-night .rec-nav-item:hover { color:#FFFFFF; }
+    .rec-head.is-night .rec-nav-item svg { color:#9AA2B8; }
+    .rec-head.is-night .rec-logo img { filter:invert(1) brightness(1.7); }
+    .rec-head.is-night .rec-login { background:#FFFFFF; color:#0F172A; }
+    .rec-head.is-night .rec-login:hover { background:#E8EAF2; }
+    .rec-logo img, .rec-nav-item, .rec-login {
+      transition:filter .25s, color .25s, background .25s; }
+    .rec-logo { display:inline-flex; }
+    .rec-logo img { height:30px; width:auto; display:block; }
+    .rec-head-right { display:flex; align-items:center; gap:28px; }
+    .rec-nav { display:flex; align-items:center; gap:24px; }
+    .rec-nav-item { display:inline-flex; align-items:center; gap:5px; cursor:pointer;
+                    background:none; border:none; padding:6px 0; font-family:inherit;
+                    font-size:14.5px; font-weight:400; color:var(--text-primary);
+                    transition:color .12s; }
+    .rec-nav-item:hover { color:var(--primary-600); }
+    .rec-nav-item svg { width:13px; height:13px; color:var(--text-muted); }
+    /* same near-black as the field's action, so the two read as one family */
+    .rec-login { display:inline-flex; align-items:center; height:38px; padding:0 20px;
+                 border:none; border-radius:8px; background:#0f172a;
+                 font-size:14px; font-weight:600; color:#ffffff;
+                 transition:background .12s; }
+    .rec-login:hover { background:#1e293b; }
+
+    /* ---- announcement chip ------------------------------------------- */
+    /* a white card holding the news, with the action as a filled pill inside
+       it rather than a link sitting beside a divider */
+    .rec-chip { display:inline-flex; align-items:center; gap:14px; margin-bottom:32px;
+                padding:8px 16px; border-radius:6px; background:var(--neutral-0);
+                box-shadow:0 2px 12px rgba(18,22,32,.10);
+                font-size:14px; font-weight:600; color:var(--text-primary);
+                white-space:nowrap; transition:box-shadow .15s, transform .15s; }
+    .rec-chip:hover { box-shadow:0 6px 20px rgba(18,22,32,.14); transform:translateY(-1px); }
+    .rec-chip-dot { width:8px; height:8px; border-radius:50%; flex:none;
+                    background:linear-gradient(135deg,#2684FF,#8B5CF6); }
+    .rec-chip-more { display:inline-flex; align-items:center; gap:4px; flex:none;
+                     font-size:14px; font-weight:400; color:var(--text-primary); }
+    .rec-chip-more svg { width:13px; height:13px; }
+
+    /* ---- hero ------------------------------------------------------------ */
+    /* one line held in the middle of the first screen, nothing else competing */
+    .rec-hero { min-height:calc(100vh - var(--rec-chrome)); display:flex;
+                flex-direction:column; align-items:center; justify-content:center;
+                text-align:center; }
+    /* extra room at the foot lifts the centred block off the middle of the
+       screen. The section selector is needed to beat the shared 48px padding
+       declared further down. */
+    .rec-wrap > section.rec-hero { padding-bottom:168px; }
+    .rec-hero h1 { max-width:20ch; font-size:72px; font-weight:600; line-height:1.16;
+                   letter-spacing:-0.032em; color:var(--grey-700); text-wrap:balance; }
+    /* the closing word carries the page's own blue-to-violet wash. Painted
+       through the text, with a solid colour behind it for anything that
+       cannot clip a background to a glyph. */
+    .rec-grad { color:var(--primary-600);
+                background:linear-gradient(100deg, #2684FF 0%, #5B7CFF 48%, #8B5CF6 100%);
+                -webkit-background-clip:text; background-clip:text; }
+    @supports ((-webkit-background-clip:text) or (background-clip:text)) {
+      .rec-grad { color:transparent; }
+    }
+    /* the cursor: zero-width so it never shifts the centred headline */
+    .rec-cursor { position:relative; display:inline-block; width:0; height:0;
+                  vertical-align:baseline;
+                  animation:rec-float 6s ease-in-out infinite; }
+    /* arrow and chip drift together, the way a cursor someone is holding
+       still never quite holds still */
+    @keyframes rec-float {
+      0%, 100% { transform:translate(0, 0); }
+      25%      { transform:translate(4px, -6px); }
+      50%      { transform:translate(7px, -1px); }
+      75%      { transform:translate(2px, -7px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .rec-cursor { animation:none; } }
+    /* the tip points back at the word it is resting on */
+    .rec-cursor svg { position:absolute; left:20px; top:-14px; width:25px; height:27px;
+                      fill:#2684FF; filter:drop-shadow(0 2px 4px rgba(38,132,255,.35)); }
+    .rec-cursor b { position:absolute; left:42px; top:8px; padding:3px 10px 4px;
+                    border-radius:100px; background:linear-gradient(100deg,#2684FF,#6E6BFF);
+                    color:#fff; font-size:13px; font-weight:500; line-height:1.3;
+                    letter-spacing:0; white-space:nowrap;
+                    box-shadow:0 2px 8px rgba(38,132,255,.3); }
+
+    .rec-hero-sub { max-width:54ch; margin-top:40px; font-size:18px; font-weight:400;
+                    line-height:1.6; color:var(--text-secondary); text-wrap:pretty; }
+    @media (max-width:1000px) {
+      .rec-hero h1 { font-size:44px; letter-spacing:-0.03em; }
+      .rec-chip { font-size:12.5px; gap:8px; margin-bottom:24px;
+                  white-space:normal; text-align:left; }
+      .rec-hero-sub { margin-top:28px; }
+      .rec-cursor svg { left:12px; top:-10px; width:18px; height:20px; }
+      .rec-cursor b { left:28px; top:5px; font-size:11px; padding:2px 8px 3px; }
+      .rec-compose-wrap { margin-top:36px; }
+    }
+
+    /* ---- hero composer ----------------------------------------------- */
+    /* Values lifted from Recruitment-frontend/src/components/HomeCreateRole.css
+       so this is the portal's own field, not a lookalike. Those are the recruit
+       portal's identity colours (slate + near-black), which the Wisemonk palette
+       check will flag -- the two design systems are separate by design. */
+    /* the hero centres its children, so the field needs a width of its own
+       or it shrinks to the placeholder */
+    .rec-compose-wrap { width:100%; max-width:820px; margin:48px auto 0; }
+    .rec-compose { position:relative; width:100%; text-align:left;
+                   background:#ffffff; border:none; border-radius:14px;
+                   padding:12px 12px 12px 18px; box-shadow:0 8px 28px rgba(37,99,235,0.12); }
+
+    /* A very light blue haze drifting around the edge: two blurred conic
+       gradients turning at different speeds in opposite directions, sitting
+       just outside the card and behind it. Only the part that spills past the
+       edge shows, which is what makes it read as smoke rather than a border. */
+    @property --rec-angle { syntax:'<angle>'; initial-value:0deg; inherits:false; }
+    @property --rec-angle-2 { syntax:'<angle>'; initial-value:220deg; inherits:false; }
+    .rec-compose::before, .rec-compose::after {
+      content:""; position:absolute; inset:-7px; z-index:-1; border-radius:21px;
+      pointer-events:none;
+    }
+    .rec-compose::before {
+      background:conic-gradient(from var(--rec-angle),
+                 rgba(38,132,255,0) 0deg, var(--primary-100) 70deg,
+                 var(--primary-300) 120deg, var(--primary-100) 170deg,
+                 rgba(38,132,255,0) 240deg, var(--primary-100) 320deg,
+                 rgba(38,132,255,0) 360deg);
+      filter:blur(10px);
+      animation:rec-smoke 9s linear infinite;
+    }
+    .rec-compose::after {
+      background:conic-gradient(from var(--rec-angle-2),
+                 rgba(38,132,255,0) 0deg, var(--primary-50) 90deg,
+                 var(--primary-100) 150deg, rgba(38,132,255,0) 260deg,
+                 var(--primary-50) 330deg, rgba(38,132,255,0) 360deg);
+      filter:blur(14px); opacity:.85;
+      animation:rec-smoke-2 14s linear infinite reverse;
+    }
+    @keyframes rec-smoke { to { --rec-angle:360deg; } }
+    @keyframes rec-smoke-2 { to { --rec-angle-2:580deg; } }
+    /* steady while the user is actually in the field */
+    .rec-compose:focus-within::before, .rec-compose:focus-within::after {
+      animation-play-state:paused; opacity:.45;
+    }
+    .rec-compose:focus-within { box-shadow:0 8px 28px rgba(37,99,235,0.12),
+                                           0 0 0 4px var(--primary-50); }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-compose::before, .rec-compose::after { animation:none; }
+    }
+
+    .rec-compose-headrow { display:flex; align-items:center; gap:16px; }
+    .rec-compose-input { flex:1; min-width:0; border:none; outline:none; resize:none;
+                         background:transparent;
+                         font-size:20px; font-weight:400; line-height:1.35; color:#1e293b;
+                         letter-spacing:-0.01em; padding:0; margin:0; overflow:hidden; }
+    .rec-compose-input::placeholder { color:#94a3b8; font-weight:400; opacity:1; }
+    .rec-compose-post { flex:none; background:#0f172a; color:#ffffff; border:none; cursor:pointer;
+                        font-size:14px; font-weight:600;
+                        padding:10px 22px; border-radius:8px; transition:background .12s; }
+    .rec-compose-post:hover { background:#1e293b; }
+
+    /* ---- next section (placeholder) ------------------------------------ */
+    /* tall enough that the slow exit completes before the page runs out
+       of scroll, with dark left over for whatever comes next */
+    /* no clipping here: the field travels up past the section's top edge on
+       its way in, and a hidden overflow cut the boxes off at that line */
+    /* The statement is pinned for the length of this section: it settles in
+       the middle of the screen and stays there while the lines colour. */
+    .rec-next { position:relative; min-height:300vh; }
+    /* above the chat window, so the boxes fall in front of it */
+    .rec-say-pin { position:sticky; top:0; height:100vh; display:grid; place-items:center;
+                   z-index:2; }
+    /* the field is centred on the same point as the text, so the boxes always
+       sit around it whatever the screen size */
+    /* The field fades in from the first scroll and slides down into place,
+       landing as the statement centres. --rec-q runs 0 to 1 over exactly that
+       stretch of scroll. */
+    .rec-boxes { --field-w:min(1200px, 92vw);
+                 position:absolute; left:50%; top:50%; translate:-50% -50%;
+                 width:var(--field-w); height:640px; pointer-events:none;
+                 opacity:var(--rec-qo, 0);
+                 transform:translateY(calc((1 - var(--rec-q, 0)) * -860px)); }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-boxes { opacity:1; transform:none; }
+      .rec-box { transform:scale(var(--d-scale, 1)); opacity:var(--d-op, 1); }
+    }
+    /* left/top are each box's centre: the negative margins pull it back by
+       half its size, which keeps percentage placement off the edges */
+    /* the marks are painted as flat silhouettes: the logo file is used as a
+       mask, so whatever colours it carries are replaced by this one */
+    /* these two have no alpha to mask, so they are tinted instead: inverted
+       to sit on a dark box, then pushed towards the same lavender */
+    .rec-mark--flat { background:none; object-fit:contain;
+                      filter:invert(1) grayscale(1) brightness(1.05) sepia(.45)
+                             hue-rotate(212deg) saturate(3.4); }
+    .rec-mark { width:46px; height:46px; background:#CFC7F5;
+                -webkit-mask:var(--logo) center / contain no-repeat;
+                mask:var(--logo) center / contain no-repeat; }
+    .rec-box { display:grid; place-items:center;
+               position:absolute; margin:-42px 0 0 -56px; width:112px; height:84px;
+               border-radius:14px;
+               /* glass that works on either sky: dark over the violet, light
+                  once the page has gone dark. Set from script. */
+               background:var(--box-fill, rgba(255,255,255,0.20)); border:none;
+               -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+               animation:rec-box-float 9s ease-in-out infinite;
+               /* --say-out runs 0 to 1 once the statement starts leaving: the
+                  boxes ride it down and inward, towards the window below */
+               opacity:calc(var(--d-op, 1) * var(--fall-o, 1));
+               transform:translate(calc(var(--fx, 0) * var(--field-w) * var(--fall, 0)),
+                                   var(--fall-px, 0px))
+                         scale(calc(var(--d-scale, 1) * (1 - 0.7 * var(--fall, 0)))); }
+    /* depth: all of them sharp, the far ones only dimmer and a touch smaller.
+       These are variables rather than declarations so the fall above can
+       multiply them instead of being overwritten by them. */
+    .rec-box--d1 { --d-op:.82; --d-scale:.94; animation-duration:11s; animation-delay:-3s; }
+    .rec-box--d2 { --d-op:.62; --d-scale:.88; animation-duration:13s; animation-delay:-6s; }
+    @keyframes rec-box-float {
+      0%, 100% { translate:0 0; }
+      50%      { translate:0 -14px; }
+    }
+    @media (prefers-reduced-motion: reduce) { .rec-box { animation:none; } }
+    /* carrying on past the landing takes the statement away again */
+    .rec-say { position:relative; z-index:1;
+               opacity:calc(1 - var(--say-out, 0));
+               transform:translateY(calc(var(--say-out, 0) * -72px)); }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-say { opacity:1; transform:none; }
+    }
+    /* one size throughout: the first line is the claim, the rest is what it
+       means. Light type, because the sky is dark by the time this is read. */
+    /* small on an ordinary screen, growing only on a wide one */
+    .rec-say { max-width:46ch; text-align:center;
+               font-size:clamp(23px, 1.3vw + 9px, 40px); font-weight:500;
+               line-height:1.45; letter-spacing:-0.015em; color:#9AA3B8;
+               text-wrap:balance; }
+    .rec-line { display:block; color:#8E97AE; }
+    .rec-line--lead { font-weight:600; }
+    /* The text is always there in grey; what moves is the colour, one line at
+       a time, driven by the scroll itself -- --l1/2/3 each run 0 to 1 over
+       their own stretch of the approach. */
+    .rec-line:nth-child(1) { color:color-mix(in srgb, #FFFFFF calc(var(--l1, 0) * 100%), #8E97AE); }
+    .rec-line:nth-child(2) { color:color-mix(in srgb, #FFFFFF calc(var(--l2, 0) * 100%), #8E97AE); }
+    .rec-line:nth-child(3) { color:color-mix(in srgb, #FFFFFF calc(var(--l3, 0) * 100%), #8E97AE); }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-line { color:#FFFFFF; }
+    }
+    @media (max-width:1000px) {
+      .rec-say { max-width:30ch; }
+      .rec-next { min-height:0; }
+      .rec-say-pin { position:static; height:auto; padding-block:80px; }
+      /* nothing is pinned and the pair stacks */
+      .rec-chat-sec { min-height:0; margin-top:0; padding-block:60px; }
+      .rec-close { min-height:40vh; }
+      .rec-wins-pin { position:static; height:auto; }
+      .rec-wins { position:static; translate:none; transform:none; }
+      .rec-win { width:100%; height:auto; max-height:none; }
+      .rec-win--static { opacity:1; transform:none; }
+      .rec-turn { max-width:86%; font-size:13.5px; }
+      /* no room to float anything around the text at this width */
+      .rec-boxes { display:none; }
+    }
+
+    /* ---- the field's entrance and its scroll behaviour ------------------ */
+    /* pops in once on load, then follows the scroll direction: out of the way
+       going down, back again coming up */
+    @keyframes rec-field-in {
+      from { opacity:0; transform:translateY(18px) scale(.96); }
+      to   { opacity:1; transform:none; }
+    }
+    /* `backwards`, not `both`: a forwards-filling animation keeps applying its
+       end values, and animation values outrank normal rules -- which would
+       leave a class-based override unable to move anything. */
+    .rec-compose-wrap { animation:rec-field-in .62s cubic-bezier(.22,.61,.36,1) .12s backwards;
+                        transition:opacity .34s cubic-bezier(.22,.61,.36,1),
+                                   transform .34s cubic-bezier(.22,.61,.36,1); }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-compose-wrap { animation:none; transition:none; }
+    }
+
+    /* ---- mira at work ---------------------------------------------------- */
+    /* Pulled up so its window is already climbing into the lower half of the
+       screen while the statement section is still pinned -- that overlap is
+       what the falling boxes land on. */
+    .rec-chat-sec { position:relative; min-height:400vh; margin-top:-55vh; }
+    .rec-wins-pin { position:sticky; top:0; height:100vh; }
+    .rec-wins { position:absolute; top:50%; left:50%; translate:-50% -50%;
+                display:flex; gap:36px;
+                /* (50% - half a window) is exactly one window plus one gap for
+                   a row of three, so each step centres the newest arrival */
+                transform:translateX(calc((1 - var(--wins, 0)) * (50% - 270px))); }
+    /* the two that follow are written out in full; they only have to appear */
+    .rec-win--static { opacity:var(--wv, 0);
+                       transform:translateX(calc((1 - var(--wv, 0)) * 48px)); }
+    .rec-wins > .rec-win--static:nth-child(2) { --wv:var(--w2, 0); }
+    .rec-wins > .rec-win--static:nth-child(3) { --wv:var(--w3, 0); }
+    .rec-win--static .rec-turn { opacity:1; transform:none; }
+    .rec-win { flex:none; width:540px; height:min(720px, calc(100vh - 110px));
+               max-height:calc(100vh - 96px);
+               display:flex; flex-direction:column;
+               border-radius:16px; overflow:hidden;
+               /* white cards on the lavender sky */
+               background:#FFFFFF;
+               box-shadow:0 24px 70px rgba(91,61,168,.22), 0 2px 10px rgba(32,22,66,.10),
+                          inset 0 0 0 1px rgba(32,22,66,.07); }
+    .rec-win-bar { display:flex; align-items:center; justify-content:space-between;
+                   padding:14px 18px; background:#F7F8FA;
+                   box-shadow:inset 0 -1px 0 rgba(32,22,66,.07); }
+    /* a dark mark on a white bar: no inversion needed */
+    .rec-win-logo { height:18px; width:auto; display:block; }
+    .rec-win-dots { display:inline-flex; align-items:center; gap:14px; color:#9AA2B2; }
+    .rec-win-dots svg { width:14px; height:14px; }
+
+    /* no floor: the window is as tall as the answer, not a fixed box with a
+       lot of empty space waiting in it */
+    .rec-thread { flex:1 1 auto; min-height:0; overflow:auto;
+                  padding:22px 18px; display:flex;
+                  flex-direction:column; gap:12px; }
+    .rec-turn { max-width:76%; padding:11px 14px; border-radius:14px; font-size:14.5px;
+                line-height:1.5; opacity:0; transform:translateY(10px);
+                transition:opacity .45s ease, transform .45s ease; }
+    .rec-turn--you { align-self:flex-end; background:#EEF0F4; color:#222733;
+                     border-bottom-right-radius:5px; }
+    .rec-turn--mira { align-self:flex-start; background:#EFE9FF; color:#2E2358;
+                      border-bottom-left-radius:5px; }
+    .rec-turn--typing { align-self:flex-start; display:flex; gap:5px; padding:14px 16px;
+                        background:#EEF0F4; border-bottom-left-radius:5px; }
+    .rec-dot { width:6px; height:6px; border-radius:50%; background:#9AA2B2;
+               animation:rec-blink 1.3s ease-in-out infinite; }
+    .rec-dot:nth-child(2) { animation-delay:.18s; }
+    .rec-dot:nth-child(3) { animation-delay:.36s; }
+    @keyframes rec-blink { 0%, 100% { opacity:.3; } 50% { opacity:1; } }
+    /* a turn is shown by script, in order; a typing turn is removed again
+       once the reply it stands in for arrives */
+    .rec-turn.is-on { opacity:1; transform:none; }
+    .rec-turn.is-done { display:none; }
+
+    .rec-ask { margin:0 14px 14px; padding:12px 14px 10px; border-radius:12px;
+               background:#F4F5F8; }
+    .rec-ask-hint { font-size:14px; color:#9AA2B2; }
+    .rec-ask-row { display:flex; align-items:center; justify-content:space-between;
+                   margin-top:10px; }
+    .rec-ask-tools { display:inline-flex; align-items:center; gap:12px; color:#6B7588;
+                     font-size:14px; font-weight:600; }
+    .rec-ask-tools svg { width:15px; height:15px; }
+    /* an answer rather than a bubble: what was read, a table of what it found,
+       and the things you would do next */
+    .rec-turn--meta, .rec-turn--say, .rec-turn--card, .rec-turn--chips {
+      align-self:stretch; max-width:none; padding:0; background:none; }
+    .rec-turn--meta { display:flex; align-items:center; gap:9px; font-size:13.5px;
+                      color:#6B7588; }
+    .rec-turn--meta svg { width:15px; height:15px; color:#7C5CF6; }
+    .rec-turn--say { font-size:14.5px; line-height:1.55; color:#222733; }
+    .rec-turn--card { border-radius:12px; overflow:hidden;
+                      box-shadow:inset 0 0 0 1px rgba(32,22,66,.10); }
+    .rec-card-head { display:flex; align-items:flex-start; justify-content:space-between;
+                     gap:16px; padding:14px 16px; background:#F7F8FA; }
+    .rec-card-head b { display:block; font-size:14.5px; font-weight:600; color:#222733; }
+    .rec-card-head i { display:block; margin-top:2px; font-style:normal; font-size:12.5px;
+                       color:#6B7588; }
+    .rec-card-count { flex:none; font-size:12.5px; color:#7C5CF6; }
+    .rec-row { display:grid; grid-template-columns:116px 1fr auto; align-items:center;
+               gap:14px; padding:11px 16px;
+               box-shadow:inset 0 1px 0 rgba(32,22,66,.08); }
+    .rec-row-k { font-size:13px; color:#6B7588; }
+    .rec-row-v { font-size:13.5px; font-weight:600; color:#222733; }
+    .rec-row-src { display:inline-flex; align-items:center; gap:7px; font-size:12.5px;
+                   color:#6B7588; white-space:nowrap; }
+    .rec-row-src img { width:15px; height:15px; object-fit:contain; }
+    /* an applicant, rather than another table of counts */
+    .rec-who { display:flex; align-items:center; gap:14px; padding:14px 16px;
+               background:#F7F8FA; }
+    .rec-who-pic { flex:none; width:44px; height:44px; border-radius:50%;
+                   display:grid; place-items:center; font-size:14.5px; font-weight:600;
+                   color:#4C1D95; background:linear-gradient(140deg,#EDE7FF,#CFC2FF); }
+    .rec-who-id { flex:1; min-width:0; }
+    .rec-who-id b { display:block; font-size:14.5px; font-weight:600; color:#222733; }
+    .rec-who-id i { display:block; margin-top:2px; font-style:normal; font-size:12.5px;
+                    color:#6B7588; }
+    .rec-who-fit { flex:none; font-size:12px; font-weight:600; color:#5B3DD4;
+                   background:#EFE9FF; border-radius:100px; padding:5px 11px; }
+    .rec-skills { display:flex; flex-wrap:wrap; gap:6px; padding:12px 16px 14px;
+                  box-shadow:inset 0 1px 0 rgba(32,22,66,.08); }
+    .rec-skills span { font-size:12px; color:#4E5768; background:#F1F2F6;
+                       border-radius:6px; padding:5px 9px; }
+
+    /* a time to book, rather than a list of times already booked */
+    .rec-slots { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;
+                 padding:14px 16px; }
+    .rec-slot { border-radius:10px; padding:10px 8px; text-align:center;
+                box-shadow:inset 0 0 0 1px rgba(32,22,66,.12); }
+    .rec-slot b { display:block; font-size:13px; font-weight:600; color:#222733; }
+    .rec-slot i { display:block; margin-top:3px; font-style:normal; font-size:11.5px;
+                  color:#6B7588; }
+    /* the one Mira is proposing */
+    .rec-slot.is-pick { background:#F3EEFF; box-shadow:inset 0 0 0 1.5px #8B5CF6; }
+    .rec-slot.is-pick b, .rec-slot.is-pick i { color:#4C1D95; }
+    .rec-meet { display:flex; align-items:center; gap:9px; padding:11px 16px;
+                font-size:12.5px; color:#6B7588;
+                box-shadow:inset 0 1px 0 rgba(32,22,66,.08); }
+    .rec-meet img { width:15px; height:15px; object-fit:contain; }
+
+    .rec-turn--chips { display:flex; flex-wrap:wrap; gap:8px; }
+    .rec-turn--chips button { font-family:inherit; font-size:13px; font-weight:500;
+                              color:#363D4D; background:#F1F2F6;
+                              border:none; border-radius:8px; padding:8px 13px;
+                              cursor:pointer; transition:background .12s; }
+    .rec-turn--chips button:hover { background:#E4E7EE; }
+
+    .rec-ask-right { display:inline-flex; align-items:center; gap:10px; }
+    /* The chat window keeps a dark treatment: it arrives while the sky is
+       still dark, and the boxes land on it there. */
+    /* a light purple light around it, so the black card lifts off the black
+       page instead of dissolving into it */
+    .rec-win--dark { background:#000000;
+                     box-shadow:0 0 90px rgba(186,164,255,.34),
+                                0 24px 70px rgba(150,120,245,.26),
+                                0 2px 0 rgba(203,188,255,.10),
+                                inset 0 0 0 1px rgba(203,188,255,.16); }
+    .rec-win--dark .rec-win-bar { background:rgba(255,255,255,.03);
+                                  box-shadow:inset 0 -1px 0 rgba(255,255,255,.07); }
+    .rec-win--dark .rec-win-logo { filter:invert(1) brightness(1.7); }
+    .rec-win--dark .rec-win-dots { color:#6B7488; }
+    .rec-win--dark .rec-turn--you { background:rgba(255,255,255,.10); color:#F2F3F8; }
+    .rec-win--dark .rec-turn--typing { background:rgba(255,255,255,.07); }
+    .rec-win--dark .rec-dot { background:#A8AFC2; }
+    .rec-win--dark .rec-turn--meta { color:#8E97AE; }
+    .rec-win--dark .rec-turn--meta svg { color:#A78BFA; }
+    .rec-win--dark .rec-turn--say { color:#E8EAF2; }
+    .rec-win--dark .rec-turn--card { box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+    .rec-win--dark .rec-card-head { background:rgba(255,255,255,.04); }
+    .rec-win--dark .rec-card-head b { color:#F2F3F8; }
+    .rec-win--dark .rec-card-head i, .rec-win--dark .rec-row-k,
+    .rec-win--dark .rec-row-src { color:#8E97AE; }
+    .rec-win--dark .rec-card-count { color:#A78BFA; }
+    .rec-win--dark .rec-row { box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
+    .rec-win--dark .rec-row-v { color:#F2F3F8; }
+    /* On pure black these were only a few per cent off the card and barely
+       read; the field and the actions both get a surface you can see. */
+    .rec-win--dark .rec-turn--chips button { color:#F2F3F8; background:rgba(255,255,255,.12);
+                                             box-shadow:inset 0 0 0 1px rgba(255,255,255,.10); }
+    .rec-win--dark .rec-turn--chips button:hover { background:rgba(255,255,255,.2); }
+    .rec-win--dark .rec-ask { background:rgba(255,255,255,.09);
+                              box-shadow:inset 0 0 0 1px rgba(255,255,255,.14); }
+    .rec-win--dark .rec-ask-hint { color:#AEB6C8; }
+    .rec-win--dark .rec-ask-tools { color:#AEB6C8; }
+
+    /* the applicant card: a lifted surface, not a white one */
+    .rec-win--dark .rec-who { background:rgba(255,255,255,.04); }
+    .rec-win--dark .rec-who-pic { color:#E7DEFF;
+                                  background:linear-gradient(140deg,
+                                    rgba(167,139,250,.40), rgba(124,92,246,.26)); }
+    .rec-win--dark .rec-who-id b { color:#F2F3F8; }
+    .rec-win--dark .rec-who-id i { color:#8E97AE; }
+    .rec-win--dark .rec-who-fit { color:#C9B8FF; background:rgba(167,139,250,.16);
+                                  box-shadow:inset 0 0 0 1px rgba(201,184,255,.24); }
+    .rec-win--dark .rec-skills { box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
+    .rec-win--dark .rec-skills span { color:#D5CDF0; background:rgba(255,255,255,.08);
+                                      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08); }
+
+    /* the slot tiles, same story */
+    .rec-win--dark .rec-slot { box-shadow:inset 0 0 0 1px rgba(255,255,255,.12); }
+    .rec-win--dark .rec-slot b { color:#F2F3F8; }
+    .rec-win--dark .rec-slot i { color:#8E97AE; }
+    .rec-win--dark .rec-slot.is-pick { background:rgba(167,139,250,.18);
+                                       box-shadow:inset 0 0 0 1.5px #A78BFA; }
+    .rec-win--dark .rec-slot.is-pick b,
+    .rec-win--dark .rec-slot.is-pick i { color:#E7DEFF; }
+    .rec-win--dark .rec-meet { color:#8E97AE;
+                               box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
+
+
+    .rec-ask-send { width:30px; height:30px; border-radius:50%; display:grid;
+                    place-items:center; background:#8B5CF6; color:#fff; }
+    .rec-ask-send svg { width:15px; height:15px; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-turn { opacity:1; transform:none; }
+      .rec-dot { animation:none; }
+    }
+
+    /* ---- closing ---------------------------------------------------------- */
+    /* No ground of its own: the sky lightens behind it, the same way it
+       darkened for the sections above. */
+    .rec-wrap > section.rec-close { padding:0; }
+    /* long enough that the light has a moment of its own before the ramp
+       starts back down -- the two must not overlap */
+    .rec-close { position:relative; min-height:150vh; }
+    .rec-wrap > section.rec-deep { padding:0; }
+    /* one screen of ramp, then a stretch of held scroll for each stage */
+    .rec-deep { position:relative; min-height:340vh; }
+    /* its own ramp runs over the screen before it, which is exactly when the
+       stage frame lets go, so the two never overlap */
+    .rec-wrap > section.rec-rest { padding:0; }
+    .rec-rest { position:relative; min-height:300vh; }
+
+
+    /* ---- stages ------------------------------------------------------------ */
+    /* A line, a row of tabs, a ruler that marks which one is open, and one
+       wide panel: the claim on the left, the stage's own card on the right. */
+    .rec-stage-pin { position:sticky; top:0; min-height:100vh;
+                     width:min(1280px, 92vw); margin-inline:auto;
+                     display:flex; flex-direction:column; justify-content:center;
+                     /* the top clears the sticky header, since the block is
+                        centred and would otherwise tuck the line under it */
+                     padding-top:clamp(96px, 10vh, 124px);
+                     padding-bottom:clamp(36px, 6vh, 90px);
+                     opacity:var(--deep-in, 0);
+                     transform:translateY(calc((1 - var(--deep-in, 0)) * 34px)); }
+    .rec-stage-top { margin:0; text-align:center; color:#191231;
+                     font-size:clamp(22px, 1.5vw + 11px, 34px); font-weight:600;
+                     line-height:1.25; letter-spacing:-0.025em; text-wrap:balance; }
+    .rec-stage-top span { color:#8F86AE; }
+
+    .rec-stage-rail { display:flex; justify-content:space-between; gap:10px;
+                      margin-top:clamp(22px, 3.2vh, 38px); }
+    .rec-stage-tab { display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+                     font-family:inherit; font-size:14.5px; font-weight:500;
+                     border:none; background:none; padding:4px 2px; color:#6E6690;
+                     transition:color .2s; }
+    .rec-stage-tab svg { width:16px; height:16px; flex:none; opacity:.7; }
+    .rec-stage-tab:hover { color:#3B3263; }
+    .rec-stage-tab.is-on { color:#191231; font-weight:600; }
+    .rec-stage-tab.is-on svg { opacity:1; color:#7C5CF6; }
+
+    /* the ruler: even ticks, and one bright mark that slides to the open tab */
+    .rec-stage-ruler { position:relative; height:14px;
+                       margin-top:clamp(10px, 1.8vh, 16px);
+                       background-image:repeating-linear-gradient(90deg,
+                         rgba(25,18,49,.20) 0 1px, transparent 1px 12px);
+                       background-size:12px 8px; background-position:left center;
+                       background-repeat:repeat-x; }
+    .rec-stage-mark { position:absolute; top:0; bottom:0; width:2px;
+                      left:var(--mark, 4%); background:#191231; border-radius:2px;
+                      transition:left .45s cubic-bezier(.22,.61,.36,1); }
+
+    .rec-stage-pane { display:none; }
+    /* without this a grid item cannot shrink below its own content, and the
+       pane's fixed height is quietly ignored */
+    .rec-stage-pane.is-on > * { min-height:0; min-width:0; }
+    .rec-stage-pane.is-on { display:grid;
+                            grid-template-columns:minmax(0, 0.92fr) minmax(0, 1.08fr);
+                            margin-top:clamp(18px, 2.6vh, 28px);
+                            border-radius:22px; overflow:hidden;
+                            /* fixed, not a minimum: a minimum let each pane
+                               grow to its own copy and the artwork with it */
+                            height:min(548px, 52vh);
+                            background:#FFFFFF;
+                            box-shadow:inset 0 0 0 1px rgba(25,18,49,.10),
+                                       0 26px 60px rgba(60,40,120,.10); }
+    /* claim at the top, the line that qualifies it held at the foot */
+    .rec-stage-text { display:flex; flex-direction:column; justify-content:space-between;
+                      gap:clamp(18px, 3vh, 40px);
+                      padding:clamp(26px, 4.4vh, 44px) clamp(26px, 2.6vw, 42px); }
+    .rec-stage-h { margin:0; max-width:15ch; color:#191231;
+                   font-size:clamp(23px, 1.5vw + 11px, 33px); font-weight:600;
+                   line-height:1.2; letter-spacing:-0.025em; text-wrap:balance; }
+    .rec-stage-p { margin:0; max-width:40ch; color:#5F5880;
+                   font-size:15px; line-height:1.62; }
+
+    /* the lit surface the card sits on */
+    .rec-stage-art { position:relative; display:grid; align-content:stretch;
+                     padding:36px 36px 46px;
+                     background:
+                       radial-gradient(112% 82% at 86% -8%, rgba(255,255,255,.92), transparent 56%),
+                       radial-gradient(86% 68% at 8% 112%, rgba(255,226,210,.85), transparent 62%),
+                       linear-gradient(134deg, #C9B7FF 0%, #DFD1FF 40%, #F0E2F6 72%, #FBE4D8 100%); }
+    /* sand over the gradient: it keeps the hue and only breaks up the value,
+       which also stops a wash this wide from banding */
+    .rec-stage-art::before { content:""; position:absolute; inset:0;
+                             pointer-events:none; opacity:.7;
+                             mix-blend-mode:overlay;
+                             background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='s'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0.33 0.33 0.33 0 -0.275 0.33 0.33 0.33 0 -0.275 0.33 0.33 0.33 0 -0.275 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23s)'/%3E%3C/svg%3E");
+                             background-size:150px 150px; }
+    /* whatever goes on the surface fills it, keeps its own shape, and sits
+       on top of the grain rather than under it */
+    .rec-stage-art > img { position:relative; z-index:1;
+                           display:block; width:100%; height:100%;
+                           object-fit:contain; border-radius:12px; }
+
+    /* the applicants list, drawn rather than screenshotted so it stays sharp */
+    .rec-app { position:relative; z-index:1; width:100%; height:100%;
+               display:flex; flex-direction:column;
+               border-radius:14px; overflow:hidden; background:#FFFFFF;
+               box-shadow:0 22px 50px rgba(48,28,104,.20),
+                          inset 0 0 0 1px rgba(25,18,49,.08); }
+    .rec-app-top { flex:none; display:flex; align-items:flex-start;
+                   justify-content:space-between;
+                   gap:12px; padding:16px 24px 10px; }
+    .rec-app-top b { display:block; font-size:15px; font-weight:600; color:#191231;
+                     letter-spacing:-0.015em; }
+    .rec-app-top i { display:block; margin-top:3px; font-style:normal; font-size:11.5px;
+                     color:#8A83A6; }
+    .rec-app-dots { flex:none; color:#A49DBC; }
+    .rec-app-dots svg { width:15px; height:15px; display:block; }
+    .rec-app-tabs { flex:none; display:flex; align-items:center; gap:18px; padding:0 24px;
+                    box-shadow:inset 0 -1px 0 rgba(25,18,49,.09); }
+    .rec-app-tab { display:inline-block; padding:7px 0 9px; font-size:12px;
+                   color:#8A83A6; border-bottom:2px solid transparent; }
+    .rec-app-tab.is-on { color:#191231; font-weight:600; border-bottom-color:#191231; }
+    .rec-app-mira { margin-left:auto; display:inline-flex; align-items:center; gap:5px;
+                    font-size:11.5px; font-weight:600; color:#5B3DD4;
+                    background:#EFE9FF; border-radius:100px; padding:4px 10px; }
+    .rec-app-mira svg { width:12px; height:12px; }
+
+    .rec-app-row { flex:1 1 0; display:grid;
+                   grid-template-columns:auto minmax(0, 1fr) auto;
+                   gap:12px; align-items:center; padding:13px 24px;
+                   box-shadow:inset 0 -1px 0 rgba(25,18,49,.07); }
+    .rec-app-row:last-child { box-shadow:none; }
+    .rec-app-pic { flex:none; width:30px; height:30px; border-radius:9px;
+                   display:grid; place-items:center; font-size:12px; font-weight:600;
+                   color:#4C1D95; background:linear-gradient(140deg,#EDE7FF,#D7C9FF); }
+    .rec-app-meta { display:block; font-style:normal; font-size:11px; color:#8A83A6; }
+    /* the designation only -- never the skills-and-years tail */
+    .rec-app-main b { display:inline; font-size:13px; font-weight:600; color:#191231; }
+    .rec-app-place { display:block; margin-top:3px; font-style:normal; font-size:11px;
+                     color:#8A83A6; }
+    .rec-app-vet { display:inline-flex; align-items:center; gap:4px; margin-left:7px;
+                   font-size:10.5px; font-weight:600; color:#5B3DD4;
+                   background:#EFE9FF; border-radius:100px; padding:2px 7px; }
+    .rec-app-vet svg { width:11px; height:11px; }
+    .rec-app-tags, .rec-rank-tags { display:flex; flex-wrap:wrap; gap:5px;
+                                    margin-top:8px; }
+    .rec-app-tags em, .rec-rank-tags em { font-style:normal; font-size:10.5px;
+                       color:#4E4870;
+                       border-radius:100px; padding:3px 9px;
+                       box-shadow:inset 0 0 0 1px rgba(25,18,49,.13); }
+    .rec-app-act { flex:none; font-size:11.5px; font-weight:600; color:#FFFFFF;
+                   background:#7C5CF6; border-radius:8px; padding:7px 13px;
+                   white-space:nowrap; }
+    .rec-app-act--done { color:#027A48; background:#E6F9F0;
+                         box-shadow:inset 0 0 0 1px rgba(2,122,72,.16); }
+
+    /* the call, with the notetaker rail beside it */
+    .rec-call { position:relative; z-index:1; width:100%; height:100%; display:grid;
+                grid-template-columns:minmax(0, 1fr) 224px; gap:9px; padding:9px;
+                border-radius:15px; background:#FFFFFF;
+                box-shadow:0 22px 50px rgba(48,28,104,.20),
+                           inset 0 0 0 1px rgba(25,18,49,.08); }
+    .rec-call-vids { display:grid; grid-template-rows:minmax(0, 1fr) auto auto;
+                     gap:9px; }
+    /* the controls a call actually has, under the tiles */
+    .rec-call-bar { display:flex; align-items:center; justify-content:center;
+                    gap:7px; padding:3px 0 1px; }
+    .rec-call-rec { display:inline-flex; align-items:center; gap:6px;
+                    margin-right:3px; font-size:10.5px; font-weight:500;
+                    color:#4E4870; background:#F3F0FC; border-radius:100px;
+                    padding:4px 10px;
+                    box-shadow:inset 0 0 0 1px rgba(25,18,49,.09); }
+    .rec-call-rec::before { content:""; width:6px; height:6px; border-radius:50%;
+                            background:#F04438; }
+    .rec-call-btn { width:26px; height:26px; border-radius:50%; display:grid;
+                    place-items:center; color:#4E4870; background:#F3F0FC;
+                    box-shadow:inset 0 0 0 1px rgba(25,18,49,.09); }
+    .rec-call-btn svg { width:13px; height:13px; }
+    /* the one control that has to read as different */
+    .rec-call-btn--end { color:#FFFFFF; background:#F04438; box-shadow:none; }
+    .rec-call-pair { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    /* no photographs: each tile is a lit surface with the person's initials,
+       the way a call looks before anyone turns a camera on */
+    .rec-call-vid { position:relative; aspect-ratio:16 / 10; border-radius:10px;
+                    overflow:hidden; display:grid; place-items:center;
+                    background:linear-gradient(145deg, #40288C 0%, #6B46E0 52%,
+                                               #9D7BF5 100%); }
+    .rec-call-vid--main { aspect-ratio:auto; min-height:0;
+                          background:linear-gradient(145deg, #2E1B6B 0%, #5B3DD4 48%,
+                                                     #A98BFF 100%); }
+    .rec-call-vid--mira { background:linear-gradient(145deg, #4B2F8F 0%, #7C5CF6 60%,
+                                                      #C0A9FF 100%); }
+    /* a photograph, once there is one, covers the tile the initials stood in for */
+    .rec-call-vid > img:not(.rec-call-bot) { position:absolute; inset:0;
+                        width:100%; height:100%;
+                        object-fit:cover; border-radius:inherit; }
+    .rec-call-vid > img:not(.rec-call-bot) ~ .rec-call-av { display:none; }
+    /* the wordmark sits in the tile the way a logo does, not as a feed */
+    .rec-call-bot { position:relative; z-index:1; width:62px; height:auto;
+                    filter:invert(1) brightness(1.9); opacity:.95; }
+    /* a soft vignette under the chips so the name and caption stay readable
+       over whatever the photograph happens to be doing down there */
+    .rec-call-vid:has(> img:not(.rec-call-bot))::after { content:"";
+                                    position:absolute; inset:auto 0 0 0;
+                                    height:42%; pointer-events:none;
+                                    background:linear-gradient(to top,
+                                      rgba(12,6,30,.55), transparent);
+                                    z-index:1; }
+    .rec-call-vid img { image-rendering:auto; }
+    .rec-call-av { width:46px; height:46px; border-radius:50%; display:grid;
+                   place-items:center; font-size:14px; font-weight:600; color:#FFFFFF;
+                   background:rgba(255,255,255,.18);
+                   box-shadow:inset 0 0 0 1px rgba(255,255,255,.34); }
+    .rec-call-av--sm { width:30px; height:30px; font-size:11px; }
+    .rec-call-av--sm svg { width:13px; height:13px; }
+    .rec-call-tag { position:absolute; z-index:2; left:8px; bottom:8px; font-size:10.5px;
+                    font-weight:500; color:#FFFFFF; background:rgba(16,8,38,.46);
+                    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+                    border-radius:6px; padding:3px 8px; }
+    .rec-call-cap { position:absolute; z-index:2; left:50%; translate:-50% 0; bottom:9px;
+                    max-width:74%; text-align:center; font-size:11px; color:#FFFFFF;
+                    background:rgba(16,8,38,.56);
+                    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+                    border-radius:7px; padding:5px 10px; }
+
+    .rec-call-side { display:flex; flex-direction:column; gap:9px; min-width:0; }
+    .rec-call-who { display:flex; align-items:center; gap:9px; border-radius:10px;
+                    padding:9px 10px; background:#F4F1FF;
+                    box-shadow:inset 0 0 0 1px rgba(124,92,246,.16); }
+    .rec-call-who-pic { flex:none; width:26px; height:26px; border-radius:50%;
+                        display:grid; place-items:center; font-size:11px;
+                        font-weight:600; color:#FFFFFF;
+                        background:linear-gradient(140deg,#7C5CF6,#A98BFF); }
+    .rec-call-who-id { flex:1; min-width:0; }
+    .rec-call-who-id b { display:block; font-size:11.5px; font-weight:600;
+                         color:#191231; }
+    .rec-call-who-id i { display:block; font-style:normal; font-size:10px;
+                         color:#8A83A6; }
+    .rec-call-live { flex:none; display:inline-flex; align-items:center; gap:5px;
+                     font-size:10px; font-weight:600; color:#5B3DD4; }
+    .rec-call-live::before { content:""; width:6px; height:6px; border-radius:50%;
+                             background:#7C5CF6; }
+
+    .rec-call-lines { flex:1 1 auto; min-height:0; display:flex;
+                      flex-direction:column; gap:11px; padding:3px 2px 0; }
+    .rec-call-line { display:block; }
+    .rec-call-line i { font-style:normal; font-size:9.5px; color:#A49DBC;
+                       font-variant-numeric:tabular-nums; }
+    .rec-call-line b { margin-left:6px; font-size:10.5px; font-weight:600;
+                       color:#5B3DD4; }
+    .rec-call-line em { display:block; margin-top:2px; font-style:normal;
+                        font-size:11px; line-height:1.45; color:#4E4870; }
+    /* what Mira adds on top of the record, rather than the record itself */
+    .rec-call-note { border-radius:10px; padding:9px 11px;
+                     background:linear-gradient(135deg, #EFE9FF, #F7EFFB);
+                     box-shadow:inset 0 0 0 1px rgba(124,92,246,.22); }
+    .rec-call-note b { display:block; font-size:10px; font-weight:600;
+                       color:#5B3DD4; letter-spacing:.02em; }
+    .rec-call-note em { display:block; margin-top:3px; font-style:normal;
+                        font-size:11px; line-height:1.45; color:#3B3263; }
+
+    /* the ranking: who is in front, and by how much */
+    .rec-rank { position:relative; z-index:1; width:100%; height:100%;
+                display:flex; flex-direction:column;
+                border-radius:14px; overflow:hidden; background:#FFFFFF;
+                box-shadow:0 22px 50px rgba(48,28,104,.20),
+                           inset 0 0 0 1px rgba(25,18,49,.08); }
+    .rec-rank-top { flex:none; display:flex; align-items:center;
+                    justify-content:space-between; gap:12px; padding:13px 18px 12px;
+                    box-shadow:inset 0 -1px 0 rgba(25,18,49,.08); }
+    .rec-rank-mira { display:inline-flex; align-items:center; gap:6px;
+                     font-size:11.5px; font-weight:600; color:#5B3DD4; }
+    .rec-rank-mira svg { width:13px; height:13px; }
+    .rec-rank-count { font-size:11px; color:#6E6690; }
+
+    .rec-rank-row { flex:1 1 0; display:grid;
+                    grid-template-columns:auto auto minmax(0, 1fr) 178px;
+                    align-items:stretch; gap:0;
+                    box-shadow:inset 0 -1px 0 rgba(25,18,49,.07); }
+    .rec-rank-row:last-child { box-shadow:none; }
+    .rec-rank-no { align-self:start; padding:20px 0 0 16px; font-size:12px;
+                   font-weight:600; color:#A49DBC;
+                   font-variant-numeric:tabular-nums; }
+    .rec-rank-pic { align-self:start; width:30px; height:30px;
+                    margin:13px 0 0 11px;
+                    border-radius:9px; display:grid; place-items:center;
+                    font-size:11.5px; font-weight:600; color:#4C1D95;
+                    background:linear-gradient(140deg,#EDE7FF,#D7C9FF); }
+    .rec-rank-main { align-self:start; min-width:0; padding:12px 14px 14px; }
+    .rec-rank-main b { display:block; font-size:13px; font-weight:600;
+                       color:#191231; }
+    .rec-rank-main i { display:block; margin-top:3px; font-style:normal;
+                       font-size:11px; color:#8A83A6; }
+    /* the verdict and the number, on their own ground */
+    .rec-rank-verdict { display:flex; flex-direction:column;
+                        justify-content:flex-start;
+                        gap:6px; padding:13px 14px; background:#F4F0FF;
+                        box-shadow:inset 1px 0 0 rgba(124,92,246,.18); }
+    .rec-rank-verdict em { font-style:normal; font-size:10px; font-weight:600;
+                           line-height:1.35; letter-spacing:.03em;
+                           text-transform:uppercase; color:#5B3DD4; }
+    .rec-rank-verdict b { font-size:21px; font-weight:600; line-height:1;
+                          color:#4C1D95; letter-spacing:-0.02em;
+                          font-variant-numeric:tabular-nums; }
+    .rec-rank-verdict sup { font-size:11px; font-weight:600; top:-0.55em; }
+    /* the leader reads a shade warmer, the tail a shade quieter */
+    .rec-rank-row--top .rec-rank-verdict { background:#EDE6FF; }
+    .rec-rank-row--low .rec-rank-verdict { background:#F7F5FC; }
+    .rec-rank-row--low .rec-rank-verdict em,
+    .rec-rank-row--low .rec-rank-verdict b { color:#6E6690; }
+
+    /* the hire: a profile, the terms, and the one action left to take */
+    .rec-offer { position:relative; z-index:1; width:100%; height:100%;
+                 display:flex; flex-direction:column; gap:11px;
+                 padding:16px 20px 78px; border-radius:14px; background:#FFFFFF;
+                 box-shadow:0 22px 50px rgba(48,28,104,.20),
+                            inset 0 0 0 1px rgba(25,18,49,.08); }
+    .rec-offer-head { flex:none; display:flex; align-items:flex-start; gap:14px; }
+    .rec-offer-pic { flex:none; width:64px; height:64px; border-radius:12px;
+                     object-fit:cover; object-position:50% 22%;
+                     box-shadow:inset 0 0 0 1px rgba(25,18,49,.10); }
+    .rec-offer-id { flex:1; min-width:0; }
+    .rec-offer-id b { display:block; font-size:16px; font-weight:600;
+                      color:#191231; letter-spacing:-0.015em; }
+    .rec-offer-id i { display:block; margin-top:3px; font-style:normal;
+                      font-size:12px; color:#6E6690; }
+    .rec-offer-id u { display:block; margin-top:5px; text-decoration:none;
+                      font-size:11px; color:#A49DBC; }
+    .rec-offer-badge { flex:none; display:inline-flex; align-items:center; gap:5px;
+                       font-size:11.5px; font-weight:600; color:#027A48;
+                       background:#E6F9F0; border-radius:100px; padding:5px 11px;
+                       box-shadow:inset 0 0 0 1px rgba(2,122,72,.18); }
+    .rec-offer-badge svg { width:12px; height:12px; }
+
+    .rec-offer-facts { flex:none; display:grid; grid-template-columns:repeat(3, 1fr);
+                       gap:1px; border-radius:11px; overflow:hidden;
+                       background:rgba(25,18,49,.09);
+                       box-shadow:inset 0 0 0 1px rgba(25,18,49,.09); }
+    .rec-offer-fact { padding:10px 13px; background:#FBFAFF; }
+    .rec-offer-fact i { display:block; font-style:normal; font-size:10.5px;
+                        color:#8A83A6; }
+    .rec-offer-fact b { display:block; margin-top:3px; font-size:14px;
+                        font-weight:600; color:#191231;
+                        font-variant-numeric:tabular-nums; }
+
+    .rec-offer-tags { flex:none; display:flex; flex-wrap:wrap; gap:6px; }
+    .rec-offer-tags em { display:inline-flex; align-items:center; gap:5px;
+                         font-style:normal; font-size:11px; color:#4C1D95;
+                         background:#F1EBFF; border-radius:100px; padding:5px 11px; }
+    .rec-offer-tags svg { width:11px; height:11px; color:#7C5CF6; }
+
+    /* the case for the hire, and the run of dates behind it */
+    .rec-offer-sum { flex:none; padding:1px 1px 0; }
+    .rec-offer-sum b { display:block; font-size:11.5px; font-weight:600;
+                       color:#5B3DD4; }
+    .rec-offer-sum p { margin:4px 0 0; font-size:11.5px; line-height:1.5;
+                       color:#4E4870; }
+    .rec-offer-sum p + p { margin-top:3px; color:#8A83A6; }
+
+    .rec-offer-track { flex:none; display:grid; grid-template-columns:repeat(4, 1fr);
+                       padding-top:2px; }
+    .rec-offer-step { position:relative; padding-top:15px; }
+    /* the rail runs from each dot to the next, and stops at the last */
+    .rec-offer-step::before { content:""; position:absolute; top:4px; left:4px;
+                              right:0; height:2px; background:#E6DEFF; }
+    .rec-offer-step:last-child::before { display:none; }
+    .rec-offer-step::after { content:""; position:absolute; top:0; left:0;
+                             width:10px; height:10px; border-radius:50%;
+                             background:#7C5CF6;
+                             box-shadow:0 0 0 3px rgba(124,92,246,.16); }
+    .rec-offer-step b { display:block; font-size:11px; font-weight:600;
+                        color:#191231; }
+    .rec-offer-step i { display:block; margin-top:1px; font-style:normal;
+                        font-size:10.5px; color:#8A83A6; }
+
+    /* the action floats off the card, which is where the eye ends up */
+    .rec-offer-float { position:absolute; z-index:2; right:14px; bottom:14px;
+                       left:auto; display:flex; align-items:center; gap:11px;
+                       border-radius:12px; padding:10px 11px 10px 13px;
+                       background:#FFFFFF;
+                       box-shadow:0 18px 38px rgba(48,28,104,.26),
+                                  inset 0 0 0 1px rgba(124,92,246,.26); }
+    .rec-offer-float-i { flex:none; width:26px; height:26px; border-radius:8px;
+                         display:grid; place-items:center; color:#FFFFFF;
+                         background:linear-gradient(140deg,#7C5CF6,#A98BFF); }
+    .rec-offer-float-i svg { width:14px; height:14px; }
+    .rec-offer-float-id b { display:block; font-size:12.5px; font-weight:600;
+                            color:#191231; }
+    .rec-offer-float-id i { display:block; margin-top:2px; font-style:normal;
+                            font-size:10.5px; color:#8A83A6; }
+    .rec-offer-go { flex:none; display:inline-flex; align-items:center; gap:5px;
+                    font-size:11.5px; font-weight:600; color:#FFFFFF;
+                    background:#7C5CF6; border-radius:9px; padding:7px 12px; }
+    .rec-offer-go svg { width:13px; height:13px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rec-stage-pin { opacity:1; transform:none; }
+      .rec-stage-tab, .rec-stage-mark { transition:none; }
+    }
+    /* the tabs scroll across, the panel stacks, the read sits under the card */
+    @media (max-width:1000px) {
+      .rec-deep { min-height:0; padding-block:72px; }
+      .rec-rest { min-height:60vh; }
+      .rec-stage-pin { position:static; min-height:0; padding:0;
+                       opacity:1; transform:none; }
+      .rec-stage-rail { justify-content:flex-start; gap:22px; margin-top:28px;
+                        overflow-x:auto; scrollbar-width:none; }
+      .rec-stage-rail::-webkit-scrollbar { display:none; }
+      .rec-stage-tab { flex:none; white-space:nowrap; }
+      .rec-stage-ruler { display:none; }
+      .rec-stage-pane.is-on { grid-template-columns:1fr; margin-top:22px;
+                              height:auto; }
+      .rec-stage-text { padding:28px 24px; gap:16px; }
+      .rec-stage-h, .rec-stage-p { max-width:none; }
+      .rec-stage-art { padding:22px 20px 24px; min-height:0; }
+      .rec-app-tags, .rec-rank-tags { display:none; }
+      .rec-call { grid-template-columns:1fr; }
+      .rec-call-pair { display:none; }
+      .rec-offer { padding-bottom:18px; }
+      .rec-offer-float { position:static; margin-top:12px; }
+      .rec-rank-row { grid-template-columns:auto auto minmax(0, 1fr); }
+      .rec-rank-verdict { grid-column:1 / -1; flex-direction:row;
+                          align-items:center; justify-content:space-between;
+                          box-shadow:inset 0 1px 0 rgba(124,92,246,.18); }
+    }
+
+
+    /* ---- the opening ------------------------------------------------------- */
+    .rec-orb-pin { position:sticky; top:0; height:100vh; display:grid;
+                   place-items:center; overflow:hidden; }
+    /* the light itself: a core that opens out of nothing, the halo it throws,
+       and a ring that travels past both */
+    .rec-orb-core { position:absolute; width:min(42vmin, 320px); aspect-ratio:1;
+                    border-radius:50%; pointer-events:none;
+                    background:radial-gradient(circle at 50% 50%,
+                      rgba(255,255,255,.98) 0%, rgba(232,222,255,.92) 26%,
+                      rgba(167,139,250,.55) 52%, rgba(124,92,246,0) 72%);
+                    /* it pulls back behind the mark rather than blowing out
+                       the middle of it while it is still part way in */
+                    opacity:calc((0.25 + 0.75 * var(--orb, 0))
+                                 * (1 - var(--orb-out, 0))
+                                 * (1 - 0.34 * var(--mark, 0)));
+                    transform:scale(calc(0.04 + 0.96 * var(--orb, 0))); }
+    .rec-orb-glow { position:absolute; width:min(96vmin, 860px); aspect-ratio:1;
+                    border-radius:50%; pointer-events:none;
+                    background:radial-gradient(circle at 50% 50%,
+                      rgba(150,118,255,.42) 0%, rgba(110,80,220,.20) 34%,
+                      rgba(60,36,140,.08) 56%, rgba(20,10,46,0) 72%);
+                    opacity:calc(var(--orb, 0) * (1 - var(--orb-out, 0)));
+                    transform:scale(calc(0.2 + 0.8 * var(--orb, 0))); }
+    .rec-orb-ring { position:absolute; width:min(74vmin, 640px); aspect-ratio:1;
+                    border-radius:50%; pointer-events:none;
+                    box-shadow:inset 0 0 0 1px rgba(216,200,255,.55),
+                               0 0 46px rgba(150,118,255,.30);
+                    /* it overtakes the core and fades as it leaves */
+                    opacity:calc(var(--orb, 0) * (1 - var(--orb, 0)) * 2.6);
+                    transform:scale(calc(0.1 + 1.25 * var(--orb, 0))); }
+    /* the mark resolves once the light has opened */
+    .rec-orb-mark { position:relative; z-index:1; display:block;
+                    width:min(30vmin, 210px); aspect-ratio:412 / 300;
+                    transform-origin:50% 55%;
+                    /* the body lives on the wrapper, so it is cast by the
+                       masked shape rather than by the gradient's box */
+                    filter:drop-shadow(1.3px 1.7px 0 rgb(139,110,255))
+                           drop-shadow(1.3px 1.7px 0 rgb(128,100,242))
+                           drop-shadow(1.3px 1.7px 0 rgb(118,90,228))
+                           drop-shadow(1.3px 1.7px 0 rgb(108,81,213))
+                           drop-shadow(1.3px 1.7px 0 rgb(98,72,197))
+                           drop-shadow(1.3px 1.7px 0 rgb(88,64,180))
+                           drop-shadow(1.3px 1.7px 0 rgb(78,56,162))
+                           drop-shadow(1.3px 1.7px 0 rgb(68,48,143))
+                           drop-shadow(1.3px 1.7px 0 rgb(58,40,123))
+                           drop-shadow(1.3px 1.7px 0 rgb(48,33,102))
+                           drop-shadow(1.3px 1.7px 0 rgb(39,26,82))
+                           drop-shadow(1.3px 1.7px 0 rgb(30,20,62))
+                           drop-shadow(0 18px 26px rgba(10,4,32,.78))
+                           drop-shadow(0 0 26px rgba(167,139,250,.34));
+                    opacity:calc(var(--mark, 0) * (1 - var(--gone, 0)));
+                    /* it turns square-on as it resolves, which is what sells
+                       the body behind the face */
+                    transform:perspective(900px)
+                              rotateY(calc((1 - var(--mark, 0)) * -34deg))
+                              rotateX(calc((1 - var(--mark, 0)) * 12deg))
+                              scale(calc(0.9 + 0.1 * var(--mark, 0))); }
+    /* polish is light, dark, light again along the form */
+    .rec-orb-face { display:block; width:100%; height:100%; overflow:visible; }
+    /* the stroke cannot reach the point where the lobes cross, so a fill
+       arrives at the end of the band and makes the mark whole */
+    .rec-orb-fill { opacity:var(--draw-done, 1); }
+    /* wide enough to clear the mark's own stroke either side of the line */
+    .rec-orb-path { fill:none; stroke:#FFFFFF; stroke-width:118;
+                    stroke-linecap:round; stroke-linejoin:round;
+                    /* pathLength 1 makes the draw a plain 1 to 0 ramp */
+                    stroke-dasharray:1;
+                    stroke-dashoffset:calc(1 - var(--draw, 1)); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rec-orb-core, .rec-orb-glow, .rec-orb-ring { transform:none; }
+      .rec-orb-mark { opacity:1; transform:perspective(900px); }
+      .rec-orb-path { stroke-dashoffset:0; }
+      .rec-orb-fill { opacity:1; }
+    }
+    @media (max-width:1000px) {
+      .rec-orb-pin { position:static; height:auto; padding-block:84px; gap:40px; }
+      .rec-say-last { position:static; translate:none; width:auto; }
+      .rec-last-line { opacity:1; transform:none; }
+      .rec-orb-mark { width:min(46vmin, 180px); }
+    }
+
+    /* the words arrive where the mark was, a line at a time */
+    .rec-say-last { position:absolute; left:50%; top:50%; translate:-50% -50%;
+                    width:min(88vw, 780px); margin:0; text-align:center;
+                    display:flex; flex-direction:column; gap:12px; }
+    .rec-last-line { display:block; color:#FFFFFF; text-wrap:balance;
+                     font-size:clamp(18px, 1.05vw + 10px, 26px); font-weight:600;
+                     line-height:1.38; letter-spacing:-0.02em;
+                     opacity:var(--ln, 0);
+                     transform:translateY(calc((1 - var(--ln, 0)) * 20px)); }
+    .rec-last-line:nth-child(1) { --ln:var(--s1, 0); }
+    .rec-last-line:nth-child(2) { --ln:var(--s2, 0); }
+    /* the last one is the quiet half of the thought */
+    .rec-last-line:nth-child(3) { --ln:var(--s3, 0); color:#A79FC8;
+                                  font-weight:500; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-last-line { transform:none; }
+    }
+
+    /* ---- suggestions --------------------------------------------------- */
+    /* sits under the field, same width, and only while there is something
+       to match against */
+    /* no panel and no rules: the examples sit straight on the page, lined up
+       with the prompt above them */
+    .rec-suggest { width:100%; max-width:820px; margin:14px auto 0; list-style:none;
+                   text-align:left; }
+    .rec-suggest button { display:block; width:100%; text-align:left; cursor:pointer;
+                          background:transparent; border:none; border-radius:10px;
+                          padding:9px 18px; font-family:inherit; font-size:15px;
+                          font-weight:400; line-height:1.4; color:var(--text-secondary);
+                          transition:background .12s, color .12s; }
+    .rec-suggest button:hover, .rec-suggest button:focus-visible {
+      background:rgba(139,92,246,.09); color:var(--text-primary); }
+
+    /* ---- landing layout ---------------------------------------------- */
+    /* Sections run the full width of the main column and stack 54px apart;
+       any measure that keeps text readable belongs on the text itself. */
+    .rec-wrap { gap:54px; }
+    /* one padding for every section, all four sides. Declared last so it
+       wins over the shorthand paddings each section sets for itself. */
+    .rec-wrap > section { padding:48px; }
+
+    @media (max-width:1000px) {
+      .rec-wrap > section { padding:32px 24px; }
+      .rec-head { padding:8px 14px; }
+      .rec-head-inner { height:54px; padding:0 14px; }
+      .rec-login { height:34px; padding:0 14px; font-size:13.5px; }
+      /* no room for the nav beside the logo; it needs a menu of its own */
+      .rec-nav { display:none; }
+      .rec-logo img { height:26px; }
+    }
+  </style>
+</head>
+<body>
+
+<svg style="display:none" aria-hidden="true">
+  </svg>
+
+<div class="app">
+  <!-- SIDEBAR -->
+
+  <!-- MAIN -->
+  <div class="main-col">
+
+    <div class="content">
+
+      <div class="rec-sky" aria-hidden="true"></div>
+
+      <header class="rec-head">
+        <div class="rec-head-inner">
+        <a class="rec-logo" href="explore-services.html">
+            <img src="mira-logo.svg" width="1152" height="365" alt="Mira">
+          </a>
+          <div class="rec-head-right">
+            <nav class="rec-nav" aria-label="Main">
+              <button type="button" class="rec-nav-item">Platform <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+              <button type="button" class="rec-nav-item">Solutions <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+              <button type="button" class="rec-nav-item">Resources <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg></button>
+              <a class="rec-nav-item" href="#pricing">Pricing</a>
+            </nav>
+            <a class="rec-login" href="#login">Log in</a>
+          </div>
+        </div>
+      </header>
+
+      <div class="rec-wrap">
+
+        <!-- HERO -->
+        <section class="rec-hero">
+          <div class="rec-hero-inner">
+          <a class="rec-chip" href="#mira">
+            <span class="rec-chip-dot" aria-hidden="true"></span>
+            Mira, your AI recruiting agent
+            <span class="rec-chip-more">Read more<svg viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true"><path d="M7.5 16.5L16.5 7.5"/><path d="M9.4 7.5h7.1v7.1"/></svg></span>
+          </a>
+          <h1>Hire the right talent, anywhere in the
+              <span class="rec-grad">world</span><span class="rec-cursor" aria-hidden="true"><svg viewBox="0 0 20 22"><path d="M2 1.6 L2 19.6 L7.2 14.8 L16.2 13.2 Z"/></svg><b>Mira</b></span></h1>
+          <p class="rec-hero-sub">Mira AI ranks every application against your scorecard as
+          it arrives. You pay only when someone joins.</p>
+              <div class="rec-compose-wrap">
+              <form class="rec-compose" onsubmit="return false">
+                <div class="rec-compose-headrow">
+                  <textarea class="rec-compose-input" rows="1"
+                            aria-label="Describe the role, paste a link, or add skills"
+                            placeholder="What role are you hiring for?"></textarea>
+                  <button type="submit" class="rec-compose-post">Describe</button>
+                </div>
+              </form>
+              </div>
+              <ul class="rec-suggest" aria-label="Example roles" hidden>
+                  <li><button type="button">Senior backend engineer, Python + Django, 4+ years, remote India</button></li>
+                  <li><button type="button">Product designer, B2B SaaS, Figma + design systems, 3+ years</button></li>
+                  <li><button type="button">Customer success manager, US-hours overlap, SaaS, 2+ years</button></li>
+                  <li><button type="button">Full-stack engineer, React + Node, mid-level, fast-paced startup</button></li>
+                  <li><button type="button">Finance analyst, India payroll + compliance, 3+ years</button></li>
+              </ul>
+          </div>
+        </section>
+
+        <!-- WHAT MIRA DOES -->
+        <section class="rec-next">
+          <div class="rec-say-pin">
+          <div class="rec-boxes" aria-hidden="true">
+            <div class="rec-box rec-box--d0" style="left:9%; top:12%; --fx:0.410"><span class="rec-mark" style="--logo:url(logo-1.svg)"></span></div>
+            <div class="rec-box rec-box--d1" style="left:26%; top:26%; --fx:0.240"><span class="rec-mark" style="--logo:url(logo-2.svg)"></span></div>
+            <div class="rec-box rec-box--d1" style="left:52%; top:10%; --fx:-0.020"><span class="rec-mark" style="--logo:url(logo-3.svg)"></span></div>
+            <div class="rec-box rec-box--d2" style="left:74%; top:20%; --fx:-0.240"><img class="rec-mark rec-mark--flat" src="logo-4.svg" alt="" loading="lazy" decoding="async"></div>
+            <div class="rec-box rec-box--d0" style="left:8%; top:50%; --fx:0.420"><span class="rec-mark" style="--logo:url(logo-5.svg)"></span></div>
+            <div class="rec-box rec-box--d2" style="left:92%; top:46%; --fx:-0.420"><img class="rec-mark rec-mark--flat" src="logo-6.svg" alt="" loading="lazy" decoding="async"></div>
+            <div class="rec-box rec-box--d2" style="left:30%; top:80%; --fx:0.200"><span class="rec-mark" style="--logo:url(logo-7.svg)"></span></div>
+            <div class="rec-box rec-box--d1" style="left:62%; top:88%; --fx:-0.120"><span class="rec-mark" style="--logo:url(logo-8.svg)"></span></div>
+          </div>
+          <p class="rec-say">
+            <span class="rec-line rec-line--lead">Mira reads every CV so you don&rsquo;t have to.</span>
+            <span class="rec-line">It goes through all of them and picks out</span>
+            <span class="rec-line">the people who fit your role.</span>
+          </p>
+          </div>
+        </section>
+
+        <!-- MIRA AT WORK -->
+        <section class="rec-chat-sec">
+          <div class="rec-wins-pin">
+          <div class="rec-wins">
+          <div class="rec-win rec-win--dark">
+            <div class="rec-win-bar">
+              <img class="rec-win-logo" src="mira-logo.svg" width="1152" height="365" alt="Mira">
+              <span class="rec-win-dots" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round"><path d="M5 12h14"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M10 20H4v-6"/><path d="M20 4l-7 7"/><path d="M4 20l7-7"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </span>
+            </div>
+
+            <div class="rec-thread">
+              <div class="rec-turn rec-turn--you"><p>Where are we on the Senior Backend Engineer role?</p></div>
+              <div class="rec-turn rec-turn--typing"><span class="rec-dot"></span><span class="rec-dot"></span><span class="rec-dot"></span></div>
+              <div class="rec-turn rec-turn--meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                Read 38 applications across 4 sources
+              </div>
+              <div class="rec-turn rec-turn--say"><p>Here is where the role stands this morning.</p></div>
+              <div class="rec-turn rec-turn--card">
+                <div class="rec-card-head">
+                  <span>
+                    <b>Senior Backend Engineer</b>
+                    <i>Bengaluru &middot; Full-time</i>
+                  </span>
+                  <span class="rec-card-count">38 applications</span>
+                </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Shortlisted</span>
+                    <span class="rec-row-v">6 of 38 applications</span>
+                    <span class="rec-row-src"><img src="logo-8.svg" alt="" loading="lazy">Careers site</span>
+                  </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Interviews</span>
+                    <span class="rec-row-v">3 confirmed this week</span>
+                    <span class="rec-row-src"><img src="logo-4.svg" alt="" loading="lazy">Calendar</span>
+                  </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Top match</span>
+                    <span class="rec-row-v">7 yrs Django &middot; shipped payments</span>
+                    <span class="rec-row-src"><img src="logo-7.svg" alt="" loading="lazy">Scorecard</span>
+                  </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Time to hire</span>
+                    <span class="rec-row-v">21 days average</span>
+                    <span class="rec-row-src"><img src="logo-3.svg" alt="" loading="lazy">Weekly report</span>
+                  </div>
+              </div>
+              <div class="rec-turn rec-turn--say"><p>Three interviews are booked for this week. The rest of the shortlist is waiting on your call.</p></div>
+              <div class="rec-turn rec-turn--chips">
+                <button type="button">See the shortlist</button>
+                <button type="button">Open the schedule</button>
+                <button type="button">Send me the report</button>
+              </div>
+            </div>
+
+            <div class="rec-ask">
+              <p class="rec-ask-hint">Ask a follow-up&hellip;</p>
+              <div class="rec-ask-row">
+                <span class="rec-ask-tools" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  <b>@</b>
+                </span>
+                <span class="rec-ask-right">
+                <span class="rec-ask-send" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                       stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="rec-win rec-win--dark rec-win--static">
+            <div class="rec-win-bar">
+              <img class="rec-win-logo" src="mira-logo.svg" width="1152" height="365" alt="Mira">
+              <span class="rec-win-dots" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round"><path d="M5 12h14"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M10 20H4v-6"/><path d="M20 4l-7 7"/><path d="M4 20l7-7"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </span>
+            </div>
+
+            <div class="rec-thread">
+              <div class="rec-turn rec-turn--you"><p>Who is the strongest applicant so far?</p></div>
+              <div class="rec-turn rec-turn--meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                Matched 38 r&eacute;sum&eacute;s against the scorecard
+              </div>
+              <div class="rec-turn rec-turn--say"><p>Priya Nair, on every line of the scorecard but one.</p></div>
+              <div class="rec-turn rec-turn--card">
+                <div class="rec-who">
+                  <span class="rec-who-pic" aria-hidden="true">PN</span>
+                  <span class="rec-who-id">
+                    <b>Priya Nair</b>
+                    <i>Senior Backend Engineer</i>
+                  </span>
+                  <span class="rec-who-fit">92% match</span>
+                </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Experience</span>
+                    <span class="rec-row-v">7 yrs &middot; shipped payments at scale</span>
+                  </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Based in</span>
+                    <span class="rec-row-v">Bengaluru &middot; open to hybrid</span>
+                  </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Available</span>
+                    <span class="rec-row-v">30-day notice period</span>
+                  </div>
+                <div class="rec-skills">
+                  <span>Django</span><span>PostgreSQL</span><span>Kafka</span>
+                  <span>Payments</span><span>AWS</span>
+                </div>
+              </div>
+              <div class="rec-turn rec-turn--say"><p>The one gap is Go, which the role lists as nice to have.</p></div>
+              <div class="rec-turn rec-turn--chips">
+                <button type="button">Open the scorecard</button>
+                <button type="button">Set up a call</button>
+                <button type="button">Share with the panel</button>
+              </div>
+            </div>
+
+            <div class="rec-ask">
+              <p class="rec-ask-hint">Ask a follow-up&hellip;</p>
+              <div class="rec-ask-row">
+                <span class="rec-ask-tools" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  <b>@</b>
+                </span>
+                <span class="rec-ask-right">
+                <span class="rec-ask-send" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                       stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="rec-win rec-win--dark rec-win--static">
+            <div class="rec-win-bar">
+              <img class="rec-win-logo" src="mira-logo.svg" width="1152" height="365" alt="Mira">
+              <span class="rec-win-dots" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round"><path d="M5 12h14"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6"/><path d="M10 20H4v-6"/><path d="M20 4l-7 7"/><path d="M4 20l7-7"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+              </span>
+            </div>
+
+            <div class="rec-thread">
+              <div class="rec-turn rec-turn--you"><p>Book the final round with Priya</p></div>
+              <div class="rec-turn rec-turn--meta">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+                Read the free time of all three interviewers
+              </div>
+              <div class="rec-turn rec-turn--say"><p>Three slots work for the whole panel this week.</p></div>
+              <div class="rec-turn rec-turn--card">
+                <div class="rec-card-head">
+                  <span>
+                    <b>Final round &middot; Priya Nair</b>
+                    <i>45 minutes &middot; 3 interviewers</i>
+                  </span>
+                  <span class="rec-card-count">Pick a time</span>
+                </div>
+                <div class="rec-slots">
+                  <span class="rec-slot">
+                    <b>Tue 11:00</b>
+                    <i>All three free</i>
+                  </span>
+                  <span class="rec-slot is-pick">
+                    <b>Thu 10:00</b>
+                    <i>All three free</i>
+                  </span>
+                  <span class="rec-slot">
+                    <b>Fri 16:30</b>
+                    <i>Two of three</i>
+                  </span>
+                </div>
+                  <div class="rec-row">
+                    <span class="rec-row-k">Panel</span>
+                    <span class="rec-row-v">Dev lead, architect, hiring manager</span>
+                    <span class="rec-row-src"><img src="logo-3.svg" alt="" loading="lazy">Slack</span>
+                  </div>
+                <div class="rec-meet">
+                  <img src="logo-4.svg" alt="" loading="lazy">
+                  A Google Meet link goes out with the invite
+                </div>
+              </div>
+              <div class="rec-turn rec-turn--say"><p>Thursday keeps the offer inside the 21-day average.</p></div>
+              <div class="rec-turn rec-turn--chips">
+                <button type="button">Send the invite</button>
+                <button type="button">See other times</button>
+                <button type="button">Add an interviewer</button>
+              </div>
+            </div>
+
+            <div class="rec-ask">
+              <p class="rec-ask-hint">Ask a follow-up&hellip;</p>
+              <div class="rec-ask-row">
+                <span class="rec-ask-tools" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                  <b>@</b>
+                </span>
+                <span class="rec-ask-right">
+                <span class="rec-ask-send" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                       stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+                </span>
+                </span>
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
+        </section>
+
+
+
+
+
+        <!-- CLOSING (scroll room; the heading rides in the pinned frame) -->
+        <section class="rec-close"></section>
+
+        <!-- and back down into violet, the same way -->
+        <section class="rec-deep">
+          <div class="rec-stage-pin">
+            <h2 class="rec-stage-top">Mira works at every stage,
+              <span>the way you already hire.</span></h2>
+
+            <div class="rec-stage-rail" role="tablist" aria-label="Hiring stages">
+              <button class="rec-stage-tab is-on" type="button" role="tab"
+                      aria-selected="true" data-rec-stage="screening"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8.2V20l-4 1.6v-8.4z"/></svg>Screening</button>
+              <button class="rec-stage-tab" type="button" role="tab"
+                      aria-selected="false" data-rec-stage="interview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 11h18"/></svg>Interview</button>
+              <button class="rec-stage-tab" type="button" role="tab"
+                      aria-selected="false" data-rec-stage="scorecard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9.5 4h5v3h-5z"/><path d="M9 13.5l2 2 4-4.5"/></svg>Scorecard</button>
+              <button class="rec-stage-tab" type="button" role="tab"
+                      aria-selected="false" data-rec-stage="offer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.3 12.4l2.6 2.6 4.8-5.4"/></svg>Offer</button>
+            </div>
+            <div class="rec-stage-ruler" aria-hidden="true">
+              <span class="rec-stage-mark"></span>
+            </div>
+
+            <div class="rec-stage-pane is-on" data-rec-pane="screening" role="tabpanel">
+              <div class="rec-stage-text">
+                <h3 class="rec-stage-h">Read every application the morning it lands</h3>
+                <p class="rec-stage-p">Mira ranks each CV against your scorecard and puts the six worth your time at the top. You set the bar; it only applies it.</p>
+              </div>
+              <div class="rec-stage-art">
+                <div class="rec-app">
+                  <div class="rec-app-top">
+                    <span>
+                      <b>Product designer</b>
+                      <i>Full-time &middot; posted 12 October</i>
+                    </span>
+                    <span class="rec-app-dots" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></span>
+                  </div>
+                  <div class="rec-app-tabs">
+                    <span class="rec-app-tab is-on">Applicants</span>
+                    <span class="rec-app-tab">Pipeline</span>
+                    <span class="rec-app-tab">Hired</span>
+                    <span class="rec-app-mira"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l1.9 5.3 5.3 1.9-5.3 1.9L12 16.9l-1.9-5.3L4.8 9.7l5.3-1.9z"/></svg> Mira AI</span>
+                  </div>
+                  <div class="rec-app-row">
+                    <span class="rec-app-pic" aria-hidden="true">N</span>
+                    <span class="rec-app-main">
+                      <i class="rec-app-meta">Northwind Labs (current) &middot; 4 days ago</i>
+                      <b>Naina Verma &mdash; Product Designer, 4 yrs</b><span class="rec-app-vet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4-3 7.5-7 8.5-4-1-7-4.5-7-8.5V6z"/><path d="M9.2 12.2l2 2 3.6-4"/></svg> Wisemonk vetted</span>
+                      <i class="rec-app-place">Bengaluru</i>
+                      <span class="rec-app-tags"><em>Design systems</em><em>Figma</em><em>Prototyping</em></span>
+                    </span>
+                    <span class="rec-app-act rec-app-act--done">Shortlisted</span>
+                  </div>
+                  <div class="rec-app-row">
+                    <span class="rec-app-pic" aria-hidden="true">K</span>
+                    <span class="rec-app-main">
+                      <i class="rec-app-meta">Marigold Health (previous) &middot; 9 days ago</i>
+                      <b>Kabir Shah &mdash; Senior Product Designer, 6 yrs</b>
+                      <i class="rec-app-place">Pune</i>
+                      <span class="rec-app-tags"><em>B2B SaaS</em><em>Design tokens</em><em>User research</em></span>
+                    </span>
+                    <span class="rec-app-act">Shortlist</span>
+                  </div>
+                  <div class="rec-app-row">
+                    <span class="rec-app-pic" aria-hidden="true">I</span>
+                    <span class="rec-app-main">
+                      <i class="rec-app-meta">Palladio Studio (current) &middot; a month ago</i>
+                      <b>Ira Sundaram &mdash; Product Designer, 3 yrs</b>
+                      <i class="rec-app-place">Remote &middot; India</i>
+                      <span class="rec-app-tags"><em>Figma</em><em>Interaction</em><em>Motion</em></span>
+                    </span>
+                    <span class="rec-app-act">Shortlist</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="rec-stage-pane" data-rec-pane="interview" role="tabpanel">
+              <div class="rec-stage-text">
+                <h3 class="rec-stage-h">Book the panel around the time people actually have</h3>
+                <p class="rec-stage-p">Mira reads everyone’s free time, proposes the slots that work and sends the invite. The conversation stays yours.</p>
+              </div>
+              <div class="rec-stage-art">
+                <div class="rec-call">
+                  <div class="rec-call-vids">
+                    <div class="rec-call-vid rec-call-vid--main">
+                      <img src="face-candidate.png" alt=""
+                           width="693" height="388" loading="lazy" decoding="async">
+                      <span class="rec-call-av">NV</span>
+                      <span class="rec-call-tag">Naina Verma</span>
+                      <span class="rec-call-cap">&ldquo;&hellip;then fix the worst step first.&rdquo;</span>
+                    </div>
+                    <div class="rec-call-pair">
+                      <div class="rec-call-vid">
+                        <img src="face-interviewer.png" alt=""
+                           width="423" height="240" loading="lazy" decoding="async">
+                      <span class="rec-call-av rec-call-av--sm">AP</span>
+                        <span class="rec-call-tag">Arun Pillai</span>
+                      </div>
+                      <div class="rec-call-vid rec-call-vid--mira">
+                        <img class="rec-call-bot" src="mira-logo.svg"
+                             width="1152" height="365" alt="Mira" loading="lazy">
+                        <span class="rec-call-tag">Mira</span>
+                      </div>
+                    </div>
+                    <div class="rec-call-bar">
+                      <span class="rec-call-rec">Recording</span>
+                      <span class="rec-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="12.5" height="12" rx="2.5"/><path d="M15.5 10.5L21 7.5v9l-5.5-3z"/></svg></span>
+                      <span class="rec-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span>
+                      <span class="rec-call-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M16 9.5a4 4 0 0 1 0 5M18.6 7a7.5 7.5 0 0 1 0 10"/></svg></span>
+                      <span class="rec-call-btn rec-call-btn--end"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 10.8a15.5 15.5 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.58 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg></span>
+                    </div>
+                  </div>
+
+                  <div class="rec-call-side">
+                    <div class="rec-call-who">
+                      <span class="rec-call-who-pic" aria-hidden="true">M</span>
+                      <span class="rec-call-who-id">
+                        <b>Mira notetaker</b>
+                        <i>Final round &middot; 45 min</i>
+                      </span>
+                      <span class="rec-call-live">Live</span>
+                    </div>
+                    <div class="rec-call-lines">
+                      <span class="rec-call-line">
+                        <i>12:04</i>
+                        <b>Naina</b>
+                        <em>I’d start by mapping where people drop off, then fix the worst step first.</em>
+                      </span>
+                      <span class="rec-call-line">
+                        <i>12:06</i>
+                        <b>Arun</b>
+                        <em>How did you measure that at Northwind?</em>
+                      </span>
+                      <span class="rec-call-line">
+                        <i>12:07</i>
+                        <b>Naina</b>
+                        <em>A weekly funnel review. Onboarding went from nine screens to four.</em>
+                      </span>
+                    </div>
+                    <div class="rec-call-note">
+                      <b>Mira</b>
+                      <em>Asked for a number and got one. Strong on prioritising.</em>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="rec-stage-pane" data-rec-pane="scorecard" role="tabpanel">
+              <div class="rec-stage-text">
+                <h3 class="rec-stage-h">Collect the feedback while the interview is still fresh</h3>
+                <p class="rec-stage-p">Mira chases the scorecard the same afternoon and pulls the notes together. Whether it is a yes is not its call.</p>
+              </div>
+              <div class="rec-stage-art">
+                <div class="rec-rank">
+                  <div class="rec-rank-top">
+                    <span class="rec-rank-mira"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l1.9 5.3 5.3 1.9-5.3 1.9L12 16.9l-1.9-5.3L4.8 9.7l5.3-1.9z"/></svg> Mira &middot; ranked by fit</span>
+                    <span class="rec-rank-count">3 of 38</span>
+                  </div>
+                  <div class="rec-rank-row rec-rank-row--top">
+                    <span class="rec-rank-no">1</span>
+                    <span class="rec-rank-pic" aria-hidden="true">NV</span>
+                    <span class="rec-rank-main">
+                      <b>Naina Verma</b>
+                      <i>Product Designer &middot; 4 yrs &middot; Bengaluru</i>
+                      <span class="rec-rank-tags"><em>Design systems</em><em>Figma</em><em>Prototyping</em></span>
+                    </span>
+                    <span class="rec-rank-verdict">
+                      <em>Strong match, excellent fit</em>
+                      <b>92<sup>%</sup></b>
+                    </span>
+                  </div>
+                  <div class="rec-rank-row">
+                    <span class="rec-rank-no">2</span>
+                    <span class="rec-rank-pic" aria-hidden="true">KS</span>
+                    <span class="rec-rank-main">
+                      <b>Kabir Shah</b>
+                      <i>Senior Product Designer &middot; 6 yrs &middot; Pune</i>
+                      <span class="rec-rank-tags"><em>B2B SaaS</em><em>Design tokens</em><em>User research</em></span>
+                    </span>
+                    <span class="rec-rank-verdict">
+                      <em>Strong match, minor gaps</em>
+                      <b>78<sup>%</sup></b>
+                    </span>
+                  </div>
+                  <div class="rec-rank-row rec-rank-row--low">
+                    <span class="rec-rank-no">3</span>
+                    <span class="rec-rank-pic" aria-hidden="true">IS</span>
+                    <span class="rec-rank-main">
+                      <b>Ira Sundaram</b>
+                      <i>Product Designer &middot; 3 yrs &middot; Remote</i>
+                      <span class="rec-rank-tags"><em>Figma</em><em>Interaction</em><em>Motion</em></span>
+                    </span>
+                    <span class="rec-rank-verdict">
+                      <em>Promising, short on depth</em>
+                      <b>64<sup>%</sup></b>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="rec-stage-pane" data-rec-pane="offer" role="tabpanel">
+              <div class="rec-stage-text">
+                <h3 class="rec-stage-h">Send the offer the day the decision is made</h3>
+                <p class="rec-stage-p">Mira drafts off the band you set, tracks it to signature and keeps the start date in front of everyone. The call is yours.</p>
+              </div>
+              <div class="rec-stage-art">
+                <div class="rec-offer">
+                  <div class="rec-offer-head">
+                    <img class="rec-offer-pic" src="face-candidate.png" alt=""
+                         width="693" height="388" loading="lazy" decoding="async">
+                    <span class="rec-offer-id">
+                      <b>Naina Verma</b>
+                      <i>Product Designer &middot; 4 yrs &middot; Bengaluru</i>
+                      <u>Shortlisted from the careers site &middot; 19 days ago</u>
+                    </span>
+                    <span class="rec-offer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg> Hired</span>
+                  </div>
+
+                  <div class="rec-offer-facts">
+                    <span class="rec-offer-fact">
+                      <i>Compensation</i>
+                      <b>&#8377;48L</b>
+                    </span>
+                    <span class="rec-offer-fact">
+                      <i>Starts</i>
+                      <b>13 Nov</b>
+                    </span>
+                    <span class="rec-offer-fact">
+                      <i>Notice served</i>
+                      <b>30 days</b>
+                    </span>
+                  </div>
+
+                  <div class="rec-offer-tags"><em><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg>Within your band</em><em><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg>Panel aligned</em><em><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6.5L9.5 17 4 11.5"/></svg>References cleared</em></div>
+
+                  <div class="rec-offer-sum">
+                    <b>Why Naina</b>
+                    <p>First on the ranking, and the only one the panel agreed
+                      on without a second conversation.</p>
+                    <p>Nineteen days from application to signature &mdash; five
+                      inside your average for this role.</p>
+                  </div>
+
+                  <div class="rec-offer-track">
+                    <span class="rec-offer-step">
+                      <b>Applied</b>
+                      <i>24 Sep</i>
+                    </span>
+                    <span class="rec-offer-step">
+                      <b>Shortlisted</b>
+                      <i>25 Sep</i>
+                    </span>
+                    <span class="rec-offer-step">
+                      <b>Final round</b>
+                      <i>10 Oct</i>
+                    </span>
+                    <span class="rec-offer-step">
+                      <b>Offer out</b>
+                      <i>13 Oct</i>
+                    </span>
+                  </div>
+
+                  <div class="rec-offer-float">
+                    <span class="rec-offer-float-i" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.5l1.9 5.3 5.3 1.9-5.3 1.9L12 16.9l-1.9-5.3L4.8 9.7l5.3-1.9z"/></svg></span>
+                    <span class="rec-offer-float-id">
+                      <b>Send the offer</b>
+                      <i>Drafted from the band you set</i>
+                    </span>
+                    <span class="rec-offer-go">Send <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h15"/><path d="M13 6l6 6-6 6"/></svg></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- and down again, the same way -->
+        <section class="rec-rest">
+          <div class="rec-orb-pin">
+            <span class="rec-orb-glow" aria-hidden="true"></span>
+            <span class="rec-orb-ring" aria-hidden="true"></span>
+            <span class="rec-orb-core" aria-hidden="true"></span>
+            <span class="rec-orb-mark" role="img" aria-label="Mira">
+              <svg class="rec-orb-face" viewBox="0 0 412 300" aria-hidden="true">
+                <defs>
+                  <linearGradient id="rec-metal" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#FFFFFF"/>
+                    <stop offset="0.14" stop-color="#EFE9FF"/>
+                    <stop offset="0.27" stop-color="#9B88E2"/>
+                    <stop offset="0.38" stop-color="#6E5CB8"/>
+                    <stop offset="0.5" stop-color="#FDFBFF"/>
+                    <stop offset="0.62" stop-color="#8C7ACF"/>
+                    <stop offset="0.76" stop-color="#E4DBFF"/>
+                    <stop offset="0.88" stop-color="#7E6BC6"/>
+                    <stop offset="1" stop-color="#FFFFFF"/>
+                  </linearGradient>
+                  <!-- the logo's own alpha, so every edge is the real mark -->
+                  <mask id="rec-logo" style="mask-type:alpha">
+                    <image x="0" y="0" width="412" height="300"
+                           href="data:image/png;base64,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"/>
+                  </mask>
+                  <!-- and the loop that gates how much of it has arrived -->
+                  <mask id="rec-draw">
+                    <rect class="rec-orb-fill" width="412" height="300"
+                          fill="#FFFFFF"/>
+                    <path class="rec-orb-path" pathLength="1" d="M236 214 C276 222 322 196 332 152 C342 108 308 78 270 92 C238 104 220 130 206 150 C192 170 172 196 142 208 C104 222 68 194 72 148 C76 104 100 82 128 86"/>
+                  </mask>
+                </defs>
+                <g mask="url(#rec-draw)">
+                  <rect width="412" height="300" fill="url(#rec-metal)"
+                        mask="url(#rec-logo)"/>
+                </g>
+              </svg>
+            </span>
+            </span>
+
+            <p class="rec-say-last">
+              <span class="rec-last-line">Mira is a new generation of recruiting agent.</span>
+              <span class="rec-last-line">It does the work of hiring, not just the record of it.</span>
+              <span class="rec-last-line">And it knows where its job ends and yours begins.</span>
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  // The example briefs under the field: open on focus or click, narrowed by
+  // whatever has been typed, and they fill the field when picked.
+  (function () {
+    var input = document.querySelector('.rec-compose-input');
+    var list = document.querySelector('.rec-suggest');
+    if (!input || !list) return;
+    var options = [].slice.call(list.querySelectorAll('button'));
+
+    function open() {
+      var q = input.value.trim().toLowerCase();
+      var shown = 0;
+      options.forEach(function (b) {
+        var hit = q.length === 0 || b.textContent.toLowerCase().indexOf(q) > -1;
+        b.parentNode.hidden = !hit;
+        if (hit) shown++;
+      });
+      list.hidden = shown === 0;
+    }
+
+    function close() { list.hidden = true; }
+
+    input.addEventListener('focus', open);
+    input.addEventListener('click', open);
+    input.addEventListener('input', open);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { close(); }
+    });
+
+    // closing on outside pointerdown rather than on blur keeps a click that
+    // lands on a suggestion alive long enough to register
+    document.addEventListener('pointerdown', function (e) {
+      if (!list.contains(e.target) && e.target !== input) close();
+    });
+
+    options.forEach(function (b) {
+      b.addEventListener('click', function () {
+        input.value = b.textContent.trim();
+        close();
+        input.focus();
+      });
+    });
+  }());
+
+  // Scroll progress drives the hero's exit and the dark sheet behind it.
+  (function () {
+    var hero = document.querySelector('.rec-hero');
+    var head = document.querySelector('.rec-head');
+    var next = document.querySelector('.rec-next');
+    var chat = document.querySelector('.rec-chat-sec');
+    var close = document.querySelector('.rec-close');
+    var deep = document.querySelector('.rec-deep');
+    var rest = document.querySelector('.rec-rest');
+    var root = document.documentElement;
+    if (!hero) return;
+    var ticking = false;
+
+    // Both colours travel through a deep violet on their way down, rather
+    // than straight from white to near-black -- a direct line passes through
+    // flat grey, which is what made the middle of the scroll look muddy.
+    var TOP = [[0, [255, 255, 255]], [0.55, [72, 58, 134]], [1, [5, 5, 8]],
+               [1.5, [5, 5, 8]], [2, [5, 5, 8]],
+               [2.5, [72, 58, 134]], [3, [239, 234, 255]],
+               [3.5, [86, 66, 160]], [4, [26, 16, 54]]];
+    var FOOT = [[0, [230, 223, 250]], [0.55, [54, 40, 108]], [1, [0, 0, 0]],
+                [1.5, [0, 0, 0]], [2, [0, 0, 0]],
+                [2.5, [54, 40, 108]], [3, [255, 255, 255]],
+                [3.5, [58, 40, 112]], [4, [10, 5, 26]]];
+
+    function ramp(stops, t) {
+      var i = 1;
+      while (i < stops.length - 1 && t > stops[i][0]) i++;
+      var a = stops[i - 1], b = stops[i];
+      var k = (t - a[0]) / (b[0] - a[0]);
+      return 'rgb(' + a[1].map(function (c, j) {
+        return Math.round(c + (b[1][j] - c) * k);
+      }).join(',') + ')';
+    }
+
+    function update() {
+      var span = Math.max(1, hero.offsetHeight * 1.35);
+      var p = Math.min(1, Math.max(0, window.scrollY / span));
+      root.style.setProperty('--rec-lift', (p * 190).toFixed(2));
+      root.style.setProperty('--rec-fade', (1 - p).toFixed(3));
+      // the sky's own two colours travel; nothing is laid over the page
+      // the colour holds its daylight a little longer than the content does
+      var c = p * p;
+      // ...and climbs back out of it as the closing section arrives, over the
+      // screenful before it reaches the top
+      var back = 0;
+      if (close) {
+        var ct = window.scrollY + close.getBoundingClientRect().top;
+        var vh = window.innerHeight;
+        // measured back from the closing section's top, which is one screen
+        // past the moment the pinned frame lets go
+        var band = function (a, b) {
+          return Math.min(1, Math.max(0,
+            (window.scrollY - (ct - vh * a)) / (vh * (a - b)))).toFixed(3);
+        };
+        back = parseFloat(band(3.5, 2.5));      // the sky lightens
+        // and then the other two, one at a time, each taking the centre
+        var w2 = parseFloat(band(2.25, 1.75));
+        var w3 = parseFloat(band(1.65, 1.2));
+        root.style.setProperty('--w2', w2.toFixed(3));
+        root.style.setProperty('--w3', w3.toFixed(3));
+        root.style.setProperty('--wins', (w2 + w3).toFixed(3));
+      }
+      // ...and then back down into violet as the last section comes up
+      var down = 0;
+      if (deep) {
+        var dt = window.scrollY + deep.getBoundingClientRect().top;
+        down = (window.scrollY - (dt - window.innerHeight)) / window.innerHeight;
+        down = Math.min(1, Math.max(0, down));
+        // the rail comes up over the back half of that ramp
+        root.style.setProperty('--deep-in',
+          Math.min(1, Math.max(0, (down - 0.45) / 0.4)).toFixed(3));
+        // past the ramp the frame is pinned, and the scroll walks the stages:
+        // an equal stretch each, measured on the section rather than the pin
+        if (window.__recStage) {
+          var span = Math.max(1, deep.offsetHeight - window.innerHeight);
+          var q = Math.min(0.9999, Math.max(0, (window.scrollY - dt) / span));
+          window.__recStage(Math.floor(q * window.__recStages));
+        }
+      }
+      // ...and down one last time as the closing section comes up
+      var last = 0;
+      if (rest) {
+        var rt = window.scrollY + rest.getBoundingClientRect().top;
+        last = (window.scrollY - (rt - window.innerHeight)) / window.innerHeight;
+        last = Math.min(1, Math.max(0, last));
+        // inside the section the frame is pinned, and the scroll opens the light
+        var rspan = Math.max(1, rest.offsetHeight - window.innerHeight);
+        var q = Math.min(1, Math.max(0, (window.scrollY - rt) / rspan));
+        // the light, the mark and the unwind all play out over the first part;
+        // what is left of the scroll belongs to the words
+        var e = Math.min(1, q / 0.62);
+        root.style.setProperty('--orb', e.toFixed(3));
+        root.style.setProperty('--mark',
+          Math.min(1, Math.max(0, (e - 0.22) / 0.44)).toFixed(3));
+        // the light leaves once it is fully open...
+        root.style.setProperty('--orb-out',
+          Math.min(1, Math.max(0, (e - 0.58) / 0.18)).toFixed(3));
+        // ...and then the loop unwinds, back the way it came
+        root.style.setProperty('--draw',
+          (1 - Math.min(1, Math.max(0, (e - 0.78) / 0.22))).toFixed(3));
+        // the fill that closed the crossing steps aside as the stroke takes over
+        root.style.setProperty('--draw-done',
+          (1 - Math.min(1, Math.max(0, (e - 0.78) / 0.10))).toFixed(3));
+        // the round cap leaves a stub behind the dash; this clears it
+        root.style.setProperty('--gone',
+          Math.min(1, Math.max(0, (e - 0.93) / 0.07)).toFixed(3));
+        // and then the lines, one at a time, once the mark has fully gone
+        var line = function (a, b) {
+          return Math.min(1, Math.max(0, (q - a) / (b - a))).toFixed(3);
+        };
+        root.style.setProperty('--s1', line(0.64, 0.75));
+        root.style.setProperty('--s2', line(0.76, 0.86));
+        root.style.setProperty('--s3', line(0.87, 0.96));
+      }
+      var t = c + back + down + last;
+      root.style.setProperty('--sky-a', ramp(TOP, t));
+      root.style.setProperty('--sky-b', ramp(FOOT, t));
+      root.style.setProperty('--sky-glow', (1 - c).toFixed(3));
+      // The glass stays white and only its strength changes. Travelling from
+      // a dark tint to a light one passed through the sky's own colour
+      // midway, which is where the boxes vanished; white is lighter than the
+      // sky at every stage of the journey.
+      // dark, light, dark again: 1 wherever the ground is dark
+      var lit = t <= 1 ? t
+              : (t <= 2 ? 1
+              : (t <= 3 ? 3 - t : Math.min(1, t - 3)));
+      var al = function (a, b) { return (a + (b - a) * lit).toFixed(3); };
+      root.style.setProperty('--box-fill', 'rgba(255,255,255,' + al(0.20, 0.115) + ')');
+
+      // 0 at the top of the page, 1 when the statement sits centred: the
+      // stretch of scroll the boxes travel over
+      if (next) {
+        // Measured from the section, which never moves. Measuring the
+        // statement itself fed its own transform back into the calculation:
+        // the further it slid, the further along the exit it thought it was.
+        var box = next.getBoundingClientRect();
+        // the statement is centred from the moment the section pins
+        var landing = window.scrollY + box.top;
+        var q = landing > 0 ? Math.min(1, Math.max(0, window.scrollY / landing)) : 1;
+        root.style.setProperty('--rec-q', q.toFixed(3));
+        // pp runs 0 to 1 across the pinned stretch, and every part of the
+        // choreography takes a slice of it
+        var pinSpan = Math.max(1, next.offsetHeight - window.innerHeight);
+        var pp = Math.min(1, Math.max(0, (window.scrollY - landing) / pinSpan));
+        var slice = function (a, b) {
+          return Math.min(1, Math.max(0, (pp - a) / (b - a))).toFixed(3);
+        };
+        // the lines come up to white one at a time, while nothing else moves
+        root.style.setProperty('--l1', slice(0.08, 0.26));
+        root.style.setProperty('--l2', slice(0.28, 0.46));
+        root.style.setProperty('--l3', slice(0.48, 0.66));
+        // they are up to full strength by the first third of that travel, so
+        // they are properly visible while the hero is still on screen
+        root.style.setProperty('--rec-qo', Math.min(1, q * 3).toFixed(3));
+        // once all three are white the statement leaves, on its own
+        root.style.setProperty('--say-out', slice(0.62, 0.80));
+
+        // The boxes keep going, all the way into the window: the drop is the
+        // real distance between the two, run over the scroll between the
+        // statement landing and the window centring.
+        if (chat) {
+          // Measured from the chat SECTION, not the window: the window is
+          // pinned, so its own rect barely moves with the scroll and every
+          // progress built on it came out as zero.
+          var cb = chat.getBoundingClientRect();
+          var chatTop = window.scrollY + cb.top;
+          // centred the moment the section pins
+          if (window.scrollY >= chatTop - 2) {
+            if (window.__miraStart) window.__miraStart();
+          } else if (window.scrollY < chatTop - window.innerHeight * 0.5) {
+            if (window.__miraReset) window.__miraReset();
+          }
+          var winLanding = chatTop;
+          // and only then do the boxes drop out of the frame. The distance is
+          // a screenful rather than the gap to the window: that window is far
+          // down the page and nowhere near the viewport while this section is
+          // pinned, so aiming at it just looked like a slide off the bottom.
+          var f = parseFloat(slice(0.80, 1));
+          root.style.setProperty('--fall', f.toFixed(4));
+          root.style.setProperty('--fall-px', (f * window.innerHeight * 0.46).toFixed(1) + 'px');
+          // they hold their strength until they are on the window, and go out
+          // over the last quarter of the drop
+          root.style.setProperty('--fall-o',
+            Math.min(1, Math.max(0, (1 - f) / 0.25)).toFixed(3));
+        }
+      }
+
+      if (head) {
+        head.classList.toggle('is-stuck', window.scrollY > 8);
+        head.classList.toggle('is-night', (t > 0.5 && t < 2.6) || t > 3.45);
+      }
+      ticking = false;
+    }
+
+    window.addEventListener('scroll', function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  }());
+
+
+
+  // One stage at a time: the rail picks which pane is shown.
+  (function () {
+    var rail = document.querySelector('.rec-stage-rail');
+    if (!rail) return;
+    var tabs = [].slice.call(rail.querySelectorAll('[data-rec-stage]'));
+    var panes = [].slice.call(document.querySelectorAll('[data-rec-pane]'));
+    var ruler = document.querySelector('.rec-stage-ruler');
+    // the mark is placed from the tab's own box, so it stays right at any width
+    function mark(tab) {
+      if (!ruler) return;
+      var r = ruler.getBoundingClientRect(), t = tab.getBoundingClientRect();
+      if (!r.width) return;
+      var at = (t.left + t.width / 2 - r.left) / r.width * 100;
+      ruler.style.setProperty('--mark', at.toFixed(2) + '%');
+    }
+    function remark() {
+      var on = rail.querySelector('.rec-stage-tab.is-on');
+      if (on) mark(on);
+    }
+    remark();
+    window.addEventListener('resize', remark, { passive: true });
+    if (document.fonts && document.fonts.ready) { document.fonts.ready.then(remark); }
+    function show(tab) {
+      var key = tab.getAttribute('data-rec-stage');
+      mark(tab);
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.classList.toggle('is-on', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      panes.forEach(function (pane) {
+        pane.classList.toggle('is-on', pane.getAttribute('data-rec-pane') === key);
+      });
+    }
+
+    var at = 0;
+    window.__recStages = tabs.length;
+    // the page's scroll handler calls this; a click just sets it directly
+    window.__recStage = function (i) {
+      if (i === at || !tabs[i]) return;
+      at = i;
+      show(tabs[i]);
+    };
+
+    rail.addEventListener('click', function (e) {
+      var tab = e.target.closest('[data-rec-stage]');
+      if (!tab) return;
+      at = tabs.indexOf(tab);
+      show(tab);
+    });
+  }());
+
+
+  // Mira's thread plays itself: each turn in order, and a typing bubble is
+  // taken away again as soon as the reply it stood in for appears.
+  (function () {
+    var win = document.querySelector('.rec-win');
+    if (!win || !('IntersectionObserver' in window)) return;
+    var turns = [].slice.call(win.querySelectorAll('.rec-turn'));
+    var timers = [];
+    var held = false, everHeld = false;
+
+    // Holding the scroll means blocking the events that cause it, rather than
+    // touching overflow -- the page keeps its position and nothing shifts.
+    function stop(e) { e.preventDefault(); }
+    var KEYS = [' ', 'PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End'];
+    function onKey(e) {
+      if (e.key === 'Escape') { release(); return; }
+      if (KEYS.indexOf(e.key) > -1) e.preventDefault();
+    }
+    function hold() {
+      if (held || everHeld) return;
+      held = everHeld = true;
+      window.addEventListener('wheel', stop, { passive: false });
+      window.addEventListener('touchmove', stop, { passive: false });
+      window.addEventListener('keydown', onKey, { passive: false });
+    }
+    function release() {
+      if (!held) return;
+      held = false;
+      // where the row starts counting from
+      window.__miraDone = window.scrollY;
+      window.removeEventListener('wheel', stop, { passive: false });
+      window.removeEventListener('touchmove', stop, { passive: false });
+      window.removeEventListener('keydown', onKey, { passive: false });
+    }
+
+    function reset() {
+      timers.forEach(clearTimeout);
+      timers = [];
+      release();
+      turns.forEach(function (t) { t.classList.remove('is-on', 'is-done'); });
+    }
+
+    function play() {
+      var at = 420;
+      hold();
+      turns.forEach(function (turn, i) {
+        timers.push(setTimeout(function () {
+          turn.classList.add('is-on');
+          var before = turns[i - 1];
+          if (before && before.classList.contains('rec-turn--typing')) {
+            before.classList.add('is-done');
+          }
+        }, at));
+        at += turn.classList.contains('rec-turn--typing') ? 560 : 340;
+      });
+      // the scroll comes back as the last turn lands, and no later than this
+      // whatever happens to the frames in between
+      timers.push(setTimeout(release, at + 200));
+      timers.push(setTimeout(release, 9000));
+    }
+
+    // The scroll handler calls these: it knows when the section pins, which
+    // is the moment the window reaches the middle of the screen.
+    var started = false;
+    window.__miraStart = function () {
+      if (started) return;
+      started = true;
+      reset();
+      play();
+    };
+    window.__miraReset = function () {
+      if (!started) return;
+      started = false;
+      reset();
+    };
+  }());
+
+
+
+  // The closing section comes up as it arrives, and resets behind you.
+  (function () {
+    var close = document.querySelector('.rec-close');
+    if (!close || !('IntersectionObserver' in window)) return;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.intersectionRatio >= 0.25) close.classList.add('is-on');
+        else if (!e.isIntersecting) close.classList.remove('is-on');
+      });
+    }, { threshold: [0, 0.25] });
+    io.observe(close);
+  }());
+</script>
+</body>
+</html>

@@ -82,10 +82,29 @@
     html, body { overflow-x:clip; }
     body { background:#FFFFFF; }
     .rec-hero { position:relative; }
+    /* sand over the foot of the section: the grain is centred on mid-grey, so
+       `overlay` disturbs the value without touching the hue underneath, and the
+       mask keeps it to the bottom where the violet gathers */
+    /* Sand, in the hero's own colours. The violet-to-blue wash is what is
+       painted; the noise is a mask over it, so the speckles carry colour
+       instead of draining it the way grey-on-overlay did. A second mask layer
+       fades the whole thing out going up, and the two intersect. */
+    .rec-hero::after { content:""; position:absolute; inset:auto 0 0 0;
+                       height:64%; z-index:0; pointer-events:none; opacity:.72;
+                       background:linear-gradient(162deg,
+                         rgba(120,152,255,.78) 0%, rgba(146,130,250,.74) 46%,
+                         rgba(178,142,246,.70) 100%);
+                       -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.28'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E"), linear-gradient(to top, transparent 0%, rgba(0,0,0,.92) 15%, rgba(0,0,0,.76) 48%, transparent 100%);
+                       mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.28'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E"), linear-gradient(to top, transparent 0%, rgba(0,0,0,.92) 15%, rgba(0,0,0,.76) 48%, transparent 100%);
+                       -webkit-mask-size:150px 150px, auto;
+                       mask-size:150px 150px, auto;
+                       -webkit-mask-composite:source-in;
+                       mask-composite:intersect; }
+    /* the hero's own content stays above the grain */
+    .rec-hero-inner { position:relative; z-index:1; }
     .rec-sky { position:fixed; inset:0; z-index:-1; pointer-events:none;
                background:linear-gradient(180deg,
-                 var(--sky-a, #FFFFFF) 0%, var(--sky-a, #FFFFFF) 34%,
-                 var(--sky-b, #E6DFFA) 100%); }
+                 var(--sky-a, #FFFFFF) 0%, var(--sky-b, #E6DFFA) 100%); }
     /* the drifting blob rides on the sky now, and fades as it darkens */
     .rec-sky::before {
       content:""; position:absolute; left:50%; bottom:-140px;
@@ -236,7 +255,8 @@
     .rec-compose-wrap { width:100%; max-width:820px; margin:48px auto 0; }
     .rec-compose { position:relative; width:100%; text-align:left;
                    background:#ffffff; border:none; border-radius:14px;
-                   padding:12px 12px 12px 18px; box-shadow:0 8px 28px rgba(37,99,235,0.12); }
+                   padding:18px 18px 14px;
+                   box-shadow:0 8px 28px rgba(37,99,235,0.12); }
 
     /* A very light blue haze drifting around the edge: two blurred conic
        gradients turning at different speeds in opposite directions, sitting
@@ -277,16 +297,25 @@
       .rec-compose::before, .rec-compose::after { animation:none; }
     }
 
-    .rec-compose-headrow { display:flex; align-items:center; gap:16px; }
-    .rec-compose-input { flex:1; min-width:0; border:none; outline:none; resize:none;
-                         background:transparent;
-                         font-size:20px; font-weight:400; line-height:1.35; color:#1e293b;
+    .rec-compose-input { display:block; width:100%; border:none; outline:none;
+                         resize:none; background:transparent;
+                         font-size:19px; font-weight:400; line-height:1.4; color:#1e293b;
                          letter-spacing:-0.01em; padding:0; margin:0; overflow:hidden; }
     .rec-compose-input::placeholder { color:#94a3b8; font-weight:400; opacity:1; }
-    .rec-compose-post { flex:none; background:#0f172a; color:#ffffff; border:none; cursor:pointer;
-                        font-size:14px; font-weight:600;
-                        padding:10px 22px; border-radius:8px; transition:background .12s; }
-    .rec-compose-post:hover { background:#1e293b; }
+    /* the tools sit under the question, with send on the far end */
+    .rec-compose-row { display:flex; align-items:center; justify-content:space-between;
+                       gap:16px; margin-top:20px; }
+    .rec-compose-tools { display:inline-flex; align-items:center; gap:15px;
+                         color:#9aa6b8; font-size:15px; font-weight:600;
+                         line-height:1; }
+    .rec-compose-tools svg { width:17px; height:17px; display:block; }
+    .rec-compose-tools b { font-weight:600; }
+    .rec-compose-post { flex:none; width:38px; height:38px; border-radius:50%;
+                        display:grid; place-items:center; cursor:pointer;
+                        border:none; color:#ffffff; background:#7C5CF6;
+                        transition:background .12s, transform .12s; }
+    .rec-compose-post svg { width:17px; height:17px; }
+    .rec-compose-post:hover { background:#6B4BE8; transform:translateY(-1px); }
 
     /* ---- next section (placeholder) ------------------------------------ */
     /* tall enough that the slow exit completes before the page runs out
@@ -1215,11 +1244,16 @@
           it arrives. You pay only when someone joins.</p>
               <div class="rec-compose-wrap">
               <form class="rec-compose" onsubmit="return false">
-                <div class="rec-compose-headrow">
-                  <textarea class="rec-compose-input" rows="1"
-                            aria-label="Describe the role, paste a link, or add skills"
-                            placeholder="What role are you hiring for?"></textarea>
-                  <button type="submit" class="rec-compose-post">Describe</button>
+                <textarea class="rec-compose-input" rows="1"
+                          aria-label="Describe the role, paste a link, or add skills"
+                          placeholder="What role are you hiring for?"></textarea>
+                <div class="rec-compose-row">
+                  <span class="rec-compose-tools" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    <b>@</b>
+                  </span>
+                  <button type="submit" class="rec-compose-post"
+                          aria-label="Describe the role"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg></button>
                 </div>
               </form>
               </div>

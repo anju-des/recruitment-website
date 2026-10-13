@@ -23,6 +23,27 @@ transitions never show a seam:
 | **Stages** | Screening · Interview · Scorecard · Offer, on a rail; the frame pins and the scroll changes the stage |
 | **Close** | a sphere of light opens on the Mira mark, the loop unwinds, three lines land |
 
+## Testing environment
+
+Pages serves one branch from one root, so the test environment is a folder on
+the same site rather than a second deployment:
+
+| | |
+|---|---|
+| live | https://anju-des.github.io/recruitment-website/ |
+| preview | https://anju-des.github.io/recruitment-website/preview/ |
+
+```bash
+python build/publish.py ../EOR/docs --preview   # put a draft in preview/
+python build/publish.py --promote               # preview/ -> live
+python build/publish.py ../EOR/docs             # straight to live
+```
+
+The preview is a self-contained copy, not a page sharing the parent's assets —
+git stores identical blobs once, and a copy cannot break on a path rewrite the
+way a shared one can. It carries a small fixed "Preview" marker in the corner
+so a tab is never mistaken for the live one; `--promote` strips it.
+
 ## How to change it
 
 **Don't hand-edit `index.html`** — it is generated, and it's 150KB of one file.

@@ -1160,6 +1160,310 @@
       .rec-last-line { transform:none; }
     }
 
+
+    /* ---- testimonials ------------------------------------------------------ */
+    /* The light they sit on is the sky's own fifth leg, not a background of
+       their own: a block laid over the fixed gradient is what reads as a seam. */
+    /* the padding goes on the same selector that clears the page's own, or
+       `.rec-wrap > section` outranks it and the section collapses */
+    .rec-wrap > section.rec-voices { padding:clamp(70px, 9vh, 124px) 0
+                                             clamp(90px, 12vh, 150px); }
+    /* at least one screen tall, so the scroll that lightens the ground is the
+       scroll that brings the rows in */
+    /* a mask hides what sticks out without shortening the page it sticks out
+       of, so the horizontal overflow of a track three screens wide is clipped
+       here instead */
+    .rec-voices { position:relative; width:100%; box-sizing:border-box;
+                  min-height:100vh; overflow:hidden;
+                  display:flex; flex-direction:column; justify-content:center; }
+    .rec-voices-h { width:min(760px, 88vw); margin:0 auto clamp(44px, 6.5vh, 82px);
+                    text-align:center; color:#1A1430;
+                    font-size:clamp(22px, 1.5vw + 11px, 34px);
+                    font-weight:600; line-height:1.24; letter-spacing:-0.025em;
+                    text-wrap:balance;
+                    opacity:calc(var(--vh, 0) * (1 - var(--tout, 0)));
+                    transform:translateY(calc((1 - var(--vh, 0)) * 20px)); }
+    .rec-voices-rows { display:flex; flex-direction:column;
+                       gap:clamp(14px, 1.6vw, 24px);
+                       --vg:clamp(14px, 1.6vw, 24px);
+                       --vcard:clamp(320px, 36vw, 560px);
+                       --vfade:clamp(40px, 7vw, 160px);
+                       opacity:calc(var(--vh, 0) * (1 - var(--tout, 0)));
+                       transform:translateY(calc((1 - var(--vh, 0)) * 26px)); }
+    /* The fade at the ends is a mask, and a mask clips to its own border box,
+       so a card rising on hover lost its top to it. The row keeps room above
+       and below and hands that room straight back with a negative margin:
+       nothing moves, and there is somewhere to rise into. */
+    .rec-voices-row { position:relative; width:100%;
+                      padding-block:44px; margin-block:-44px;
+                      -webkit-mask-image:linear-gradient(90deg,
+                        transparent 0, #000 var(--vfade),
+                        #000 calc(100% - var(--vfade)), transparent 100%);
+                      mask-image:linear-gradient(90deg,
+                        transparent 0, #000 var(--vfade),
+                        #000 calc(100% - var(--vfade)), transparent 100%); }
+    /* two copies of the three, travelling exactly one copy: half the track
+       plus half a gap, since the track holds one gap fewer than twice the
+       cards. The lap closes on the picture it opened with. */
+    .rec-voices-track { display:flex; align-items:stretch; gap:var(--vg);
+                        width:max-content;
+                        animation:rec-voices-drift 48s linear infinite; }
+    @keyframes rec-voices-drift {
+      from { transform:translateX(0); }
+      to   { transform:translateX(calc(-50% - var(--vg) / 2)); }
+    }
+    /* half a lap in, or the two rows move as one slab */
+    .rec-voices-row:nth-child(2) .rec-voices-track { animation-delay:-24s; }
+    /* the row under the pointer stops, which is also what makes a moving card
+       something you can click */
+    .rec-voices-row:hover .rec-voices-track { animation-play-state:paused; }
+    .rec-voice { flex:none; width:var(--vcard);
+                 margin:0; display:flex; flex-direction:column;
+                 align-items:center; justify-content:center; text-align:center;
+                 box-sizing:border-box; border-radius:18px;
+                 min-height:clamp(210px, 17vw, 280px);
+                 padding:clamp(24px, 2.6vw, 34px) clamp(20px, 2.2vw, 30px);
+                 background:#FFFFFF;
+                 box-shadow:0 6px 22px rgba(58,38,116,.07); }
+    /* auto margins top and bottom take all the free space and split it, so
+       the quote centres in what the byline leaves rather than being pushed
+       down onto it */
+    .rec-voice blockquote { margin:auto 0;
+                            font-family:Georgia, 'Times New Roman', Times, serif;
+                            font-style:italic; color:#1A1430;
+                            font-size:clamp(16px, 0.55vw + 11px, 20px);
+                            line-height:1.45; letter-spacing:-0.008em;
+                            text-wrap:balance; }
+    .rec-voice blockquote::before { content:"\201C"; }
+    .rec-voice blockquote::after { content:"\201D"; }
+    /* no `margin-top:auto` here: it pinned the byline to the foot of the card
+       and left the quote stranded at the top. The two travel together and the
+       pair sits in the middle. */
+    .rec-voice figcaption { display:flex; align-items:center; justify-content:center;
+                            flex-wrap:wrap; gap:7px;
+                            padding-top:clamp(16px, 1.8vw, 24px);
+                            font-size:clamp(11.5px, 0.15vw + 10.5px, 12.5px); }
+    .rec-voice figcaption b { font-weight:600; color:#2C2545; }
+    .rec-voice figcaption span { color:#A79FC8; }
+    .rec-voice figcaption i { font-style:normal; color:#6F6790; }
+    /* a card lifts under the pointer, and opens as a sheet when clicked */
+    .rec-voice { cursor:pointer;
+                 transition:transform .22s cubic-bezier(.2,.7,.3,1),
+                            box-shadow .22s ease; }
+    .rec-voice:hover, .rec-voice:focus-visible {
+      transform:translateY(-9px) scale(1.055);
+      box-shadow:0 26px 56px rgba(58,38,116,.18); }
+    .rec-voice:focus-visible { outline:2px solid #7C5CF6; outline-offset:3px; }
+    /* `display:grid` below would beat the default [hidden] rule on its own */
+    .rec-voice-modal[hidden] { display:none; }
+    /* it arrives on an animation rather than a class set a frame later: a
+       transition needs a painted frame to run from, and in a background tab
+       the frame never comes and the sheet sits at nothing */
+    .rec-voice-modal { position:fixed; inset:0; z-index:200;
+                       display:grid; place-items:center;
+                       padding:clamp(16px, 4vw, 48px);
+                       background:rgba(22,16,44,.55);
+                       animation:rec-voice-in .2s ease both; }
+    .rec-voice-modal.is-out { animation:rec-voice-out .18s ease both; }
+    @keyframes rec-voice-in { from { opacity:0; } to { opacity:1; } }
+    @keyframes rec-voice-out { from { opacity:1; } to { opacity:0; } }
+    .rec-voice-sheet { position:relative; box-sizing:border-box;
+                       width:min(680px, 100%); max-height:86vh; overflow:auto;
+                       background:#FFFFFF; border-radius:22px; text-align:center;
+                       padding:clamp(44px, 5vw, 62px) clamp(26px, 4vw, 56px);
+                       box-shadow:0 30px 80px rgba(20,12,48,.3);
+                       animation:rec-voice-rise .22s cubic-bezier(.2,.7,.3,1) both; }
+    @keyframes rec-voice-rise {
+      from { transform:translateY(12px) scale(.98); }
+      to   { transform:none; }
+    }
+    .rec-voice-modal.is-out .rec-voice-sheet { animation:none; }
+    .rec-voice-sheet blockquote { margin:0 0 clamp(18px, 2.4vw, 28px);
+                                  font-family:Georgia, 'Times New Roman', Times, serif;
+                                  font-style:italic; color:#1A1430;
+                                  font-size:clamp(20px, 1.1vw + 13px, 30px);
+                                  line-height:1.4; letter-spacing:-0.012em;
+                                  text-wrap:balance; }
+    .rec-voice-sheet blockquote::before { content:"\201C"; }
+    .rec-voice-sheet blockquote::after { content:"\201D"; }
+    .rec-voice-who { margin:0; display:flex; flex-wrap:wrap; gap:7px;
+                     align-items:center; justify-content:center;
+                     font-size:clamp(12.5px, 0.2vw + 11.5px, 14px); }
+    .rec-voice-who b { font-weight:600; color:#2C2545; }
+    .rec-voice-who span { color:#A79FC8; }
+    .rec-voice-who i { font-style:normal; color:#6F6790; }
+    .rec-voice-x { position:absolute; top:14px; right:14px;
+                   width:36px; height:36px; border-radius:50%;
+                   display:grid; place-items:center; cursor:pointer;
+                   border:none; background:#F2EFFB; color:#4E4470;
+                   font-size:20px; line-height:1; font-family:inherit;
+                   transition:background .15s; }
+    .rec-voice-x:hover { background:#E6E0F7; }
+    /* the closing words step aside before the ground under them lightens */
+    .rec-say-last { opacity:calc(1 - var(--vout, 0)); }
+    @media (max-width:640px) {
+      .rec-voices-rows { --vcard:min(86vw, 340px); --vfade:clamp(20px, 7vw, 40px); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-voices-h, .rec-voices-rows { transform:none; }
+      .rec-voice { transition:none; }
+      .rec-voices-track { animation:none; }
+      .rec-voice:hover, .rec-voice:focus-visible { transform:none; }
+      .rec-voice-modal, .rec-voice-sheet { animation:none; }
+    }
+
+    /* ---- footer ------------------------------------------------------------ */
+    /* No background: the dark is the sky's sixth leg, arriving on the scroll
+       like every other change of ground on this page. */
+    /* Three quarters of a screen: the ramp used to finish at this element's
+       top, which only a full screen could reach, so it now finishes at the
+       foot of the page instead and the height is free to be what it should. */
+    .rec-foot { position:relative; color:#9A93B4; box-sizing:border-box;
+                min-height:75vh; display:flex; flex-direction:column;
+                padding:clamp(48px, 7vh, 96px) clamp(22px, 4.5vw, 110px)
+                        clamp(26px, 4vh, 48px);
+                font-size:14px; line-height:1.6;
+                opacity:var(--fin, 0);
+                transform:translateY(calc((1 - var(--fin, 0)) * 24px)); }
+    /* full width, with the footer's own padding as the only gutter: the line
+       takes the room that is left, and `auto` keeps the nav the width of its
+       own columns so it sits against the right edge rather than being
+       stretched across half a wide screen */
+    /* auto margins centre the body of it and leave the rule at the floor */
+    /* `auto` on the top margin only, so the block sits on the rule rather
+       than floating in the middle of whatever height is spare */
+    /* the banner across the top: the page spends its length showing what
+       Mira does and used to end without saying what to do about it */
+    .rec-foot-cta { position:relative; z-index:1; width:100%;
+                    box-sizing:border-box;
+                    display:flex; flex-wrap:wrap; align-items:center;
+                    justify-content:space-between; gap:clamp(22px, 3vw, 52px);
+                    margin-top:clamp(-56px, -4.5vh, -24px);
+                    margin-bottom:clamp(70px, 13vh, 170px);
+                    border-radius:clamp(18px, 1.6vw, 26px);
+                    /* a floor rather than a fixed height, so a wrapped line
+                       on a narrow screen still has somewhere to go */
+                    min-height:clamp(200px, 16vw, 280px);
+                    padding:clamp(34px, 3.8vw, 62px) clamp(26px, 3.2vw, 54px);
+                    background:linear-gradient(118deg,
+                      rgba(226,216,250,.97) 0%, rgba(238,241,253,.96) 46%,
+                      rgba(250,222,236,.95) 100%);
+                    opacity:var(--fin, 0);
+                    transform:translateY(calc((1 - var(--fin, 0)) * 18px)); }
+    /* The card's own sand, built like the rest of the page's: the blue-into-
+       purple wash is what is painted and the noise masks it, so the speckles
+       carry the colour. It has to be a layer behind the content -- a mask
+       applies to everything an element paints, children included, so masking
+       the card itself would eat the words along with the fill. */
+    .rec-foot-cta::before { content:""; position:absolute; inset:0; z-index:0;
+                            border-radius:inherit; pointer-events:none;
+                            opacity:.85;
+                            /* the fill's own three, carried deeper: each
+                               speckle is the same colour a few shades down,
+                               which is what makes the surface read as sand
+                               rather than as a wash */
+                            background:linear-gradient(118deg,
+                              rgba(186,164,246,.95) 0%,
+                              rgba(194,206,248,.92) 46%,
+                              rgba(242,180,212,.92) 100%);
+                            -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.17'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
+                            mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.17'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
+                            -webkit-mask-size:150px 150px;
+                            mask-size:150px 150px; }
+    .rec-foot-cta-say, .rec-foot-cta-act { position:relative; z-index:1; }
+    .rec-foot-cta-say { flex:1 1 420px; }
+    .rec-foot-cta h2 { margin:0 0 clamp(14px, 1.5vw, 24px); color:#1A1430;
+                       font-size:clamp(21px, 1.3vw + 11px, 32px);
+                       font-weight:600; line-height:1.2;
+                       letter-spacing:-0.025em; text-wrap:balance; }
+    .rec-foot-cta p { margin:0; color:#4B4270; font-size:14.5px;
+                      max-width:56ch; }
+    .rec-foot-cta-act { flex:none; display:flex; flex-wrap:wrap; gap:12px; }
+    /* two classes, because `.rec-foot a` is a class and an element and would
+       otherwise win and paint both of these the same muted violet */
+    .rec-foot-cta .rec-foot-cta-go,
+    .rec-foot-cta .rec-foot-cta-alt {
+      display:inline-flex; align-items:center; border-radius:10px;
+      padding:13px 24px; font-size:14.5px; font-weight:600;
+      text-decoration:none; white-space:nowrap;
+      transition:background .15s, color .15s; }
+    .rec-foot-cta .rec-foot-cta-go { background:#1A1430; color:#FFFFFF; }
+    .rec-foot-cta .rec-foot-cta-go:hover { background:#2E2650; color:#FFFFFF; }
+    .rec-foot-cta .rec-foot-cta-alt { color:#2C2545;
+      box-shadow:inset 0 0 0 1px rgba(26,20,48,.24); }
+    .rec-foot-cta .rec-foot-cta-alt:hover { background:rgba(26,20,48,.07);
+      color:#1A1430; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-foot-cta { transform:none; }
+    }
+    /* Sand across the foot of the page. The wash is what is painted and the
+       noise is a mask over it, so the speckles carry the colour rather than
+       draining it; a second mask layer fades it out going up and the two
+       intersect. Darker than the hero's, since here it lifts a near-black
+       instead of tinting a white. */
+    .rec-foot::after { content:""; position:absolute; inset:auto 0 0 0;
+                       height:78%; z-index:0; pointer-events:none;
+                       opacity:calc(var(--fin, 0) * .82);
+                       /* light purple into purple into blue, so the grain
+                          has somewhere to travel across the foot rather than
+                          sitting on one note */
+                       background:linear-gradient(162deg,
+                         rgba(206,184,255,.90) 0%, rgba(150,110,245,.85) 30%,
+                         rgba(104,80,230,.80) 62%, rgba(58,86,226,.74) 100%);
+                       -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.28'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23f)'/%3E%3C/svg%3E"), linear-gradient(to top, transparent 0%, rgba(0,0,0,.95) 14%, rgba(0,0,0,.72) 52%, transparent 100%);
+                       mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.28'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23f)'/%3E%3C/svg%3E"), linear-gradient(to top, transparent 0%, rgba(0,0,0,.95) 14%, rgba(0,0,0,.72) 52%, transparent 100%);
+                       -webkit-mask-size:150px 150px, auto;
+                       mask-size:150px 150px, auto;
+                       -webkit-mask-composite:source-in;
+                       mask-composite:intersect; }
+    /* the footer's own content stays above the grain */
+    .rec-foot-inner, .rec-foot-base { position:relative; z-index:1; }
+    .rec-foot-inner { width:100%; margin:auto 0 0;
+                      display:grid; grid-template-columns:1fr auto;
+                      gap:clamp(40px, 5vw, 90px); align-items:start;
+                      padding-bottom:clamp(44px, 7vh, 84px); }
+    .rec-foot-say h2 { margin:0 0 clamp(26px, 3.4vh, 42px); color:#FFFFFF;
+                       font-size:clamp(34px, 4.2vw, 66px); font-weight:500;
+                       line-height:1.06; letter-spacing:-0.032em; }
+    .rec-foot-social { display:flex; flex-wrap:wrap; gap:12px; }
+    .rec-foot-social a { width:42px; height:42px; border-radius:50%;
+                         display:grid; place-items:center; color:#D7D1EA;
+                         box-shadow:inset 0 0 0 1px rgba(201,184,255,.22);
+                         transition:background .15s, color .15s; }
+    .rec-foot-social a:hover { background:rgba(255,255,255,.1); color:#FFFFFF; }
+    .rec-foot-social svg { width:17px; height:17px; display:block; }
+    /* three of them now, so they fit on one line */
+    .rec-foot-cols { display:grid;
+                     grid-template-columns:repeat(3, minmax(126px, 200px));
+                     gap:clamp(28px, 4vh, 48px) clamp(22px, 2.6vw, 56px); }
+    .rec-foot-col h3 { margin:0 0 16px; color:#7A7298; font-size:11px;
+                       font-weight:600; letter-spacing:.13em;
+                       text-transform:uppercase; }
+    .rec-foot-col ul { margin:0; padding:0; list-style:none;
+                       display:flex; flex-direction:column; gap:10px; }
+    .rec-foot a { color:#B4ADCB; text-decoration:none; transition:color .15s; }
+    .rec-foot a:hover, .rec-foot a:focus-visible { color:#FFFFFF; }
+    .rec-foot a:focus-visible { outline:2px solid #7C5CF6; outline-offset:3px;
+                                border-radius:4px; }
+    .rec-foot-base { width:100%;
+                     padding-top:clamp(18px, 2.4vh, 26px);
+                     border-top:1px solid rgba(201,184,255,.14);
+                     display:flex; flex-wrap:wrap; gap:14px 32px;
+                     align-items:center; justify-content:flex-end; }
+    .rec-foot-base small { color:#6E6690; font-size:12.5px; }
+    .rec-foot-base nav { display:flex; flex-wrap:wrap; gap:22px;
+                         font-size:12.5px; }
+    @media (max-width:1100px) {
+      .rec-foot-inner { grid-template-columns:1fr; }
+    }
+    @media (max-width:560px) {
+      .rec-foot-cols { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-foot { transform:none; }
+      .rec-foot a, .rec-foot-social a { transition:none; }
+    }
+
     /* ---- suggestions --------------------------------------------------- */
     /* sits under the field, same width, and only while there is something
        to match against */
@@ -1850,6 +2154,204 @@
           </div>
         </section>
 
+        <!-- the ground comes back to the light, and the rows drift across it -->
+        <section class="rec-voices">
+          <h2 class="rec-voices-h">What the hiring teams say</h2>
+          <div class="rec-voices-rows">
+            <div class="rec-voices-row">
+              <div class="rec-voices-track">
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>Two roles closed in a month and nobody on my team opened a CV. The shortlist was short, which is the part I didn&#8217;t expect.</blockquote>
+                  <figcaption>
+                    <b>Devika Rao</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Head of Engineering, Halyard</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>I still make the call on every hire. I&#8217;ve just stopped losing Thursdays to finding an hour three people can agree on.</blockquote>
+                  <figcaption>
+                    <b>Tomas Lindqvist</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Talent Lead, Tessellate</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>The scorecard goes in once and every candidate comes back measured against it. For a team our size that&#8217;s the whole thing.</blockquote>
+                  <figcaption>
+                    <b>Priya Menon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Founder, Brightfold</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>Two roles closed in a month and nobody on my team opened a CV. The shortlist was short, which is the part I didn&#8217;t expect.</blockquote>
+                  <figcaption>
+                    <b>Devika Rao</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Head of Engineering, Halyard</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>I still make the call on every hire. I&#8217;ve just stopped losing Thursdays to finding an hour three people can agree on.</blockquote>
+                  <figcaption>
+                    <b>Tomas Lindqvist</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Talent Lead, Tessellate</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>The scorecard goes in once and every candidate comes back measured against it. For a team our size that&#8217;s the whole thing.</blockquote>
+                  <figcaption>
+                    <b>Priya Menon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Founder, Brightfold</i>
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="rec-voices-row">
+              <div class="rec-voices-track">
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>Time to offer went from six weeks to eleven days, and the candidates noticed before we did.</blockquote>
+                  <figcaption>
+                    <b>Adaeze Okafor</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>VP People, Crosslight</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>The interview notes are written before I&#8217;m out of the room. I read them now instead of writing them.</blockquote>
+                  <figcaption>
+                    <b>J&#250;lia Ferreira</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Engineering Manager, Northbeam</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>We hired across four time zones without a coordinator. That used to be a full job.</blockquote>
+                  <figcaption>
+                    <b>Sam Kwon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>COO, Larkfield</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>Time to offer went from six weeks to eleven days, and the candidates noticed before we did.</blockquote>
+                  <figcaption>
+                    <b>Adaeze Okafor</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>VP People, Crosslight</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>The interview notes are written before I&#8217;m out of the room. I read them now instead of writing them.</blockquote>
+                  <figcaption>
+                    <b>J&#250;lia Ferreira</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Engineering Manager, Northbeam</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>We hired across four time zones without a coordinator. That used to be a full job.</blockquote>
+                  <figcaption>
+                    <b>Sam Kwon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>COO, Larkfield</i>
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </section>
+      <footer class="rec-foot">
+        <div class="rec-foot-cta">
+          <div class="rec-foot-cta-say">
+            <h2>Your next hire is already in the pile.</h2>
+            <p>Mira ranks every application against your scorecard as it
+               arrives, books the interviews and keeps the record. You pay
+               only when someone joins.</p>
+          </div>
+          <div class="rec-foot-cta-act">
+            <a class="rec-foot-cta-go" href="#start">Start a role</a>
+            <a class="rec-foot-cta-alt" href="#demo">Book a demo</a>
+          </div>
+        </div>
+        <div class="rec-foot-inner">
+          <div class="rec-foot-say">
+            <h2>Start hiring<br>with Mira.</h2>
+            <div class="rec-foot-social">
+              <a href="#linkedin" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7.5 10.6v5.9"/><circle cx="7.5" cy="7.7" r=".85" fill="currentColor" stroke="none"/><path d="M11.6 16.5v-3.2a2.3 2.3 0 0 1 4.6 0v3.2"/><path d="M11.6 10.6v5.9"/></svg>
+              </a>
+              <a href="#x" aria-label="X">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5l15 15"/><path d="M19.5 4.5l-15 15"/></svg>
+              </a>
+              <a href="#youtube" aria-label="YouTube">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="4"/><path d="M10.6 9.7l4.7 2.3-4.7 2.3z"/></svg>
+              </a>
+              <a href="#instagram" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="1.6" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.6"/><circle cx="16.9" cy="7.1" r=".9" fill="currentColor" stroke="none"/></svg>
+              </a>
+            </div>
+          </div>
+          <nav class="rec-foot-cols" aria-label="Footer">
+            <div class="rec-foot-col">
+              <h3>Solutions</h3>
+              <ul>
+                <li><a href="#startups">Startups</a></li>
+                <li><a href="#scale-ups">Scale-ups</a></li>
+                <li><a href="#agencies">Agencies</a></li>
+              </ul>
+            </div>
+            <div class="rec-foot-col">
+              <h3>Resources</h3>
+              <ul>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#help-centre">Help centre</a></li>
+                <li><a href="#contact">Contact</a></li>
+              </ul>
+            </div>
+            <div class="rec-foot-col">
+              <h3>Company</h3>
+              <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#careers">Careers</a></li>
+                <li><a href="#press">Press</a></li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+        <div class="rec-foot-base">
+          <small>&#169; 2026 Wisemonk. All rights reserved.</small>
+          <nav aria-label="Legal">
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+            <a href="#login">Log in</a>
+          </nav>
+        </div>
+      </footer>
+
       </div>
     </div>
   </div>
@@ -1907,6 +2409,8 @@
     var close = document.querySelector('.rec-close');
     var deep = document.querySelector('.rec-deep');
     var rest = document.querySelector('.rec-rest');
+    var voices = document.querySelector('.rec-voices');
+    var foot = document.querySelector('.rec-foot');
     var root = document.documentElement;
     if (!hero) return;
     var ticking = false;
@@ -1917,11 +2421,15 @@
     var TOP = [[0, [255, 255, 255]], [0.55, [72, 58, 134]], [1, [5, 5, 8]],
                [1.5, [5, 5, 8]], [2, [5, 5, 8]],
                [2.5, [72, 58, 134]], [3, [239, 234, 255]],
-               [3.5, [86, 66, 160]], [4, [26, 16, 54]]];
+               [3.5, [86, 66, 160]], [4, [26, 16, 54]],
+               [4.5, [86, 66, 160]], [5, [240, 236, 255]],
+               [5.5, [86, 66, 160]], [6, [16, 10, 30]]];
     var FOOT = [[0, [230, 223, 250]], [0.55, [54, 40, 108]], [1, [0, 0, 0]],
                 [1.5, [0, 0, 0]], [2, [0, 0, 0]],
                 [2.5, [54, 40, 108]], [3, [255, 255, 255]],
-                [3.5, [58, 40, 112]], [4, [10, 5, 26]]];
+                [3.5, [58, 40, 112]], [4, [10, 5, 26]],
+                [4.5, [58, 40, 112]], [5, [255, 255, 255]],
+                [5.5, [58, 40, 112]], [6, [6, 3, 14]]];
 
     function ramp(stops, t) {
       var i = 1;
@@ -2013,7 +2521,40 @@
         root.style.setProperty('--s2', line(0.76, 0.86));
         root.style.setProperty('--s3', line(0.87, 0.96));
       }
-      var t = c + back + down + last;
+      // ...and back up to the light over the screen before the voices, which
+      // is the same screen the pinned frame spends letting go
+      var voiceIn = 0;
+      if (voices) {
+        var vt = window.scrollY + voices.getBoundingClientRect().top;
+        voiceIn = (window.scrollY - (vt - window.innerHeight)) / window.innerHeight;
+        voiceIn = Math.min(1, Math.max(0, voiceIn));
+        var vb = function (a, b) {
+          return Math.min(1, Math.max(0, (voiceIn - a) / (b - a))).toFixed(3);
+        };
+        // the white words leave first, while the ground is still dark
+        root.style.setProperty('--vout', vb(0.06, 0.38));
+        // ...and the voices only come up once the ground under them is light
+        root.style.setProperty('--vh', vb(0.62, 0.98));
+      }
+      // ...and down one last time for the footer, over the screen before its
+      // top -- which is the whole of the testimonial section, so the quotes
+      // leave first rather than turning into dark text on a dark ground
+      var footIn = 0;
+      if (foot) {
+        // the end of the band is the footer's top or the foot of the page,
+        // whichever comes first: a footer shorter than a screen leaves its own
+        // top unreachable, and the ramp would stop partway down
+        var ft = window.scrollY + foot.getBoundingClientRect().top;
+        var fend = Math.min(ft, root.scrollHeight - window.innerHeight);
+        footIn = (window.scrollY - (fend - window.innerHeight)) / window.innerHeight;
+        footIn = Math.min(1, Math.max(0, footIn));
+        var fb = function (a, b) {
+          return Math.min(1, Math.max(0, (footIn - a) / (b - a))).toFixed(3);
+        };
+        root.style.setProperty('--tout', fb(0.12, 0.52));
+        root.style.setProperty('--fin', fb(0.55, 0.95));
+      }
+      var t = c + back + down + last + voiceIn + footIn;
       root.style.setProperty('--sky-a', ramp(TOP, t));
       root.style.setProperty('--sky-b', ramp(FOOT, t));
       root.style.setProperty('--sky-glow', (1 - c).toFixed(3));
@@ -2024,7 +2565,9 @@
       // dark, light, dark again: 1 wherever the ground is dark
       var lit = t <= 1 ? t
               : (t <= 2 ? 1
-              : (t <= 3 ? 3 - t : Math.min(1, t - 3)));
+              : (t <= 3 ? 3 - t
+              : (t <= 4 ? Math.min(1, t - 3)
+              : (t <= 5 ? Math.max(0, 5 - t) : Math.min(1, t - 5)))));
       var al = function (a, b) { return (a + (b - a) * lit).toFixed(3); };
       root.style.setProperty('--box-fill', 'rgba(255,255,255,' + al(0.20, 0.115) + ')');
 
@@ -2088,7 +2631,8 @@
 
       if (head) {
         head.classList.toggle('is-stuck', window.scrollY > 8);
-        head.classList.toggle('is-night', (t > 0.5 && t < 2.6) || t > 3.45);
+        head.classList.toggle('is-night',
+          (t > 0.5 && t < 2.6) || (t > 3.45 && t < 4.55) || t > 5.45);
       }
       ticking = false;
     }
@@ -2246,6 +2790,76 @@
       });
     }, { threshold: [0, 0.25] });
     io.observe(close);
+  }());
+
+  // A card opens as a sheet. It is built here and hung off <body>, not written
+  // into the section: a fixed element is positioned against the nearest
+  // transformed ancestor rather than the viewport, and the grid carries a
+  // transform for its reveal, so inside it the backdrop would cover the grid
+  // instead of the page.
+  (function () {
+    var cards = [].slice.call(document.querySelectorAll('.rec-voice'));
+    if (!cards.length) return;
+
+    var wrap = document.createElement('div');
+    wrap.className = 'rec-voice-modal';
+    wrap.hidden = true;
+    wrap.innerHTML = '<div class="rec-voice-sheet" role="dialog" aria-modal="true"'
+      + ' aria-label="Testimonial">'
+      + '<button type="button" class="rec-voice-x" aria-label="Close">&#215;</button>'
+      + '<blockquote></blockquote><p class="rec-voice-who"></p></div>';
+    document.body.appendChild(wrap);
+
+    var quote = wrap.querySelector('blockquote');
+    var who = wrap.querySelector('.rec-voice-who');
+    var shut = wrap.querySelector('.rec-voice-x');
+    var from = null;
+
+    function open(card) {
+      quote.textContent = card.querySelector('blockquote').textContent;
+      who.innerHTML = card.querySelector('figcaption').innerHTML;
+      from = card;
+      wrap.classList.remove('is-out');
+      // showing it restarts the animation on its own; nothing to schedule
+      wrap.hidden = false;
+      shut.focus();
+    }
+
+    function close() {
+      wrap.classList.add('is-out');
+      window.setTimeout(function () {
+        wrap.hidden = true;
+        wrap.classList.remove('is-out');
+      }, 200);
+      if (from) from.focus();
+      from = null;
+    }
+
+    cards.forEach(function (card) {
+      card.addEventListener('click', function () { open(card); });
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          open(card);
+        }
+      });
+    });
+
+    shut.addEventListener('click', close);
+    wrap.addEventListener('click', function (e) { if (e.target === wrap) close(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !wrap.hidden) close();
+    });
+    // the close button is the only thing in here to land on
+    wrap.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab') { e.preventDefault(); shut.focus(); }
+    });
+    // the page behind is scroll-driven: scrolling it now would move the sky
+    // and the closing words about, and leave the reader somewhere else
+    wrap.addEventListener('wheel', function (e) { e.preventDefault(); },
+                          { passive: false });
+    wrap.addEventListener('touchmove', function (e) { e.preventDefault(); },
+                          { passive: false });
   }());
 </script>
 </body>

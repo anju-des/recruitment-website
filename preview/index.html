@@ -1312,6 +1312,54 @@
       .rec-voice-modal, .rec-voice-sheet { animation:none; }
     }
 
+    /* ---- footer ------------------------------------------------------------ */
+    /* Its own ground, not another leg on the sky ramp. Every other change of
+       ground here is a transition and the ramp is what keeps those seamless;
+       a footer is a slab at the end, and a slab is meant to have an edge. */
+    .rec-foot { position:relative; background:#0A0616; color:#9A93B4;
+                padding:clamp(56px, 7vh, 88px) clamp(22px, 5vw, 72px)
+                        clamp(22px, 3vh, 32px);
+                font-size:14px; line-height:1.6; }
+    .rec-foot-top { width:min(1180px, 100%); margin-inline:auto;
+                    display:flex; flex-wrap:wrap; gap:clamp(32px, 5vw, 80px);
+                    align-items:flex-start;
+                    padding-bottom:clamp(36px, 5vh, 60px); }
+    .rec-foot-brand { flex:1 1 320px; max-width:420px; }
+    /* the header's own dark wordmark, flattened to black and then inverted:
+       white where it is opaque, untouched where it is not */
+    .rec-foot-brand img { display:block; width:124px; height:auto;
+                          margin-bottom:18px;
+                          filter:brightness(0) invert(1); opacity:.92; }
+    .rec-foot-brand p { margin:0; color:#8E86AC; font-size:14px; max-width:38ch; }
+    .rec-foot-cols { flex:1 1 420px; display:flex; flex-wrap:wrap;
+                     gap:clamp(28px, 4vw, 64px); }
+    .rec-foot-col { min-width:124px; }
+    .rec-foot-col h3 { margin:0 0 14px; color:#FFFFFF; font-size:13px;
+                       font-weight:600; letter-spacing:.02em; }
+    .rec-foot-col ul { margin:0; padding:0; list-style:none;
+                       display:flex; flex-direction:column; gap:9px; }
+    .rec-foot a { color:#9A93B4; text-decoration:none;
+                  transition:color .15s; }
+    .rec-foot a:hover, .rec-foot a:focus-visible { color:#FFFFFF; }
+    .rec-foot a:focus-visible { outline:2px solid #7C5CF6; outline-offset:3px;
+                                border-radius:3px; }
+    .rec-foot-base { width:min(1180px, 100%); margin-inline:auto;
+                     padding-top:clamp(18px, 2.4vh, 26px);
+                     border-top:1px solid rgba(201,184,255,.12);
+                     display:flex; flex-wrap:wrap; gap:14px 28px;
+                     align-items:center; justify-content:space-between; }
+    .rec-foot-base small { color:#6E6690; font-size:12.5px; }
+    .rec-foot-base nav { display:flex; flex-wrap:wrap; gap:22px;
+                         font-size:12.5px; }
+    /* the shell pads its content by 20px below 1000px, and a footer that
+       stops short of the edge is not a footer; this cancels exactly that */
+    @media (max-width:1000px) {
+      .rec-foot { margin-inline:-20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-foot a { transition:none; }
+    }
+
     /* ---- suggestions --------------------------------------------------- */
     /* sits under the field, same width, and only while there is something
        to match against */
@@ -2124,6 +2172,51 @@
             </div>
           </div>
         </section>
+      <footer class="rec-foot">
+        <div class="rec-foot-top">
+          <div class="rec-foot-brand">
+            <img src="mira-logo.svg" width="1152" height="365" alt="Mira">
+            <p>The recruiting agent behind Wisemonk Recruit. It reads every
+               application, books the interviews and keeps the record. You make
+               the calls.</p>
+          </div>
+          <nav class="rec-foot-cols" aria-label="Footer">
+            <div class="rec-foot-col">
+              <h3>Platform</h3>
+              <ul>
+                <li><a href="#screening">Screening</a></li>
+                <li><a href="#interviews">Interviews</a></li>
+                <li><a href="#scorecards">Scorecards</a></li>
+                <li><a href="#offers">Offers</a></li>
+              </ul>
+            </div>
+            <div class="rec-foot-col">
+              <h3>Solutions</h3>
+              <ul>
+                <li><a href="#startups">Startups</a></li>
+                <li><a href="#scale-ups">Scale-ups</a></li>
+                <li><a href="#agencies">Agencies</a></li>
+              </ul>
+            </div>
+            <div class="rec-foot-col">
+              <h3>Resources</h3>
+              <ul>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="#help-centre">Help centre</a></li>
+                <li><a href="#contact">Contact</a></li>
+              </ul>
+            </div>
+          </nav>
+        </div>
+        <div class="rec-foot-base">
+          <small>&#169; 2026 Wisemonk. All rights reserved.</small>
+          <nav aria-label="Legal">
+            <a href="#privacy">Privacy</a>
+            <a href="#terms">Terms</a>
+            <a href="#login">Log in</a>
+          </nav>
+        </div>
+      </footer>
 
       </div>
     </div>

@@ -1346,8 +1346,8 @@
                     min-height:clamp(200px, 16vw, 280px);
                     padding:clamp(34px, 3.8vw, 62px) clamp(26px, 3.2vw, 54px);
                     background:linear-gradient(118deg,
-                      rgba(150,190,255,.26) 0%, rgba(178,144,255,.30) 40%,
-                      rgba(240,182,222,.24) 100%);
+                      rgba(226,216,250,.97) 0%, rgba(238,241,253,.96) 46%,
+                      rgba(251,231,220,.95) 100%);
                     opacity:var(--fin, 0);
                     transform:translateY(calc((1 - var(--fin, 0)) * 18px)); }
     /* The card's own sand, built like the rest of the page's: the blue-into-
@@ -1357,26 +1357,24 @@
        the card itself would eat the words along with the fill. */
     .rec-foot-cta::before { content:""; position:absolute; inset:0; z-index:0;
                             border-radius:inherit; pointer-events:none;
-                            opacity:.70;
-                            /* purple most of the way, with light blue
-                               entering at one corner and pink leaving at the
-                               other */
+                            opacity:.50;
+                            /* a shade deeper than the fill, so the speckles
+                               still show against a surface this pale */
                             background:linear-gradient(118deg,
-                              rgba(160,198,255,.92) 0%,
-                              rgba(184,152,255,.94) 28%,
-                              rgba(206,170,252,.90) 62%,
-                              rgba(244,186,226,.86) 100%);
+                              rgba(198,180,246,.92) 0%,
+                              rgba(206,218,250,.88) 46%,
+                              rgba(247,212,194,.88) 100%);
                             -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.26'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
                             mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.26'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
                             -webkit-mask-size:150px 150px;
                             mask-size:150px 150px; }
     .rec-foot-cta-say, .rec-foot-cta-act { position:relative; z-index:1; }
     .rec-foot-cta-say { flex:1 1 420px; }
-    .rec-foot-cta h2 { margin:0 0 10px; color:#FFFFFF;
+    .rec-foot-cta h2 { margin:0 0 10px; color:#1A1430;
                        font-size:clamp(21px, 1.3vw + 11px, 32px);
                        font-weight:600; line-height:1.2;
                        letter-spacing:-0.025em; text-wrap:balance; }
-    .rec-foot-cta p { margin:0; color:#E2DDF4; font-size:14.5px;
+    .rec-foot-cta p { margin:0; color:#4B4270; font-size:14.5px;
                       max-width:56ch; }
     .rec-foot-cta-act { flex:none; display:flex; flex-wrap:wrap; gap:12px; }
     /* two classes, because `.rec-foot a` is a class and an element and would
@@ -1387,12 +1385,12 @@
       padding:13px 24px; font-size:14.5px; font-weight:600;
       text-decoration:none; white-space:nowrap;
       transition:background .15s, color .15s; }
-    .rec-foot-cta .rec-foot-cta-go { background:#FFFFFF; color:#1A1430; }
-    .rec-foot-cta .rec-foot-cta-go:hover { background:#EDE9FC; }
-    .rec-foot-cta .rec-foot-cta-alt { color:#E4DFF6;
-      box-shadow:inset 0 0 0 1px rgba(201,184,255,.3); }
-    .rec-foot-cta .rec-foot-cta-alt:hover { background:rgba(255,255,255,.09);
-      color:#FFFFFF; }
+    .rec-foot-cta .rec-foot-cta-go { background:#1A1430; color:#FFFFFF; }
+    .rec-foot-cta .rec-foot-cta-go:hover { background:#2E2650; color:#FFFFFF; }
+    .rec-foot-cta .rec-foot-cta-alt { color:#2C2545;
+      box-shadow:inset 0 0 0 1px rgba(26,20,48,.24); }
+    .rec-foot-cta .rec-foot-cta-alt:hover { background:rgba(26,20,48,.07);
+      color:#1A1430; }
     @media (prefers-reduced-motion: reduce) {
       .rec-foot-cta { transform:none; }
     }

@@ -1569,6 +1569,8 @@
     .rec-flow-in:focus { border-color:#7C5CF6;
                          box-shadow:0 0 0 3px rgba(124,92,246,.16); }
     .rec-flow-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .rec-flow-chips:first-of-type { margin-top:0; }
+    .rec-flow-chip:focus-visible { outline:2px solid #7C5CF6; outline-offset:2px; }
     .rec-flow-chip { border:1px solid #DCD6EE; background:#FFFFFF;
                      border-radius:100px; padding:8px 15px; cursor:pointer;
                      font:inherit; font-size:13.5px; color:#4B4270;
@@ -3166,9 +3168,9 @@
 
     var STEPS = [
       { key: 'location',
-        q: 'Where is this role based?',
-        hint: 'A city, a region, or remote. It is what Mira filters on first.',
-        placeholder: 'e.g. Bengaluru, or Remote (India)',
+        q: 'Where will they work from?',
+        hint: 'It is the first thing Mira filters on.',
+        chipsOnly: true,
         chips: ['Remote', 'Hybrid', 'On-site'] },
       { key: 'salary',
         q: 'What is the budget?',
@@ -3256,8 +3258,10 @@
       var val = step.tags ? '' : brief[step.key];
       return '<h2 class="rec-flow-q">' + esc(step.q) + '</h2>' +
         '<p class="rec-flow-hint">' + esc(step.hint) + '</p>' +
-        '<input class="rec-flow-in" type="text" value="' + esc(val) + '"' +
-        ' placeholder="' + esc(step.placeholder) + '" aria-label="' + esc(step.q) + '">' +
+        (step.chipsOnly ? '' :
+          '<input class="rec-flow-in" type="text" value="' + esc(val) + '"' +
+          ' placeholder="' + esc(step.placeholder) + '" aria-label="' +
+          esc(step.q) + '">') +
         (step.chips ? '<div class="rec-flow-chips">' + step.chips.map(function (c) {
           return '<button type="button" class="rec-flow-chip' +
             (brief[step.key] === c ? ' is-on' : '') + '">' + esc(c) + '</button>';
@@ -3269,7 +3273,8 @@
         }).join('') + '</div>' : '') +
         '<div class="rec-flow-act">' +
           (at > 0 ? '<button type="button" class="rec-flow-back">Back</button>' : '') +
-          '<button type="button" class="rec-flow-next">Continue</button>' +
+          (step.chipsOnly ? '' :
+            '<button type="button" class="rec-flow-next">Continue</button>') +
           '<button type="button" class="rec-flow-skip">Skip for now</button>' +
         '</div>';
     }
@@ -3326,18 +3331,20 @@
       function ready() {
         if (!next || at >= STEPS.length) return;
         var has = step.tags ? brief.skills.length > 0
-                            : input.value.trim().length > 0;
+                : (input ? input.value.trim().length > 0
+                         : !!brief[step.key]);
         next.disabled = !has;
       }
 
+      function onward() { at++; draw(); }
+
       function go() {
         if (at < STEPS.length) {
-          if (!step.tags) brief[step.key] = input.value.trim();
-          if (next.disabled) return;
+          if (!step.tags && input) brief[step.key] = input.value.trim();
+          if (next && next.disabled) return;
         }
         if (at >= STEPS.length) { done(); return; }
-        at++;
-        draw();
+        onward();
       }
 
       if (input) {
@@ -3359,13 +3366,19 @@
         input.focus();
       }
 
-      card.querySelectorAll('.rec-flow-chip').forEach(function (chip) {
+      var chips = card.querySelectorAll('.rec-flow-chip');
+      chips.forEach(function (chip) {
         chip.addEventListener('click', function () {
           brief[step.key] = chip.textContent;
-          input.value = chip.textContent;
-          draw();
+          if (input) { input.value = chip.textContent; draw(); return; }
+          // nothing left to confirm on a chips-only step: the choice is the
+          // answer, so it carries straight on
+          onward();
         });
       });
+      if (!input && chips.length) {
+        (card.querySelector('.rec-flow-chip.is-on') || chips[0]).focus();
+      }
 
       card.querySelectorAll('[data-drop]').forEach(function (x) {
         x.addEventListener('click', function () {

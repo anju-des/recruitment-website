@@ -654,7 +654,11 @@
     /* its own ramp runs over the screen before it, which is exactly when the
        stage frame lets go, so the two never overlap */
     .rec-wrap > section.rec-rest { padding:0; }
-    .rec-rest { position:relative; min-height:300vh; }
+    /* 500vh rather than 300. The pinned span is the section minus one
+       screen, so this takes it from 200vh to 400vh: the light opens, the mark
+       resolves and the loop unwinds over twice the scroll they had, each at
+       the same point in the sequence as before. */
+    .rec-rest { position:relative; min-height:500vh; }
 
 
     /* ---- stages ------------------------------------------------------------ */

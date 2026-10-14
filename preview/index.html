@@ -1320,8 +1320,11 @@
        foot of the page instead and the height is free to be what it should. */
     .rec-foot { position:relative; color:#9A93B4; box-sizing:border-box;
                 min-height:75vh; display:flex; flex-direction:column;
+                /* the deeper floor is what the mark hangs into: without it
+                   there is only the rule, a line of text and 34px under here,
+                   and the drop below runs out of page */
                 padding:clamp(48px, 7vh, 96px) clamp(22px, 4.5vw, 110px)
-                        clamp(22px, 3vh, 34px);
+                        clamp(34px, 8vh, 110px);
                 font-size:14px; line-height:1.6;
                 opacity:var(--fin, 0);
                 transform:translateY(calc((1 - var(--fin, 0)) * 24px)); }
@@ -1378,7 +1381,7 @@
        on it. The drop is held short of the page edge: there is only the rule,
        one line of text and the footer's own padding under here */
     .rec-foot-mark { position:absolute; z-index:0; pointer-events:none;
-                     left:0; bottom:clamp(-44px, -3vw, -22px);
+                     left:0; bottom:clamp(-88px, -6vw, -40px);
                      width:clamp(150px, 19vw, 300px); aspect-ratio:412 / 300;
                      opacity:calc(var(--fin, 0) * .95);
                      transform:perspective(820px) rotateX(13deg)

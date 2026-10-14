@@ -2593,9 +2593,10 @@
         root.style.setProperty('--l1', slice(0.08, 0.26));
         root.style.setProperty('--l2', slice(0.28, 0.46));
         root.style.setProperty('--l3', slice(0.48, 0.66));
-        // they are up to full strength by the first third of that travel, so
-        // they are properly visible while the hero is still on screen
-        root.style.setProperty('--rec-qo', Math.min(1, q * 3).toFixed(3));
+        // they hold off while the hero is still the page, and arrive on the
+        // way down rather than crowding the field they fall past
+        root.style.setProperty('--rec-qo',
+          Math.min(1, Math.max(0, (q - 0.38) / 0.34)).toFixed(3));
         // once all three are white the statement leaves, on its own
         root.style.setProperty('--say-out', slice(0.62, 0.80));
 

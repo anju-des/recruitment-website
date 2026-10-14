@@ -1339,11 +1339,14 @@
                     display:flex; flex-wrap:wrap; align-items:center;
                     justify-content:space-between; gap:clamp(22px, 3vw, 52px);
                     margin-top:clamp(-56px, -4.5vh, -24px);
-                    margin-bottom:clamp(30px, 4.5vh, 64px);
+                    margin-bottom:clamp(70px, 13vh, 170px);
                     border-radius:clamp(18px, 1.6vw, 26px);
-                    padding:clamp(28px, 3.2vw, 50px) clamp(26px, 3.2vw, 54px);
+                    /* a floor rather than a fixed height, so a wrapped line
+                       on a narrow screen still has somewhere to go */
+                    min-height:clamp(200px, 16vw, 280px);
+                    padding:clamp(34px, 3.8vw, 62px) clamp(26px, 3.2vw, 54px);
                     background:linear-gradient(118deg,
-                      rgba(60,84,214,.20) 0%, rgba(132,96,242,.16) 100%);
+                      rgba(118,150,255,.30) 0%, rgba(168,132,255,.24) 100%);
                     opacity:var(--fin, 0);
                     transform:translateY(calc((1 - var(--fin, 0)) * 18px)); }
     /* The card's own sand, built like the rest of the page's: the blue-into-
@@ -1353,11 +1356,11 @@
        the card itself would eat the words along with the fill. */
     .rec-foot-cta::before { content:""; position:absolute; inset:0; z-index:0;
                             border-radius:inherit; pointer-events:none;
-                            opacity:.62;
+                            opacity:.70;
                             background:linear-gradient(118deg,
-                              rgba(74,104,240,.92) 0%,
-                              rgba(118,88,238,.86) 52%,
-                              rgba(176,124,252,.80) 100%);
+                              rgba(138,176,255,.95) 0%,
+                              rgba(166,146,252,.90) 52%,
+                              rgba(206,170,255,.85) 100%);
                             -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.26'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
                             mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.26'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
                             -webkit-mask-size:150px 150px;
@@ -1368,7 +1371,7 @@
                        font-size:clamp(21px, 1.3vw + 11px, 32px);
                        font-weight:600; line-height:1.2;
                        letter-spacing:-0.025em; text-wrap:balance; }
-    .rec-foot-cta p { margin:0; color:#B4ADCB; font-size:14.5px;
+    .rec-foot-cta p { margin:0; color:#E2DDF4; font-size:14.5px;
                       max-width:56ch; }
     .rec-foot-cta-act { flex:none; display:flex; flex-wrap:wrap; gap:12px; }
     /* two classes, because `.rec-foot a` is a class and an element and would

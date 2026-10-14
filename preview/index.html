@@ -1330,10 +1330,16 @@
        own columns so it sits against the right edge rather than being
        stretched across half a wide screen */
     /* auto margins centre the body of it and leave the rule at the floor */
-    .rec-foot-inner { width:100%; margin:auto 0;
+    /* `auto` on the top margin only: with it on both, the spare height split
+       above and below and left a gap between this block and the rule, which
+       the mark was then pinned to the wrong side of */
+    .rec-foot-inner { position:relative; width:100%; margin:auto 0 0;
                       display:grid; grid-template-columns:1fr auto;
                       gap:clamp(40px, 5vw, 90px); align-items:start;
-                      padding-bottom:clamp(40px, 6vh, 76px); }
+                      /* the room the mark stands in. It is sized off the
+                         width like the mark is, so the two cannot drift apart
+                         and leave it sitting on the socials */
+                      padding-bottom:clamp(150px, 16vw, 320px); }
     .rec-foot-say h2 { margin:0 0 clamp(26px, 3.4vh, 42px); color:#FFFFFF;
                        font-size:clamp(34px, 4.2vw, 66px); font-weight:500;
                        line-height:1.06; letter-spacing:-0.032em; }
@@ -1344,9 +1350,10 @@
                          transition:background .15s, color .15s; }
     .rec-foot-social a:hover { background:rgba(255,255,255,.1); color:#FFFFFF; }
     .rec-foot-social svg { width:17px; height:17px; display:block; }
+    /* three of them now, so they fit on one line */
     .rec-foot-cols { display:grid;
-                     grid-template-columns:repeat(2, minmax(150px, 240px));
-                     gap:clamp(28px, 4vh, 48px) clamp(24px, 3vw, 72px); }
+                     grid-template-columns:repeat(3, minmax(126px, 200px));
+                     gap:clamp(28px, 4vh, 48px) clamp(22px, 2.6vw, 56px); }
     .rec-foot-col h3 { margin:0 0 16px; color:#7A7298; font-size:11px;
                        font-weight:600; letter-spacing:.13em;
                        text-transform:uppercase; }
@@ -1363,10 +1370,13 @@
        take the one before as their source, so the offsets accumulate into a
        solid extrusion -- and it has to sit on the wrapper because filter runs
        before masking, and the shape here is a masked child. */
+    /* `bottom: 0` of the block above the rule puts it on the rule: an
+       absolutely positioned child is laid out against its ancestor's padding
+       box, and that box ends exactly where the rule's border begins -- so
+       nothing here has to know how tall the line beneath it is */
     .rec-foot-mark { position:absolute; z-index:0; pointer-events:none;
-                     left:clamp(22px, 4.5vw, 110px);
-                     bottom:clamp(76px, 11vh, 132px);
-                     width:clamp(104px, 11vw, 188px); aspect-ratio:412 / 300;
+                     left:0; bottom:0;
+                     width:clamp(150px, 19vw, 300px); aspect-ratio:412 / 300;
                      opacity:calc(var(--fin, 0) * .95);
                      transform:perspective(820px) rotateX(13deg)
                                rotateY(-19deg) rotate(-6deg);
@@ -1383,18 +1393,22 @@
                             drop-shadow(0 14px 22px rgba(8,3,26,.8))
                             drop-shadow(0 0 22px rgba(167,139,250,.3)); }
     .rec-foot-mark svg { display:block; width:100%; height:100%; }
-    /* once the footer stacks there is no spare corner to put it in */
-    @media (max-width:860px) { .rec-foot-mark { display:none; } }
     .rec-foot-base { width:100%;
                      padding-top:clamp(18px, 2.4vh, 26px);
                      border-top:1px solid rgba(201,184,255,.14);
-                     display:flex; flex-wrap:wrap; gap:14px 28px;
-                     align-items:center; justify-content:space-between; }
+                     display:flex; flex-wrap:wrap; gap:14px 32px;
+                     align-items:center; justify-content:flex-end; }
     .rec-foot-base small { color:#6E6690; font-size:12.5px; }
     .rec-foot-base nav { display:flex; flex-wrap:wrap; gap:22px;
                          font-size:12.5px; }
-    @media (max-width:860px) {
-      .rec-foot-inner { grid-template-columns:1fr; }
+    @media (max-width:1100px) {
+      .rec-foot-inner { grid-template-columns:1fr;
+                        /* no mark down here, so no room to keep for it */
+                        padding-bottom:clamp(36px, 6vh, 64px); }
+      .rec-foot-mark { display:none; }
+    }
+    @media (max-width:560px) {
+      .rec-foot-cols { grid-template-columns:repeat(2, minmax(0, 1fr)); }
     }
     @media (prefers-reduced-motion: reduce) {
       .rec-foot { transform:none; }
@@ -2214,13 +2228,13 @@
           </div>
         </section>
       <footer class="rec-foot">
-        <span class="rec-foot-mark" aria-hidden="true">
-          <svg viewBox="0 0 412 300">
-            <rect width="412" height="300" fill="url(#rec-metal)"
-                  mask="url(#rec-logo)"/>
-          </svg>
-        </span>
         <div class="rec-foot-inner">
+          <span class="rec-foot-mark" aria-hidden="true">
+            <svg viewBox="0 0 412 300">
+              <rect width="412" height="300" fill="url(#rec-metal)"
+                    mask="url(#rec-logo)"/>
+            </svg>
+          </span>
           <div class="rec-foot-say">
             <h2>Start hiring<br>with Mira.</h2>
             <div class="rec-foot-social">
@@ -2247,15 +2261,6 @@
             </div>
           </div>
           <nav class="rec-foot-cols" aria-label="Footer">
-            <div class="rec-foot-col">
-              <h3>Platform</h3>
-              <ul>
-                <li><a href="#screening">Screening</a></li>
-                <li><a href="#interviews">Interviews</a></li>
-                <li><a href="#scorecards">Scorecards</a></li>
-                <li><a href="#offers">Offers</a></li>
-              </ul>
-            </div>
             <div class="rec-foot-col">
               <h3>Solutions</h3>
               <ul>

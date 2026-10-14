@@ -1315,18 +1315,23 @@
     /* ---- footer ------------------------------------------------------------ */
     /* No background: the dark is the sky's sixth leg, arriving on the scroll
        like every other change of ground on this page. */
-    /* A full screen tall, because the ramp finishes at this element's top and
-       that is only reachable when what follows it is at least a screen. */
+    /* Three quarters of a screen: the ramp used to finish at this element's
+       top, which only a full screen could reach, so it now finishes at the
+       foot of the page instead and the height is free to be what it should. */
     .rec-foot { position:relative; color:#9A93B4; box-sizing:border-box;
-                min-height:100vh; display:flex; flex-direction:column;
-                padding:clamp(48px, 7vh, 96px) clamp(22px, 5vw, 72px)
+                min-height:75vh; display:flex; flex-direction:column;
+                padding:clamp(48px, 7vh, 96px) clamp(22px, 4.5vw, 110px)
                         clamp(22px, 3vh, 34px);
                 font-size:14px; line-height:1.6;
                 opacity:var(--fin, 0);
                 transform:translateY(calc((1 - var(--fin, 0)) * 24px)); }
+    /* full width, with the footer's own padding as the only gutter: the line
+       takes the room that is left, and `auto` keeps the nav the width of its
+       own columns so it sits against the right edge rather than being
+       stretched across half a wide screen */
     /* auto margins centre the body of it and leave the rule at the floor */
-    .rec-foot-inner { width:min(1240px, 100%); margin:auto auto;
-                      display:grid; grid-template-columns:1fr 1fr;
+    .rec-foot-inner { width:100%; margin:auto 0;
+                      display:grid; grid-template-columns:1fr auto;
                       gap:clamp(40px, 5vw, 90px); align-items:start;
                       padding-bottom:clamp(40px, 6vh, 76px); }
     .rec-foot-say h2 { margin:0 0 clamp(26px, 3.4vh, 42px); color:#FFFFFF;
@@ -1339,8 +1344,9 @@
                          transition:background .15s, color .15s; }
     .rec-foot-social a:hover { background:rgba(255,255,255,.1); color:#FFFFFF; }
     .rec-foot-social svg { width:17px; height:17px; display:block; }
-    .rec-foot-cols { display:grid; grid-template-columns:repeat(2, 1fr);
-                     gap:clamp(28px, 4vh, 48px) clamp(24px, 3vw, 56px); }
+    .rec-foot-cols { display:grid;
+                     grid-template-columns:repeat(2, minmax(150px, 240px));
+                     gap:clamp(28px, 4vh, 48px) clamp(24px, 3vw, 72px); }
     .rec-foot-col h3 { margin:0 0 16px; color:#7A7298; font-size:11px;
                        font-weight:600; letter-spacing:.13em;
                        text-transform:uppercase; }
@@ -1350,7 +1356,7 @@
     .rec-foot a:hover, .rec-foot a:focus-visible { color:#FFFFFF; }
     .rec-foot a:focus-visible { outline:2px solid #7C5CF6; outline-offset:3px;
                                 border-radius:4px; }
-    .rec-foot-base { width:min(1240px, 100%); margin-inline:auto;
+    .rec-foot-base { width:100%;
                      padding-top:clamp(18px, 2.4vh, 26px);
                      border-top:1px solid rgba(201,184,255,.14);
                      display:flex; flex-wrap:wrap; gap:14px 28px;
@@ -2440,8 +2446,12 @@
       // leave first rather than turning into dark text on a dark ground
       var footIn = 0;
       if (foot) {
+        // the end of the band is the footer's top or the foot of the page,
+        // whichever comes first: a footer shorter than a screen leaves its own
+        // top unreachable, and the ramp would stop partway down
         var ft = window.scrollY + foot.getBoundingClientRect().top;
-        footIn = (window.scrollY - (ft - window.innerHeight)) / window.innerHeight;
+        var fend = Math.min(ft, root.scrollHeight - window.innerHeight);
+        footIn = (window.scrollY - (fend - window.innerHeight)) / window.innerHeight;
         footIn = Math.min(1, Math.max(0, footIn));
         var fb = function (a, b) {
           return Math.min(1, Math.max(0, (footIn - a) / (b - a))).toFixed(3);

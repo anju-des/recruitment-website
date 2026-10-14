@@ -1346,7 +1346,8 @@
                     min-height:clamp(200px, 16vw, 280px);
                     padding:clamp(34px, 3.8vw, 62px) clamp(26px, 3.2vw, 54px);
                     background:linear-gradient(118deg,
-                      rgba(176,142,255,.30) 0%, rgba(214,186,255,.24) 100%);
+                      rgba(150,190,255,.26) 0%, rgba(178,144,255,.30) 40%,
+                      rgba(240,182,222,.24) 100%);
                     opacity:var(--fin, 0);
                     transform:translateY(calc((1 - var(--fin, 0)) * 18px)); }
     /* The card's own sand, built like the rest of the page's: the blue-into-
@@ -1357,10 +1358,14 @@
     .rec-foot-cta::before { content:""; position:absolute; inset:0; z-index:0;
                             border-radius:inherit; pointer-events:none;
                             opacity:.70;
+                            /* purple most of the way, with light blue
+                               entering at one corner and pink leaving at the
+                               other */
                             background:linear-gradient(118deg,
-                              rgba(182,148,255,.95) 0%,
-                              rgba(204,174,255,.90) 52%,
-                              rgba(228,204,255,.85) 100%);
+                              rgba(160,198,255,.92) 0%,
+                              rgba(184,152,255,.94) 28%,
+                              rgba(206,170,252,.90) 62%,
+                              rgba(244,186,226,.86) 100%);
                             -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.26'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
                             mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='c'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.26'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23c)'/%3E%3C/svg%3E");
                             -webkit-mask-size:150px 150px;

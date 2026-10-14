@@ -1374,8 +1374,11 @@
        absolutely positioned child is laid out against its ancestor's padding
        box, and that box ends exactly where the rule's border begins -- so
        nothing here has to know how tall the line beneath it is */
+    /* and then pushed below that line, so it crosses it rather than resting
+       on it. The drop is held short of the page edge: there is only the rule,
+       one line of text and the footer's own padding under here */
     .rec-foot-mark { position:absolute; z-index:0; pointer-events:none;
-                     left:0; bottom:0;
+                     left:0; bottom:clamp(-44px, -3vw, -22px);
                      width:clamp(150px, 19vw, 300px); aspect-ratio:412 / 300;
                      opacity:calc(var(--fin, 0) * .95);
                      transform:perspective(820px) rotateX(13deg)

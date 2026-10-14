@@ -1213,8 +1213,11 @@
                             text-wrap:balance; }
     .rec-voice blockquote::before { content:"\201C"; }
     .rec-voice blockquote::after { content:"\201D"; }
+    /* no `margin-top:auto` here: it pinned the byline to the foot of the card
+       and left the quote stranded at the top. The two travel together and the
+       pair sits in the middle. */
     .rec-voice figcaption { display:flex; align-items:center; justify-content:center;
-                            flex-wrap:wrap; gap:7px; margin-top:auto;
+                            flex-wrap:wrap; gap:7px;
                             font-size:clamp(11.5px, 0.15vw + 10.5px, 12.5px); }
     .rec-voice figcaption b { font-weight:600; color:#2C2545; }
     .rec-voice figcaption span { color:#A79FC8; }

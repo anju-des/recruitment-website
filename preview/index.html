@@ -324,7 +324,12 @@
        its way in, and a hidden overflow cut the boxes off at that line */
     /* The statement is pinned for the length of this section: it settles in
        the middle of the screen and stays there while the lines colour. */
-    .rec-next { position:relative; min-height:300vh; }
+    /* 420vh rather than 300: the extra is all for the fall at the end of
+       it. The pinned span is the section minus one screen, so this takes it
+       from 200vh to 320vh -- a ratio of 1.6, not the 1.4 of the heights --
+       and every band before the fall is divided by 1.6, which puts each of
+       them back on the exact scroll it had. */
+    .rec-next { position:relative; min-height:420vh; }
     /* above the chat window, so the boxes fall in front of it */
     .rec-say-pin { position:sticky; top:0; height:100vh; display:grid; place-items:center;
                    z-index:2; }
@@ -2590,15 +2595,15 @@
           return Math.min(1, Math.max(0, (pp - a) / (b - a))).toFixed(3);
         };
         // the lines come up to white one at a time, while nothing else moves
-        root.style.setProperty('--l1', slice(0.08, 0.26));
-        root.style.setProperty('--l2', slice(0.28, 0.46));
-        root.style.setProperty('--l3', slice(0.48, 0.66));
+        root.style.setProperty('--l1', slice(0.050, 0.163));
+        root.style.setProperty('--l2', slice(0.175, 0.288));
+        root.style.setProperty('--l3', slice(0.300, 0.413));
         // they hold off while the hero is still the page, and arrive on the
         // way down rather than crowding the field they fall past
         root.style.setProperty('--rec-qo',
           Math.min(1, Math.max(0, (q - 0.38) / 0.34)).toFixed(3));
         // once all three are white the statement leaves, on its own
-        root.style.setProperty('--say-out', slice(0.62, 0.80));
+        root.style.setProperty('--say-out', slice(0.388, 0.500));
 
         // The boxes keep going, all the way into the window: the drop is the
         // real distance between the two, run over the scroll between the
@@ -2620,7 +2625,9 @@
           // a screenful rather than the gap to the window: that window is far
           // down the page and nowhere near the viewport while this section is
           // pinned, so aiming at it just looked like a slide off the bottom.
-          var f = parseFloat(slice(0.80, 1));
+          // all the room the longer section bought: four times the
+          // scroll the fall used to have, over the same distance
+          var f = parseFloat(slice(0.500, 1));
           root.style.setProperty('--fall', f.toFixed(4));
           root.style.setProperty('--fall-px', (f * window.innerHeight * 0.46).toFixed(1) + 'px');
           // they hold their strength until they are on the window, and go out

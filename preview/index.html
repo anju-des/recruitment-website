@@ -1170,8 +1170,11 @@
                                              clamp(90px, 12vh, 150px); }
     /* at least one screen tall, so the scroll that lightens the ground is the
        scroll that brings the rows in */
+    /* a mask hides what sticks out without shortening the page it sticks out
+       of, so the horizontal overflow of a track three screens wide is clipped
+       here instead */
     .rec-voices { position:relative; width:100%; box-sizing:border-box;
-                  min-height:100vh;
+                  min-height:100vh; overflow:hidden;
                   display:flex; flex-direction:column; justify-content:center; }
     .rec-voices-h { width:min(760px, 88vw); margin:0 auto clamp(44px, 6.5vh, 82px);
                     text-align:center; color:#1A1430;
@@ -1180,30 +1183,42 @@
                     text-wrap:balance;
                     opacity:var(--vh, 0);
                     transform:translateY(calc((1 - var(--vh, 0)) * 20px)); }
-    /* two rows of three. `1fr` rows rather than auto: the quotes are different
-       lengths, and auto rows would make the second row shallower than the
-       first, which reads as crooked rather than as two rows */
-    /* The mask clips to this element's own border box, so a card lifting on
-       hover lost its top to it. The box gets room above and below, and the
-       negative margin takes that room back off the layout, so nothing moves
-       but there is somewhere for a card to rise into. */
-    .rec-voices-grid { width:min(1600px, 94vw); margin-inline:auto;
-                       padding-block:44px; margin-block:-44px;
-                       display:grid; grid-template-columns:repeat(3, 1fr);
-                       grid-auto-rows:1fr; gap:clamp(14px, 1.6vw, 24px);
+    .rec-voices-rows { display:flex; flex-direction:column;
+                       gap:clamp(14px, 1.6vw, 24px);
+                       --vg:clamp(14px, 1.6vw, 24px);
+                       --vcard:clamp(320px, 36vw, 560px);
+                       --vfade:clamp(40px, 7vw, 160px);
                        opacity:var(--vh, 0);
-                       transform:translateY(calc((1 - var(--vh, 0)) * 26px));
-                       /* the ends give out rather than stop, so the rows read
-                          as carrying on past the page instead of ending in a
-                          hard column of white */
-                       --vfade:clamp(36px, 6vw, 120px);
-                       -webkit-mask-image:linear-gradient(90deg,
-                         transparent 0, #000 var(--vfade),
-                         #000 calc(100% - var(--vfade)), transparent 100%);
-                       mask-image:linear-gradient(90deg,
-                         transparent 0, #000 var(--vfade),
-                         #000 calc(100% - var(--vfade)), transparent 100%); }
-    .rec-voice { margin:0; display:flex; flex-direction:column;
+                       transform:translateY(calc((1 - var(--vh, 0)) * 26px)); }
+    /* The fade at the ends is a mask, and a mask clips to its own border box,
+       so a card rising on hover lost its top to it. The row keeps room above
+       and below and hands that room straight back with a negative margin:
+       nothing moves, and there is somewhere to rise into. */
+    .rec-voices-row { position:relative; width:100%;
+                      padding-block:44px; margin-block:-44px;
+                      -webkit-mask-image:linear-gradient(90deg,
+                        transparent 0, #000 var(--vfade),
+                        #000 calc(100% - var(--vfade)), transparent 100%);
+                      mask-image:linear-gradient(90deg,
+                        transparent 0, #000 var(--vfade),
+                        #000 calc(100% - var(--vfade)), transparent 100%); }
+    /* two copies of the three, travelling exactly one copy: half the track
+       plus half a gap, since the track holds one gap fewer than twice the
+       cards. The lap closes on the picture it opened with. */
+    .rec-voices-track { display:flex; align-items:stretch; gap:var(--vg);
+                        width:max-content;
+                        animation:rec-voices-drift 48s linear infinite; }
+    @keyframes rec-voices-drift {
+      from { transform:translateX(0); }
+      to   { transform:translateX(calc(-50% - var(--vg) / 2)); }
+    }
+    /* half a lap in, or the two rows move as one slab */
+    .rec-voices-row:nth-child(2) .rec-voices-track { animation-delay:-24s; }
+    /* the row under the pointer stops, which is also what makes a moving card
+       something you can click */
+    .rec-voices-row:hover .rec-voices-track { animation-play-state:paused; }
+    .rec-voice { flex:none; width:var(--vcard);
+                 margin:0; display:flex; flex-direction:column;
                  align-items:center; justify-content:center; text-align:center;
                  box-sizing:border-box; border-radius:18px;
                  min-height:clamp(210px, 17vw, 280px);
@@ -1286,19 +1301,13 @@
     .rec-voice-x:hover { background:#E6E0F7; }
     /* the closing words step aside before the ground under them lightens */
     .rec-say-last { opacity:calc(1 - var(--vout, 0)); }
-    @media (max-width:1000px) {
-      .rec-voices-grid { grid-template-columns:repeat(2, 1fr); }
-    }
     @media (max-width:640px) {
-      /* one column has no outer edge to give out at: the fade would only dim
-         both sides of every card */
-      .rec-voices-grid { grid-template-columns:1fr; grid-auto-rows:auto;
-                         width:min(520px, 92vw);
-                         -webkit-mask-image:none; mask-image:none; }
+      .rec-voices-rows { --vcard:min(86vw, 340px); --vfade:clamp(20px, 7vw, 40px); }
     }
     @media (prefers-reduced-motion: reduce) {
-      .rec-voices-h, .rec-voices-grid { transform:none; }
+      .rec-voices-h, .rec-voices-rows { transform:none; }
       .rec-voice { transition:none; }
+      .rec-voices-track { animation:none; }
       .rec-voice:hover, .rec-voice:focus-visible { transform:none; }
       .rec-voice-modal, .rec-voice-sheet { animation:none; }
     }
@@ -1993,64 +2002,126 @@
           </div>
         </section>
 
-        <!-- the ground comes back to the light, and all six are on it -->
+        <!-- the ground comes back to the light, and the rows drift across it -->
         <section class="rec-voices">
           <h2 class="rec-voices-h">What the hiring teams say</h2>
-          <div class="rec-voices-grid">
-              <figure class="rec-voice" tabindex="0" role="button"
-                      aria-haspopup="dialog">
-                <blockquote>Two roles closed in a month and nobody on my team opened a CV. The shortlist was short, which is the part I didn&#8217;t expect.</blockquote>
-                <figcaption>
-                  <b>Devika Rao</b>
-                  <span aria-hidden="true">&#183;</span>
-                  <i>Head of Engineering, Halyard</i>
-                </figcaption>
-              </figure>
-              <figure class="rec-voice" tabindex="0" role="button"
-                      aria-haspopup="dialog">
-                <blockquote>I still make the call on every hire. I&#8217;ve just stopped losing Thursdays to finding an hour three people can agree on.</blockquote>
-                <figcaption>
-                  <b>Tomas Lindqvist</b>
-                  <span aria-hidden="true">&#183;</span>
-                  <i>Talent Lead, Tessellate</i>
-                </figcaption>
-              </figure>
-              <figure class="rec-voice" tabindex="0" role="button"
-                      aria-haspopup="dialog">
-                <blockquote>The scorecard goes in once and every candidate comes back measured against it. For a team our size that&#8217;s the whole thing.</blockquote>
-                <figcaption>
-                  <b>Priya Menon</b>
-                  <span aria-hidden="true">&#183;</span>
-                  <i>Founder, Brightfold</i>
-                </figcaption>
-              </figure>
-              <figure class="rec-voice" tabindex="0" role="button"
-                      aria-haspopup="dialog">
-                <blockquote>Time to offer went from six weeks to eleven days, and the candidates noticed before we did.</blockquote>
-                <figcaption>
-                  <b>Adaeze Okafor</b>
-                  <span aria-hidden="true">&#183;</span>
-                  <i>VP People, Crosslight</i>
-                </figcaption>
-              </figure>
-              <figure class="rec-voice" tabindex="0" role="button"
-                      aria-haspopup="dialog">
-                <blockquote>The interview notes are written before I&#8217;m out of the room. I read them now instead of writing them.</blockquote>
-                <figcaption>
-                  <b>J&#250;lia Ferreira</b>
-                  <span aria-hidden="true">&#183;</span>
-                  <i>Engineering Manager, Northbeam</i>
-                </figcaption>
-              </figure>
-              <figure class="rec-voice" tabindex="0" role="button"
-                      aria-haspopup="dialog">
-                <blockquote>We hired across four time zones without a coordinator. That used to be a full job.</blockquote>
-                <figcaption>
-                  <b>Sam Kwon</b>
-                  <span aria-hidden="true">&#183;</span>
-                  <i>COO, Larkfield</i>
-                </figcaption>
-              </figure>
+          <div class="rec-voices-rows">
+            <div class="rec-voices-row">
+              <div class="rec-voices-track">
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>Two roles closed in a month and nobody on my team opened a CV. The shortlist was short, which is the part I didn&#8217;t expect.</blockquote>
+                  <figcaption>
+                    <b>Devika Rao</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Head of Engineering, Halyard</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>I still make the call on every hire. I&#8217;ve just stopped losing Thursdays to finding an hour three people can agree on.</blockquote>
+                  <figcaption>
+                    <b>Tomas Lindqvist</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Talent Lead, Tessellate</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>The scorecard goes in once and every candidate comes back measured against it. For a team our size that&#8217;s the whole thing.</blockquote>
+                  <figcaption>
+                    <b>Priya Menon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Founder, Brightfold</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>Two roles closed in a month and nobody on my team opened a CV. The shortlist was short, which is the part I didn&#8217;t expect.</blockquote>
+                  <figcaption>
+                    <b>Devika Rao</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Head of Engineering, Halyard</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>I still make the call on every hire. I&#8217;ve just stopped losing Thursdays to finding an hour three people can agree on.</blockquote>
+                  <figcaption>
+                    <b>Tomas Lindqvist</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Talent Lead, Tessellate</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>The scorecard goes in once and every candidate comes back measured against it. For a team our size that&#8217;s the whole thing.</blockquote>
+                  <figcaption>
+                    <b>Priya Menon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Founder, Brightfold</i>
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
+            <div class="rec-voices-row">
+              <div class="rec-voices-track">
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>Time to offer went from six weeks to eleven days, and the candidates noticed before we did.</blockquote>
+                  <figcaption>
+                    <b>Adaeze Okafor</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>VP People, Crosslight</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>The interview notes are written before I&#8217;m out of the room. I read them now instead of writing them.</blockquote>
+                  <figcaption>
+                    <b>J&#250;lia Ferreira</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Engineering Manager, Northbeam</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog">
+                  <blockquote>We hired across four time zones without a coordinator. That used to be a full job.</blockquote>
+                  <figcaption>
+                    <b>Sam Kwon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>COO, Larkfield</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>Time to offer went from six weeks to eleven days, and the candidates noticed before we did.</blockquote>
+                  <figcaption>
+                    <b>Adaeze Okafor</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>VP People, Crosslight</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>The interview notes are written before I&#8217;m out of the room. I read them now instead of writing them.</blockquote>
+                  <figcaption>
+                    <b>J&#250;lia Ferreira</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>Engineering Manager, Northbeam</i>
+                  </figcaption>
+                </figure>
+                <figure class="rec-voice" tabindex="0" role="button"
+                        aria-haspopup="dialog" aria-hidden="true">
+                  <blockquote>We hired across four time zones without a coordinator. That used to be a full job.</blockquote>
+                  <figcaption>
+                    <b>Sam Kwon</b>
+                    <span aria-hidden="true">&#183;</span>
+                    <i>COO, Larkfield</i>
+                  </figcaption>
+                </figure>
+              </div>
+            </div>
           </div>
         </section>
 

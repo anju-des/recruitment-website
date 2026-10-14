@@ -1183,11 +1183,21 @@
     /* two rows of three. `1fr` rows rather than auto: the quotes are different
        lengths, and auto rows would make the second row shallower than the
        first, which reads as crooked rather than as two rows */
-    .rec-voices-grid { width:min(1180px, 92vw); margin-inline:auto;
+    .rec-voices-grid { width:min(1600px, 94vw); margin-inline:auto;
                        display:grid; grid-template-columns:repeat(3, 1fr);
                        grid-auto-rows:1fr; gap:clamp(14px, 1.6vw, 24px);
                        opacity:var(--vh, 0);
-                       transform:translateY(calc((1 - var(--vh, 0)) * 26px)); }
+                       transform:translateY(calc((1 - var(--vh, 0)) * 26px));
+                       /* the ends give out rather than stop, so the rows read
+                          as carrying on past the page instead of ending in a
+                          hard column of white */
+                       --vfade:clamp(36px, 6vw, 120px);
+                       -webkit-mask-image:linear-gradient(90deg,
+                         transparent 0, #000 var(--vfade),
+                         #000 calc(100% - var(--vfade)), transparent 100%);
+                       mask-image:linear-gradient(90deg,
+                         transparent 0, #000 var(--vfade),
+                         #000 calc(100% - var(--vfade)), transparent 100%); }
     .rec-voice { margin:0; display:flex; flex-direction:column;
                  align-items:center; justify-content:center; text-align:center;
                  box-sizing:border-box; border-radius:18px;
@@ -1225,7 +1235,11 @@
       .rec-voices-grid { grid-template-columns:repeat(2, 1fr); }
     }
     @media (max-width:640px) {
-      .rec-voices-grid { grid-template-columns:1fr; grid-auto-rows:auto; }
+      /* one column has no outer edge to give out at: the fade would only dim
+         both sides of every card */
+      .rec-voices-grid { grid-template-columns:1fr; grid-auto-rows:auto;
+                         width:min(520px, 92vw);
+                         -webkit-mask-image:none; mask-image:none; }
     }
     @media (prefers-reduced-motion: reduce) {
       .rec-voices-h, .rec-voices-grid { transform:none; }

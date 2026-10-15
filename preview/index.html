@@ -1570,7 +1570,7 @@
     .rec-flow:not(.is-found) .rec-done-card { border-color:#BCAEF0; }
     .rec-done-go { flex:none; width:14px; height:14px; margin-left:auto;
                    color:#A49CC0; transition:transform .2s ease; }
-    .rec-flow:not(.is-found) .rec-done-go { transform:rotate(180deg);
+    .rec-flow:not(.is-found) .rec-done-go { transform:rotate(90deg);
                                             color:#6B4BE8; }
     @media (prefers-reduced-motion: reduce) {
       .rec-done-go { transition:none; }
@@ -3741,6 +3741,8 @@
     var kept_html = '';
 
     function show_details(on) {
+      // an older record can name a company without carrying its screen
+      if (on && !kept_html) return;
       var face = flow.querySelector('.rec-flow-card');
       var chip = flow.querySelector('.rec-done-card');
       flow.classList.toggle('is-found', !on);
@@ -3766,7 +3768,7 @@
           '<svg class="rec-done-go" viewBox="0 0 24 24" fill="none" ' +
             'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" ' +
             'stroke-linejoin="round" aria-hidden="true">' +
-            '<path d="M6 9.5l6 6 6-6"/></svg>' +
+            '<path d="M9 6l6 6-6 6"/></svg>' +
         '</button>';
       slot.querySelector('.rec-done-card').addEventListener('click',
         function () {
@@ -4319,7 +4321,12 @@
       if (!kept) return;
       var was;
       try { was = JSON.parse(kept); } catch (e) { return; }
-      if (!was || !was.who) return;
+      // a record from a build that did not keep the screen cannot be
+      // reopened, so it is not worth restoring
+      if (!was || !was.who || !was.html) {
+        try { window.sessionStorage.removeItem('wm-flow'); } catch (e) {}
+        return;
+      }
 
       brief.role = was.role || '';
       brief.website = was.website || '';

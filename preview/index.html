@@ -1836,8 +1836,7 @@
     .rec-bot-head { flex:none; display:flex; align-items:center; gap:10px;
                     padding:15px 18px;
                     border-bottom:1px solid rgba(124,92,246,.14); }
-    .rec-bot-head img { width:22px; height:auto; display:block; }
-    .rec-bot-head b { font-size:14.5px; font-weight:600; color:#1A1430; }
+    .rec-bot-head img { height:21px; width:auto; display:block; }
     .rec-bot-head i { font-style:normal; margin-left:auto; font-size:12px;
                       color:#8A82A8; }
     .rec-bot-log { flex:1; min-height:0; overflow-y:auto;
@@ -1861,6 +1860,21 @@
                          background:none; font:inherit; font-size:14px;
                          color:#1A1430; }
     .rec-bot-say input::placeholder { color:#A49CC0; }
+    .rec-bot-mic { flex:none; width:32px; height:32px; border-radius:50%;
+                   position:relative; display:grid; place-items:center;
+                   border:0; padding:0; background:none; color:#A49CC0;
+                   transition:background .15s, color .15s; }
+    .rec-bot-mic svg { width:17px; height:17px; display:block; }
+    .rec-bot-mic.is-live { cursor:pointer; }
+    .rec-bot-mic.is-live:hover { background:#F4F1FD; color:#6B6392; }
+    .rec-bot-mic.is-live:focus-visible { outline:2px solid #7C5CF6;
+                                         outline-offset:2px; }
+    .rec-bot-mic.is-on { color:#FFFFFF; background:#7C5CF6; }
+    .rec-bot-mic.is-on:hover { color:#FFFFFF; background:#6B4BE8; }
+    .rec-bot-mic.is-on::after { content:""; position:absolute; inset:0;
+                                border-radius:50%;
+                                border:2px solid rgba(124,92,246,.5);
+                                animation:rec-mic-ring 1.6s ease-out infinite; }
     .rec-bot-send { flex:none; width:34px; height:34px; border-radius:50%;
                     border:0; display:grid; place-items:center; cursor:pointer;
                     background:#7C5CF6; color:#fff; transition:background .15s; }
@@ -1870,6 +1884,8 @@
       .rec-bot, .rec-bot.is-out { animation:none; }
       .rec-bot-open { transition:none; }
       .rec-bot-open:hover { transform:none; }
+      .rec-bot-mic { transition:none; }
+      .rec-bot-mic.is-on::after { animation:none; }
     }
 
     /* ---- suggestions --------------------------------------------------- */
@@ -3279,11 +3295,10 @@
   // Dictation, where the browser has it to give. Firefox has no
   // SpeechRecognition at all, so the icon is left as the decoration it is
   // rather than becoming a button that cannot do what it says.
-  (function () {
+  // Shared, because the bubble's composer wants exactly this and is built
+  // too late to be found from here. `what` finishes the button's label.
+  window.recDictate = function (icon, field, list, what) {
     var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    var icon = document.querySelector('.rec-compose-mic');
-    var field = document.querySelector('.rec-compose-input');
-    var list = document.querySelector('.rec-suggest');
     if (!Rec || !icon || !field) return;
 
     // the markup carries a span, because a button in a browser without the
@@ -3291,7 +3306,7 @@
     var mic = document.createElement('button');
     mic.type = 'button';
     mic.className = icon.className + ' is-live';
-    mic.setAttribute('aria-label', 'Dictate the role');
+    mic.setAttribute('aria-label', 'Dictate ' + what);
     mic.setAttribute('aria-pressed', 'false');
     mic.innerHTML = icon.innerHTML;
     icon.parentNode.replaceChild(mic, icon);
@@ -3310,6 +3325,7 @@
     // one row is right for a line someone types and wrong for a paragraph
     // someone says
     function grow() {
+      if (field.tagName !== 'TEXTAREA') return;
       field.style.height = 'auto';
       var cap = parseFloat(getComputedStyle(field).lineHeight) * 5;
       field.style.height = Math.min(field.scrollHeight, cap) + 'px';
@@ -3320,7 +3336,8 @@
       on = state;
       mic.classList.toggle('is-on', state);
       mic.setAttribute('aria-pressed', state ? 'true' : 'false');
-      mic.setAttribute('aria-label', state ? 'Stop dictating' : 'Dictate the role');
+      mic.setAttribute('aria-label',
+                       state ? 'Stop dictating' : 'Dictate ' + what);
     }
 
     function begin() {
@@ -3393,7 +3410,12 @@
     window.addEventListener('pagehide', function () { if (on) stop(); });
     var form = field.closest('form');
     if (form) form.addEventListener('submit', function () { if (on) stop(); });
-  }());
+  };
+
+  // the hero's composer, wired at load; the bubble wires its own on open
+  window.recDictate(document.querySelector('.rec-compose-mic'),
+                    document.querySelector('.rec-compose-input'),
+                    document.querySelector('.rec-suggest'), 'the role');
 
   // Send opens the brief: the role in a sentence is the start of it, and the
   // three things Mira still needs come one screen at a time.
@@ -3966,13 +3988,21 @@
       panel.setAttribute('aria-label', 'Chat with Mira');
       panel.innerHTML =
         '<div class="rec-bot-head">' +
-          '<img src="mira-mark.svg" alt="" width="412" height="300">' +
-          '<b>Mira</b><i>Usually replies instantly</i>' +
+          '<img src="mira-logo.svg" alt="Mira" width="1152" height="365">' +
+          '<i>Usually replies instantly</i>' +
         '</div>' +
         '<div class="rec-bot-log"></div>' +
         '<form class="rec-bot-say">' +
           '<input type="text" aria-label="Ask Mira" ' +
             'placeholder="Ask about hiring with Mira">' +
+          '<span class="rec-bot-mic" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="1.9" stroke-linecap="round" ' +
+              'stroke-linejoin="round" aria-hidden="true">' +
+              '<rect x="9" y="3" width="6" height="11" rx="3"/>' +
+              '<path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/>' +
+              '<path d="M12 18v3"/></svg>' +
+          '</span>' +
           '<button type="submit" class="rec-bot-send" aria-label="Send">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
               'stroke-width="2.2" stroke-linecap="round" ' +
@@ -3988,6 +4018,11 @@
         e.preventDefault();
         send(field.value);
       });
+      // the same dictation the hero has; a span if the browser cannot
+      if (window.recDictate) {
+        window.recDictate(panel.querySelector('.rec-bot-mic'), field, null,
+                          'your question');
+      }
 
       say('them', 'I am Mira. I read every application, book the interviews ' +
                   'and keep the record. What would you like to know?');

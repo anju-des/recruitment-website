@@ -1533,6 +1533,28 @@
                      justify-content:space-between; gap:16px;
                      padding:clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 40px); }
     .rec-flow-head img { display:block; width:92px; height:auto; }
+    /* the three steps, in the header */
+    .rec-steps { display:flex; align-items:center; gap:10px; margin:0;
+                 padding:0; list-style:none; }
+    .rec-step { display:flex; align-items:center; gap:7px; color:#A49CC0;
+                font-size:12.5px; }
+    .rec-step + .rec-step::before { content:""; width:22px; height:1px;
+                                    background:#E2DCF4; margin-right:3px; }
+    .rec-step i { font-style:normal; display:grid; place-items:center;
+                  width:20px; height:20px; flex:none; border-radius:50%;
+                  background:#F1EEFA; color:#9A93B8; font-size:11px;
+                  font-weight:700; }
+    .rec-step b { font-weight:500; }
+    .rec-step.is-on { color:#1A1430; }
+    .rec-step.is-on i { background:#7C5CF6; color:#FFFFFF; }
+    .rec-step.is-on b { font-weight:600; }
+    .rec-step.is-done { color:#6B6392; }
+    .rec-step.is-done i { background:#EDE8FD; color:#5A4BD8; }
+    @media (max-width:760px) {
+      .rec-step b { display:none; }
+      .rec-steps { gap:6px; }
+      .rec-step + .rec-step::before { width:14px; }
+    }
     .rec-flow-x { width:36px; height:36px; border-radius:50%; border:0;
                   display:grid; place-items:center; cursor:pointer;
                   background:#F2EFFB; color:#4E4470; font-size:19px;
@@ -3583,6 +3605,13 @@
       flow.innerHTML =
         '<div class="rec-flow-head">' +
           '<img src="mira-logo.svg" width="1152" height="365" alt="Mira">' +
+          '<ol class="rec-steps">' +
+            ['Company details', 'Job board', 'Account']
+              .map(function (s, i) {
+                return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
+                  '<b>' + s + '</b></li>';
+              }).join('') +
+          '</ol>' +
           '<button type="button" class="rec-flow-x" aria-label="Close">&#215;</button>' +
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
@@ -3598,6 +3627,16 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && flow && !flow.hidden) close();
       });
+    }
+
+    // only the first of the three does anything yet; the others are what
+    // is coming, not work being claimed
+    function at_step(i, done) {
+      var all = flow.querySelectorAll('.rec-step');
+      for (var k = 0; k < all.length; k++) {
+        all[k].classList.toggle('is-on', k === i && !done);
+        all[k].classList.toggle('is-done', k < i || (k === i && done));
+      }
     }
 
     function open() {
@@ -3627,6 +3666,7 @@
       flow.querySelector('.rec-flow-bar span').style.setProperty(
         '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
       if (at >= STEPS.length) { close(); return; }
+      at_step(0, false);
       card.innerHTML = ask(STEPS[at]);
       wire(card);
     }
@@ -3817,6 +3857,7 @@
         function rest() {
           busy = '';
           finished = true;
+          at_step(0, true);
           screen();
           flow.querySelector('.rec-flow-bar span')
               .style.setProperty('--at', '100%');

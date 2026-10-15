@@ -3473,6 +3473,15 @@
       '</div>';
     }
 
+    // The title, not the sentence: what someone types into the field runs
+    // "Senior backend engineer, Python + Django, 4+ years, remote India", and
+    // the tail is the three things the next screens asked for anyway. The
+    // whole sentence stays in the brief; only the designation is shown.
+    function title(role) {
+      var cut = role.indexOf(',');
+      return (cut > 0 ? role.slice(0, cut) : role).trim();
+    }
+
     function review() {
       var facts = [
         ['Where', brief.location],
@@ -3487,7 +3496,7 @@
         '<p class="rec-flow-hint">This is what Mira has. Publish it and every ' +
         'application is read and ranked against it from the moment it lands.</p>' +
         '<p class="rec-flow-brief' + (brief.role ? '' : ' is-blank') + '">' +
-          (brief.role ? esc(brief.role) : 'No description given') + '</p>' +
+          (brief.role ? esc(title(brief.role)) : 'No description given') + '</p>' +
         '<div class="rec-flow-facts">' + facts + '</div>' +
         '<div class="rec-flow-act">' +
           '<button type="button" class="rec-flow-back">Back</button>' +

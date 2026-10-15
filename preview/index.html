@@ -1873,6 +1873,18 @@
     .rec-found-about { max-width:34ch; margin:16px auto 0; font-size:14px;
                        line-height:1.55; color:var(--text-secondary); }
     .rec-found-about.is-thin { color:var(--text-muted); font-size:13.5px; }
+    /* the found screen shares one left edge */
+    .rec-found-col { width:min(420px, 100%); margin-inline:auto;
+                     text-align:left; }
+    .rec-found-col .rec-flow-q { text-align:left; }
+    .rec-found-col .rec-flow-found { width:100%; margin-left:0;
+                                     margin-right:0; }
+    .rec-found-col .rec-found-about { max-width:none; margin-left:0;
+                                      margin-right:0; }
+    .rec-found-col .rec-found-facts,
+    .rec-found-col .rec-found-links,
+    .rec-found-col .rec-tell { justify-content:flex-start; }
+    .rec-found-col .rec-flow-act { justify-content:flex-start; }
     .rec-found-links { display:flex; flex-wrap:wrap; justify-content:center;
                        gap:8px; margin-top:14px; }
     .rec-found-links a { padding:6px 13px; border-radius:100px;
@@ -3751,8 +3763,14 @@
 
         // ---- the found screen, filled in in three parts ----------------
         function screen() {
+          // nothing came back: do not dress a miss up as a find
+          var blank = finished && !got.about &&
+                      !(got.facts && got.facts.length);
           card.innerHTML =
-            '<h2 class="rec-flow-q is-alone">Found your company</h2>' +
+            '<div class="rec-found-col">' +
+            '<h2 class="rec-flow-q is-alone">' +
+              (blank ? 'Nothing on that domain' : 'Found your company') +
+            '</h2>' +
             '<div class="rec-flow-found">' +
               '<span class="rec-flow-found-mark">' +
                 (logo ? '<img src="' + esc(logo) + '" alt="">'
@@ -3760,7 +3778,8 @@
               '</span>' +
               '<span class="rec-flow-found-say"><b>' + esc(who) + '</b>' +
                 '<i>' + esc(site) + '</i></span>' +
-              '<span class="rec-flow-found-badge">Found</span>' +
+              (blank ? ''
+                     : '<span class="rec-flow-found-badge">Found</span>') +
             '</div>' +
             (got.about
               ? '<p class="rec-found-about">' + esc(got.about) + '</p>' : '') +
@@ -3780,10 +3799,19 @@
               ? '<p class="rec-tell"><i>›</i><span>' + esc(busy) +
                 '…</span><b></b></p>'
               : '') +
-            (finished && !got.about && !(got.facts && got.facts.length)
-              ? '<p class="rec-found-about is-thin">No public record to ' +
-                'read from. Mira will take the rest from you.</p>'
-              : '');
+            (blank
+              ? '<p class="rec-found-about is-thin">No public record for ' +
+                  'that one. Check the spelling, or try another.</p>' +
+                '<div class="rec-flow-act">' +
+                  '<button type="button" class="rec-flow-back">Try another ' +
+                    'website</button>' +
+                '</div>'
+              : '') +
+            '</div>';
+
+          var again = card.querySelector('.rec-flow-back');
+          // the domain is still in the brief, so the field comes back filled
+          if (again) again.addEventListener('click', function () { draw(); });
         }
 
         function rest() {

@@ -1553,12 +1553,28 @@
     .rec-flow.is-found .rec-steps { display:flex; }
 
     /* what the finished step keeps: the company, and nothing else */
-    .rec-done-card { display:flex; align-items:center; gap:9px;
+    .rec-done-slot { list-style:none; max-width:100%; }
+    .rec-done-card { display:flex; align-items:center; gap:9px; font:inherit;
                      margin:2px 0 0 30px; padding:9px 12px; max-width:100%;
-                     box-sizing:border-box; border-radius:12px;
+                     box-sizing:border-box; border-radius:12px; cursor:pointer;
                      border:1px solid #ECE7F9; background:#FFFFFF;
+                     text-align:left;
                      box-shadow:0 1px 8px rgba(18,22,32,.05);
+                     transition:border-color .15s, box-shadow .15s;
                      animation:rec-mini-in .32s ease both; }
+    .rec-done-card:hover { border-color:#BCAEF0;
+                           box-shadow:0 2px 12px rgba(18,22,32,.08); }
+    .rec-done-card:focus-visible { outline:2px solid #7C5CF6;
+                                   outline-offset:2px; }
+    /* the details are open: the chip is the thing holding them there */
+    .rec-flow:not(.is-found) .rec-done-card { border-color:#BCAEF0; }
+    .rec-done-go { flex:none; width:14px; height:14px; margin-left:auto;
+                   color:#A49CC0; transition:transform .2s ease; }
+    .rec-flow:not(.is-found) .rec-done-go { transform:rotate(180deg);
+                                            color:#6B4BE8; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-done-go { transition:none; }
+    }
     @keyframes rec-mini-in { from { opacity:0; transform:translateY(-4px); }
                              to { opacity:1; transform:none; } }
     .rec-done-mark { flex:none; width:22px; height:22px; border-radius:7px;
@@ -3721,20 +3737,41 @@
       }
     }
 
+    // the screen the chip puts back
+    var kept_html = '';
+
+    function show_details(on) {
+      var face = flow.querySelector('.rec-flow-card');
+      var chip = flow.querySelector('.rec-done-card');
+      flow.classList.toggle('is-found', !on);
+      face.innerHTML = on ? kept_html : '';
+      if (chip) chip.setAttribute('aria-expanded', on ? 'true' : 'false');
+    }
+
     // what a finished lookup leaves behind in the rail
     function put_mini(who, logo) {
       var rail = flow.querySelector('.rec-steps');
-      var mini = rail.querySelector('.rec-done-card');
-      if (!mini) {
-        mini = document.createElement('li');
-        mini.className = 'rec-done-card';
-        rail.appendChild(mini);
+      var slot = rail.querySelector('.rec-done-slot');
+      if (!slot) {
+        slot = document.createElement('li');
+        slot.className = 'rec-done-slot';
+        rail.appendChild(slot);
       }
-      mini.innerHTML =
-        '<span class="rec-done-mark">' +
-          (logo ? '<img src="' + esc(logo) + '" alt="">'
-                : esc(String(who || '?').charAt(0))) +
-        '</span><b>' + esc(who) + '</b>';
+      slot.innerHTML =
+        '<button type="button" class="rec-done-card" aria-expanded="false">' +
+          '<span class="rec-done-mark">' +
+            (logo ? '<img src="' + esc(logo) + '" alt="">'
+                  : esc(String(who || '?').charAt(0))) +
+          '</span><b>' + esc(who) + '</b>' +
+          '<svg class="rec-done-go" viewBox="0 0 24 24" fill="none" ' +
+            'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" ' +
+            'stroke-linejoin="round" aria-hidden="true">' +
+            '<path d="M6 9.5l6 6 6-6"/></svg>' +
+        '</button>';
+      slot.querySelector('.rec-done-card').addEventListener('click',
+        function () {
+          show_details(flow.classList.contains('is-found'));
+        });
     }
 
     // the step is working, not merely current. The rail is only drawn
@@ -3975,6 +4012,7 @@
           // let it be read at full size before it becomes a card
           window.setTimeout(function () {
             if (!flow || flow.hidden) return;
+            kept_html = card.innerHTML;
             flow.classList.add('is-found');
             put_mini(who, logo);
             card.innerHTML = '';
@@ -3983,7 +4021,7 @@
             try {
               window.sessionStorage.setItem('wm-flow', JSON.stringify({
                 role: brief.role, website: brief.website,
-                who: who, logo: logo
+                who: who, logo: logo, html: card.innerHTML
               }));
             } catch (e) {}
           }, 0);
@@ -4324,6 +4362,7 @@
       flow.querySelector('.rec-flow-bar span')
           .style.setProperty('--at', '100%');
       flow.querySelector('.rec-flow-card').innerHTML = '';
+      kept_html = was.html || '';
       put_mini(was.who, was.logo);
     }());
   }());

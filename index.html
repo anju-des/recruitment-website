@@ -1505,6 +1505,389 @@
       .rec-foot a, .rec-foot-social a { transition:none; }
     }
 
+    /* ---- the brief ---------------------------------------------------------- */
+    /* A screen of its own, over everything. Fixed, so it is hung off <body> in
+       script rather than written into a page this full of transforms. */
+    .rec-flow[hidden] { display:none; }
+    .rec-flow { position:fixed; inset:0; z-index:300; background:#FFFFFF;
+                display:flex; flex-direction:column;
+                font-size:15px; color:#2C2545;
+                animation:rec-flow-in .22s ease both; }
+    @keyframes rec-flow-in { from { opacity:0; } to { opacity:1; } }
+    .rec-flow.is-out { animation:rec-flow-out .18s ease both; }
+    @keyframes rec-flow-out { from { opacity:1; } to { opacity:0; } }
+    .rec-flow-head { flex:none; display:flex; align-items:center;
+                     justify-content:space-between; gap:16px;
+                     padding:clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 40px); }
+    .rec-flow-head img { display:block; width:92px; height:auto; }
+    .rec-flow-step { font-size:12.5px; color:#8A82A8; letter-spacing:.01em; }
+    .rec-flow-x { width:36px; height:36px; border-radius:50%; border:0;
+                  display:grid; place-items:center; cursor:pointer;
+                  background:#F2EFFB; color:#4E4470; font-size:19px;
+                  line-height:1; font-family:inherit; transition:background .15s; }
+    .rec-flow-x:hover { background:#E6E0F7; }
+    /* the rail fills as the brief does */
+    .rec-flow-bar { flex:none; height:3px; background:#EFECF9; }
+    .rec-flow-bar span { display:block; height:100%; background:#7C5CF6;
+                         width:var(--at, 25%); transition:width .25s ease; }
+    /* Sand under the header, purple into blue. A zero-height element
+       between the rail and the body, painting downward out of itself: that
+       puts it at the top of the body without knowing how tall the header is,
+       and keeps it out of the body, which scrolls. */
+    .rec-flow-sand { position:relative; height:0; z-index:0; }
+    .rec-flow-sand::before { content:""; position:absolute;
+                             top:0; left:0; right:0;
+                             height:clamp(190px, 34vh, 360px);
+                             pointer-events:none;
+                             background:linear-gradient(118deg,
+                               rgba(168,138,255,.58) 0%,
+                               rgba(134,148,255,.50) 52%,
+                               rgba(118,178,255,.42) 100%);
+                             -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.17'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23b)'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 0%, rgba(0,0,0,.66) 42%, transparent 100%);
+                             mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.17'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23b)'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 0%, rgba(0,0,0,.66) 42%, transparent 100%);
+                             -webkit-mask-size:150px 150px, auto;
+                             mask-size:150px 150px, auto;
+                             -webkit-mask-composite:source-in;
+                             mask-composite:intersect; }
+    /* the questions sit over it */
+    .rec-flow-card { position:relative; z-index:1; text-align:center; }
+    .rec-flow-body { flex:1; min-height:0; overflow:auto;
+                     display:flex; align-items:center; justify-content:center;
+                     padding:clamp(24px, 4vw, 56px) clamp(18px, 3vw, 40px); }
+    .rec-flow-card { width:min(620px, 100%); }
+    .rec-flow-q { margin:0 0 10px; color:#1A1430;
+                  font-size:clamp(24px, 1.8vw + 14px, 40px); font-weight:600;
+                  line-height:1.16; letter-spacing:-0.028em; text-wrap:balance; }
+    .rec-flow-hint { margin:0 0 clamp(22px, 2.6vw, 34px); color:#6F6790;
+                     font-size:15px; }
+    /* with no line under it, the question carries the whole gap itself */
+    .rec-flow-q.is-alone { margin-bottom:clamp(26px, 3vw, 40px); }
+    .rec-flow-in { width:100%; box-sizing:border-box; display:block;
+                   border:1px solid #DCD6EE; border-radius:12px;
+                   padding:15px 18px; font:inherit; font-size:17px;
+                   color:#1A1430; background:#FFFFFF; outline:none;
+                   transition:border-color .15s, box-shadow .15s; }
+    .rec-flow-in::placeholder { color:#A49CC0; }
+    .rec-flow-in:focus { border-color:#7C5CF6;
+                         box-shadow:0 0 0 3px rgba(124,92,246,.16); }
+    /* a band you drag: two range inputs stacked, each contributing one end */
+    .rec-flow-range { margin-top:4px; }
+    .rec-flow-range-val { display:block; color:#1A1430; font-size:30px;
+                          font-weight:600; letter-spacing:-0.02em;
+                          font-variant-numeric:tabular-nums;
+                          margin-bottom:clamp(18px, 2vw, 26px); }
+    .rec-flow-range-val small { font-size:17px; font-weight:500;
+                                color:#6F6790; margin-left:6px; }
+    .rec-flow-track { position:relative; height:26px; }
+    .rec-flow-track::before { content:""; position:absolute; left:0; right:0;
+                              top:11px; height:4px; border-radius:100px;
+                              background:#E7E2F6; }
+    .rec-flow-fill { position:absolute; top:11px; height:4px;
+                     border-radius:100px; background:#7C5CF6;
+                     left:var(--from, 0%); right:var(--to, 0%); }
+    /* the inputs are invisible rails; only the thumbs answer the pointer */
+    .rec-flow-track input { position:absolute; left:0; top:0; width:100%;
+                            height:26px; margin:0; background:none;
+                            pointer-events:none; -webkit-appearance:none;
+                            appearance:none; }
+    .rec-flow-track input:focus { outline:none; }
+    .rec-flow-track input::-webkit-slider-thumb {
+      -webkit-appearance:none; appearance:none; pointer-events:auto;
+      width:22px; height:22px; border-radius:50%; cursor:grab;
+      background:#FFFFFF; border:2px solid #7C5CF6;
+      box-shadow:0 2px 6px rgba(58,38,116,.22); }
+    .rec-flow-track input::-moz-range-thumb {
+      pointer-events:auto; width:22px; height:22px; border-radius:50%;
+      cursor:grab; background:#FFFFFF; border:2px solid #7C5CF6;
+      box-shadow:0 2px 6px rgba(58,38,116,.22); }
+    .rec-flow-track input:active::-webkit-slider-thumb { cursor:grabbing; }
+    .rec-flow-track input:focus-visible::-webkit-slider-thumb {
+      box-shadow:0 0 0 4px rgba(124,92,246,.28); }
+    .rec-flow-track input:focus-visible::-moz-range-thumb {
+      box-shadow:0 0 0 4px rgba(124,92,246,.28); }
+    .rec-flow-ends { display:flex; justify-content:space-between;
+                     margin-top:10px; color:#8A82A8; font-size:12.5px;
+                     font-variant-numeric:tabular-nums; }
+    .rec-flow-mail { max-width:380px; margin-inline:auto; text-align:center; }
+    /* the same two ways in the product's own sign-in screen offers */
+    .rec-flow-google { width:100%; max-width:380px; box-sizing:border-box;
+                       height:46px; margin-inline:auto;
+                       display:inline-flex; align-items:center;
+                       justify-content:center; gap:10px; cursor:pointer;
+                       border:1.5px solid #DCD6EE; border-radius:10px;
+                       background:#FFFFFF; font:inherit; font-size:15px;
+                       font-weight:600; color:#1A1430;
+                       transition:background .15s, border-color .15s; }
+    .rec-flow-google:hover { background:#F7F5FE; border-color:#BCAEF0; }
+    .rec-flow-google svg { width:18px; height:18px; }
+    .rec-flow-or { display:flex; align-items:center; gap:12px;
+                   width:100%; max-width:380px; margin:18px auto;
+                   font-size:12.5px; font-weight:500; color:#8A82A8; }
+    .rec-flow-or::before, .rec-flow-or::after { content:""; flex:1; height:1px;
+                                                background:#E7E2F6; }
+    .rec-flow-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
+                      justify-content:center; max-width:640px;
+                      margin-inline:auto; }
+    .rec-flow-chips:first-of-type { margin-top:0; }
+    .rec-flow-chip:focus-visible { outline:2px solid #7C5CF6; outline-offset:2px; }
+    .rec-flow-chip { border:1px solid #DCD6EE; background:#FFFFFF;
+                     border-radius:100px; padding:8px 15px; cursor:pointer;
+                     font:inherit; font-size:13.5px; color:#4B4270;
+                     transition:background .15s, border-color .15s, color .15s; }
+    .rec-flow-chip:hover { border-color:#BCAEF0; background:#F7F5FE; }
+    .rec-flow-chip.is-on { background:#1A1430; border-color:#1A1430;
+                           color:#FFFFFF; }
+    /* the skills already added, each with its own way out */
+    .rec-flow-tags { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
+                     justify-content:center; }
+    .rec-flow-tag { display:inline-flex; align-items:center; gap:8px;
+                    background:#F2EFFB; border-radius:100px;
+                    padding:8px 9px 8px 15px; font-size:13.5px; color:#2C2545; }
+    .rec-flow-tag button { width:18px; height:18px; border-radius:50%; border:0;
+                           display:grid; place-items:center; cursor:pointer;
+                           background:#DDD6F5; color:#4E4470; font-size:13px;
+                           line-height:1; font-family:inherit;
+                           transition:background .15s; }
+    .rec-flow-tag button:hover { background:#C9BEF0; }
+    .rec-flow-act { display:flex; align-items:center; justify-content:center;
+                    gap:12px; margin-top:clamp(26px, 3vw, 38px); }
+    .rec-flow-next, .rec-flow-back {
+      border:0; border-radius:10px; padding:13px 26px; cursor:pointer;
+      font:inherit; font-size:15px; font-weight:600;
+      transition:background .15s, color .15s, opacity .15s; }
+    .rec-flow-next { background:#1A1430; color:#FFFFFF; }
+    .rec-flow-next:hover { background:#2E2650; }
+    .rec-flow-next[disabled] { opacity:.38; cursor:not-allowed;
+                               background:#1A1430; }
+    .rec-flow-back { background:none; color:#6F6790; padding-inline:8px; }
+    .rec-flow-back:hover { color:#1A1430; }
+    /* what it has understood, read back rather than tabled */
+    .rec-flow-brief { max-width:34ch; margin:0 auto clamp(20px, 2.4vw, 30px);
+                      color:#1A1430; font-size:clamp(17px, 0.6vw + 13px, 22px);
+                      line-height:1.45; letter-spacing:-0.012em;
+                      text-wrap:balance; }
+    .rec-flow-brief.is-blank { color:#A49CC0; }
+    .rec-flow-facts { display:flex; flex-wrap:wrap; justify-content:center;
+                      gap:10px; margin-bottom:clamp(24px, 3vw, 34px); }
+    .rec-flow-fact { display:flex; flex-direction:column; gap:3px;
+                     min-width:120px; padding:12px 18px; border-radius:12px;
+                     background:#F6F4FD; text-align:center; }
+    .rec-flow-fact i { font-style:normal; color:#8A82A8; font-size:11px;
+                       letter-spacing:.09em; text-transform:uppercase; }
+    .rec-flow-fact b { font-weight:600; color:#1A1430; font-size:14.5px;
+                       line-height:1.4; }
+    .rec-flow-fact b.is-blank { font-weight:500; color:#A49CC0; }
+    .rec-flow-done { text-align:center; }
+    .rec-flow-done .rec-flow-tick { width:54px; height:54px; border-radius:50%;
+                                    margin:0 auto 20px; display:grid;
+                                    place-items:center; background:#EAF7F0;
+                                    color:#12B76A; }
+    .rec-flow-done .rec-flow-tick svg { width:26px; height:26px; }
+    /* it would be a lie to end on a confirmation and leave it at that */
+    .rec-flow-note { margin:18px 0 0; color:#8A82A8; font-size:13px; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-flow, .rec-flow.is-out { animation:none; }
+      .rec-flow-bar span { transition:none; }
+    }
+    @media (max-width:600px) {
+      .rec-flow-fact { min-width:0; flex:1 1 140px; }
+      .rec-flow-act { flex-wrap:wrap; }
+    }
+
+    /* ---- sign in ------------------------------------------------------------ */
+    /* The product's own screen, lifted from Recruitment-frontend: Login.tsx for
+       the markup, the .login-* block of Auth.css for these rules, and
+       public/login-graphic.html in the same iframe on the right, so the two
+       cannot drift apart. Scoped under .rec-auth -- the header's own link is
+       already .rec-login and could not lend its name. */
+    .rec-auth[hidden] { display:none; }
+    .rec-auth { position:fixed; inset:0; z-index:300; background:var(--neutral-0);
+                color:var(--text-primary); text-align:left;
+                --border-strong:#DDE1E9;
+                animation:rec-auth-in .22s ease both; }
+    @keyframes rec-auth-in { from { opacity:0; } to { opacity:1; } }
+    .rec-auth.is-out { animation:rec-auth-out .18s ease both; }
+    @keyframes rec-auth-out { from { opacity:1; } to { opacity:0; } }
+    .rec-auth .login-shell { width:100%; height:100%; display:grid;
+                             grid-template-columns:minmax(0, 1fr) minmax(0, 1.05fr);
+                             background:var(--neutral-0); overflow:hidden; }
+    .rec-auth .login-left { position:relative; display:flex; flex-direction:column;
+                            padding:28px 40px 24px; }
+    .rec-auth .login-form-wrap { margin:auto; width:100%; max-width:340px; }
+    .rec-auth .login-mira { height:46px; width:auto; display:block;
+                            margin-bottom:20px; }
+    .rec-auth .login-title { font-size:26px; font-weight:700;
+                             letter-spacing:-0.4px; color:var(--text-primary);
+                             margin:0 0 6px; }
+    .rec-auth .login-sub { font-size:14px; color:var(--text-muted);
+                           margin:0 0 26px; line-height:1.5; }
+    .rec-auth .login-form { display:flex; flex-direction:column; gap:8px; }
+    .rec-auth .login-input { position:relative; display:flex; align-items:center; }
+    .rec-auth .login-input input {
+      width:100%; box-sizing:border-box; padding:12px 14px;
+      background:var(--neutral-0); border:1.5px solid var(--border-strong);
+      border-radius:10px; font-family:inherit; font-size:16px; font-weight:500;
+      color:var(--text-primary); outline:none;
+      transition:padding .18s ease, border-color .15s, box-shadow .15s; }
+    .rec-auth .login-input input:focus { border-color:var(--primary-500);
+                                         box-shadow:0 0 0 4px var(--primary-50); }
+    /* the label sits as a placeholder until the field has focus or a value,
+       then shrinks and rises while the field grows to make room */
+    .rec-auth .login-float label {
+      position:absolute; left:15px; top:50%; transform:translateY(-50%);
+      color:var(--neutral-400); font-size:14px; font-weight:200;
+      pointer-events:none;
+      transition:top .18s ease, transform .18s ease, font-size .18s ease,
+                 color .18s ease, font-weight .18s ease; }
+    .rec-auth .login-float input:focus,
+    .rec-auth .login-float input:not(:placeholder-shown) { padding:27px 14px 7px; }
+    .rec-auth .login-float input:focus + label,
+    .rec-auth .login-float input:not(:placeholder-shown) + label {
+      top:8px; transform:translateY(0); font-size:11px; font-weight:500;
+      color:var(--primary-600); }
+    .rec-auth .login-primary {
+      margin-top:6px; width:100%; height:46px; border:none; border-radius:10px;
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      background:linear-gradient(120deg, #2440E6 0%, #5A4BD8 58%, #7C63DC 100%);
+      color:#fff; font-family:inherit; font-size:15px; font-weight:600;
+      cursor:pointer; transition:filter .15s; }
+    .rec-auth .login-primary:hover { filter:brightness(0.94); }
+    .rec-auth .login-primary-arrow { width:17px; height:17px; flex:none;
+      opacity:0; transform:translateX(-6px);
+      transition:opacity .18s, transform .18s; }
+    .rec-auth .login-primary:hover .login-primary-arrow { opacity:1;
+                                                          transform:translateX(0); }
+    .rec-auth .login-divider { display:flex; align-items:center; gap:12px;
+                               margin:20px 0; font-size:12.5px; font-weight:500;
+                               color:var(--text-muted); }
+    .rec-auth .login-divider::before,
+    .rec-auth .login-divider::after { content:""; flex:1; height:1px;
+                                      background:var(--border); }
+    .rec-auth .login-google-btn {
+      width:100%; box-sizing:border-box; height:46px; display:inline-flex;
+      align-items:center; justify-content:center; gap:10px; text-decoration:none;
+      border:1.5px solid var(--border-strong); border-radius:10px; padding:0;
+      background:var(--neutral-0); font-family:inherit; font-size:15px;
+      font-weight:600; color:var(--text-primary); cursor:pointer;
+      transition:background .15s, border-color .15s; }
+    .rec-auth .login-google-btn:hover { background:var(--neutral-50);
+                                        border-color:var(--neutral-400); }
+    .rec-auth .login-google-btn svg { width:18px; height:18px; }
+    .rec-auth .login-switch { margin:16px 0 0; font-size:13.5px;
+                              color:var(--text-muted); }
+    .rec-auth .login-switch-link { font-weight:700; color:var(--primary-600);
+                                   text-decoration:none; }
+    .rec-auth .login-switch-link:hover { text-decoration:underline; }
+    .rec-auth .login-foot { margin-top:24px; text-align:center; font-size:12px;
+                            color:var(--text-muted); }
+    .rec-auth .login-legal { margin:0; line-height:1.5; }
+    .rec-auth .login-legal a { color:var(--text-primary); font-weight:600;
+                               text-decoration:none; }
+    .rec-auth .login-legal a:hover { text-decoration:underline; }
+    .rec-auth .login-right { position:relative; overflow:hidden; display:block;
+                             margin:14px 14px 14px 0; border-radius:22px;
+                             background:linear-gradient(142deg, #F6F9FF 0%,
+                               #FAF8FE 52%, #F8F5FD 100%); }
+    .rec-auth .lr-frame { display:block; width:100%; height:100%; border:0; }
+    /* below tablet the panel goes and the form takes the width */
+    @media (max-width:920px) {
+      .rec-auth .login-shell { grid-template-columns:1fr; }
+      .rec-auth .login-right { display:none; }
+      .rec-auth .login-left { padding:24px 22px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-auth, .rec-auth.is-out { animation:none; }
+      .rec-auth .login-primary-arrow { transition:none; }
+    }
+
+    /* ---- Mira in the corner -------------------------------------------------- */
+    .rec-bot-open { position:fixed; z-index:260; right:clamp(16px, 2.4vw, 32px);
+                    bottom:clamp(16px, 2.4vw, 32px);
+                    width:58px; height:58px; border-radius:50%; border:0;
+                    display:grid; place-items:center; cursor:pointer;
+                    background:linear-gradient(140deg, #7C5CF6, #5A4BD8);
+                    box-shadow:0 10px 26px rgba(58,38,116,.34);
+                    transition:transform .16s ease, box-shadow .16s ease; }
+    .rec-bot-open:hover { transform:translateY(-2px);
+                          box-shadow:0 16px 34px rgba(58,38,116,.42); }
+    .rec-bot-open img { width:30px; height:auto; display:block;
+                        filter:brightness(0) invert(1); }
+    .rec-bot-open.is-on img { opacity:0; }
+    /* the mark gives way to a cross while the panel is up */
+    .rec-bot-open::after { content:"\00d7"; position:absolute; color:#fff;
+                           font-size:24px; line-height:1; opacity:0;
+                           transition:opacity .16s; }
+    .rec-bot-open.is-on::after { opacity:1; }
+
+    .rec-bot[hidden] { display:none; }
+    .rec-bot { position:fixed; z-index:261; right:clamp(16px, 2.4vw, 32px);
+               bottom:calc(clamp(16px, 2.4vw, 32px) + 70px);
+               width:min(368px, calc(100vw - 32px));
+               max-height:min(560px, calc(100vh - 140px));
+               display:flex; flex-direction:column; overflow:hidden;
+               border-radius:18px; background:#FFFFFF; color:#2C2545;
+               box-shadow:0 26px 60px rgba(20,12,48,.26),
+                          0 0 0 1px rgba(124,92,246,.12);
+               animation:rec-bot-in .2s ease both; }
+    @keyframes rec-bot-in { from { opacity:0; transform:translateY(10px); }
+                            to   { opacity:1; transform:none; } }
+    .rec-bot.is-out { animation:rec-bot-out .16s ease both; }
+    @keyframes rec-bot-out { from { opacity:1; } to { opacity:0; } }
+    .rec-bot-head { flex:none; display:flex; align-items:center; gap:10px;
+                    padding:15px 18px;
+                    border-bottom:1px solid rgba(124,92,246,.14); }
+    .rec-bot-head img { height:21px; width:auto; display:block; }
+    .rec-bot-head i { font-style:normal; margin-left:auto; font-size:12px;
+                      color:#8A82A8; }
+    .rec-bot-log { flex:1; min-height:0; overflow-y:auto;
+                   padding:18px; display:flex; flex-direction:column;
+                   gap:10px; font-size:14px; line-height:1.55; }
+    .rec-bot-msg { max-width:84%; padding:11px 14px; border-radius:14px; }
+    .rec-bot-msg.them { align-self:flex-start; background:#F4F1FD;
+                        color:#2C2545; border-bottom-left-radius:5px; }
+    .rec-bot-msg.you { align-self:flex-end; background:#1A1430; color:#FFFFFF;
+                       border-bottom-right-radius:5px; }
+    .rec-bot-asks { display:flex; flex-wrap:wrap; gap:7px; margin-top:2px; }
+    .rec-bot-ask { border:1px solid #DCD6EE; background:#FFFFFF;
+                   border-radius:100px; padding:7px 13px; cursor:pointer;
+                   font:inherit; font-size:12.5px; color:#4B4270;
+                   transition:background .15s, border-color .15s; }
+    .rec-bot-ask:hover { background:#F7F5FE; border-color:#BCAEF0; }
+    .rec-bot-say { flex:none; display:flex; gap:8px; align-items:center;
+                   padding:12px 14px;
+                   border-top:1px solid rgba(124,92,246,.14); }
+    .rec-bot-say input { flex:1; min-width:0; border:0; outline:none;
+                         background:none; font:inherit; font-size:14px;
+                         color:#1A1430; }
+    .rec-bot-say input::placeholder { color:#A49CC0; }
+    .rec-bot-mic { flex:none; width:32px; height:32px; border-radius:50%;
+                   position:relative; display:grid; place-items:center;
+                   border:0; padding:0; background:none; color:#A49CC0;
+                   transition:background .15s, color .15s; }
+    .rec-bot-mic svg { width:17px; height:17px; display:block; }
+    .rec-bot-mic.is-live { cursor:pointer; }
+    .rec-bot-mic.is-live:hover { background:#F4F1FD; color:#6B6392; }
+    .rec-bot-mic.is-live:focus-visible { outline:2px solid #7C5CF6;
+                                         outline-offset:2px; }
+    .rec-bot-mic.is-on { color:#FFFFFF; background:#7C5CF6; }
+    .rec-bot-mic.is-on:hover { color:#FFFFFF; background:#6B4BE8; }
+    .rec-bot-mic.is-on::after { content:""; position:absolute; inset:0;
+                                border-radius:50%;
+                                border:2px solid rgba(124,92,246,.5);
+                                animation:rec-mic-ring 1.6s ease-out infinite; }
+    .rec-bot-send { flex:none; width:34px; height:34px; border-radius:50%;
+                    border:0; display:grid; place-items:center; cursor:pointer;
+                    background:#7C5CF6; color:#fff; transition:background .15s; }
+    .rec-bot-send:hover { background:#6B4BE8; }
+    .rec-bot-send svg { width:16px; height:16px; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-bot, .rec-bot.is-out { animation:none; }
+      .rec-bot-open { transition:none; }
+      .rec-bot-open:hover { transform:none; }
+      .rec-bot-mic { transition:none; }
+      .rec-bot-mic.is-on::after { animation:none; }
+    }
+
     /* ---- suggestions --------------------------------------------------- */
     /* sits under the field, same width, and only while there is something
        to match against */
@@ -2912,11 +3295,10 @@
   // Dictation, where the browser has it to give. Firefox has no
   // SpeechRecognition at all, so the icon is left as the decoration it is
   // rather than becoming a button that cannot do what it says.
-  (function () {
+  // Shared, because the bubble's composer wants exactly this and is built
+  // too late to be found from here. `what` finishes the button's label.
+  window.recDictate = function (icon, field, list, what) {
     var Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    var icon = document.querySelector('.rec-compose-mic');
-    var field = document.querySelector('.rec-compose-input');
-    var list = document.querySelector('.rec-suggest');
     if (!Rec || !icon || !field) return;
 
     // the markup carries a span, because a button in a browser without the
@@ -2924,7 +3306,7 @@
     var mic = document.createElement('button');
     mic.type = 'button';
     mic.className = icon.className + ' is-live';
-    mic.setAttribute('aria-label', 'Dictate the role');
+    mic.setAttribute('aria-label', 'Dictate ' + what);
     mic.setAttribute('aria-pressed', 'false');
     mic.innerHTML = icon.innerHTML;
     icon.parentNode.replaceChild(mic, icon);
@@ -2943,6 +3325,7 @@
     // one row is right for a line someone types and wrong for a paragraph
     // someone says
     function grow() {
+      if (field.tagName !== 'TEXTAREA') return;
       field.style.height = 'auto';
       var cap = parseFloat(getComputedStyle(field).lineHeight) * 5;
       field.style.height = Math.min(field.scrollHeight, cap) + 'px';
@@ -2953,7 +3336,8 @@
       on = state;
       mic.classList.toggle('is-on', state);
       mic.setAttribute('aria-pressed', state ? 'true' : 'false');
-      mic.setAttribute('aria-label', state ? 'Stop dictating' : 'Dictate the role');
+      mic.setAttribute('aria-label',
+                       state ? 'Stop dictating' : 'Dictate ' + what);
     }
 
     function begin() {
@@ -3026,6 +3410,656 @@
     window.addEventListener('pagehide', function () { if (on) stop(); });
     var form = field.closest('form');
     if (form) form.addEventListener('submit', function () { if (on) stop(); });
+  };
+
+  // the hero's composer, wired at load; the bubble wires its own on open
+  window.recDictate(document.querySelector('.rec-compose-mic'),
+                    document.querySelector('.rec-compose-input'),
+                    document.querySelector('.rec-suggest'), 'the role');
+
+  // Send opens the brief: the role in a sentence is the start of it, and the
+  // three things Mira still needs come one screen at a time.
+  (function () {
+    var form = document.querySelector('.rec-compose');
+    var field = document.querySelector('.rec-compose-input');
+    if (!form || !field) return;
+
+    var STEPS = [
+      { key: 'location',
+        q: 'Where will they work from?',
+        chipsOnly: true,
+        chips: ['Remote', 'Hybrid', 'On-site'] },
+      { key: 'salary',
+        q: 'What is the budget?',
+        range: { min: 20, max: 300, step: 5 } },
+      { key: 'skills',
+        q: 'What must they be good at?',
+        chipsOnly: true,
+        multi: true,
+        chips: ['Python', 'Django', 'Go', 'Node.js', 'TypeScript', 'React', 'PostgreSQL', 'AWS', 'Kubernetes', 'System design', 'Figma', 'Design systems', 'User research', 'Product strategy', 'SQL', 'Machine learning'] }
+    ];
+
+    var brief = { role: '', location: '', salary: '', skills: [] };
+    var band = { from: 90, to: 120 };   // thousands a year
+    var at = 0;
+    var flow = null;
+
+    function esc(s) {
+      return String(s).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+      });
+    }
+
+    function build() {
+      flow = document.createElement('div');
+      flow.className = 'rec-flow';
+      flow.hidden = true;
+      flow.setAttribute('role', 'dialog');
+      flow.setAttribute('aria-modal', 'true');
+      flow.setAttribute('aria-label', 'New role');
+      flow.innerHTML =
+        '<div class="rec-flow-head">' +
+          '<img src="mira-logo.svg" width="1152" height="365" alt="Mira">' +
+          '<span class="rec-flow-step"></span>' +
+          '<button type="button" class="rec-flow-x" aria-label="Close">&#215;</button>' +
+        '</div>' +
+        '<div class="rec-flow-bar"><span></span></div>' +
+        '<div class="rec-flow-sand" aria-hidden="true"></div>' +
+        '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>';
+      document.body.appendChild(flow);
+
+      flow.querySelector('.rec-flow-x').addEventListener('click', close);
+      // the page behind is scroll-driven; it should stay where it was
+      flow.addEventListener('wheel', function (e) {
+        if (!flow.querySelector('.rec-flow-body').contains(e.target)) e.preventDefault();
+      }, { passive: false });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && flow && !flow.hidden) close();
+      });
+    }
+
+    function open() {
+      brief.role = field.value.trim();
+      brief.location = '';
+      brief.salary = '';
+      brief.skills = [];
+      at = 0;
+      if (!flow) build();
+      flow.classList.remove('is-out');
+      flow.hidden = false;
+      draw();
+    }
+
+    function close() {
+      if (!flow || flow.hidden) return;
+      flow.classList.add('is-out');
+      window.setTimeout(function () {
+        flow.hidden = true;
+        flow.classList.remove('is-out');
+      }, 180);
+      field.focus();
+    }
+
+    function draw() {
+      var card = flow.querySelector('.rec-flow-card');
+      var total = STEPS.length + 1;
+      // the gate is not one of the questions, so it takes no number
+      flow.querySelector('.rec-flow-step').textContent =
+        at > STEPS.length ? '' : 'Step ' + (at + 1) + ' of ' + total;
+      flow.querySelector('.rec-flow-bar span').style.setProperty(
+        '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
+      card.innerHTML = at < STEPS.length ? ask(STEPS[at])
+                     : at === STEPS.length ? review() : signup();
+      wire(card);
+    }
+
+    function ask(step) {
+      var val = step.tags ? '' : brief[step.key];
+      return '<h2 class="rec-flow-q' + (step.hint ? '' : ' is-alone') +
+        '">' + esc(step.q) + '</h2>' +
+        (step.hint ? '<p class="rec-flow-hint">' + esc(step.hint) + '</p>' : '') +
+        (step.range ? rail(step.range) : step.chipsOnly ? '' :
+          '<input class="rec-flow-in" type="text" value="' + esc(val) + '"' +
+          ' placeholder="' + esc(step.placeholder) + '" aria-label="' +
+          esc(step.q) + '">') +
+        (step.chips ? '<div class="rec-flow-chips">' + step.chips.map(function (c) {
+          var picked = step.multi ? brief.skills.indexOf(c) > -1
+                                  : brief[step.key] === c;
+          return '<button type="button" class="rec-flow-chip' +
+            (picked ? ' is-on' : '') + '">' + esc(c) + '</button>';
+        }).join('') + '</div>' : '') +
+        (step.tags ? '<div class="rec-flow-tags">' + brief.skills.map(function (s, i) {
+          return '<span class="rec-flow-tag">' + esc(s) +
+            '<button type="button" data-drop="' + i + '" aria-label="Remove ' +
+            esc(s) + '">&#215;</button></span>';
+        }).join('') + '</div>' : '') +
+        '<div class="rec-flow-act">' +
+          (at > 0 ? '<button type="button" class="rec-flow-back">Back</button>' : '') +
+          // a single choice answers and carries on by itself; picking several
+          // does not, so a multi step keeps its Continue
+          (step.chipsOnly && !step.multi ? '' :
+            '<button type="button" class="rec-flow-next">Continue</button>') +
+        '</div>';
+    }
+
+    function money(n, top) {
+      return '$' + n + 'k' + (n >= top ? '+' : '');
+    }
+
+    function said(r) {
+      return money(band.from, r.max) + '\u2013' + money(band.to, r.max);
+    }
+
+    function rail(r) {
+      return '<div class="rec-flow-range">' +
+        '<output class="rec-flow-range-val"></output>' +
+        '<div class="rec-flow-track">' +
+          '<span class="rec-flow-fill"></span>' +
+          '<input type="range" class="rec-flow-lo" min="' + r.min + '" max="' +
+            r.max + '" step="' + r.step + '" value="' + band.from +
+            '" aria-label="Lowest in the band">' +
+          '<input type="range" class="rec-flow-hi" min="' + r.min + '" max="' +
+            r.max + '" step="' + r.step + '" value="' + band.to +
+            '" aria-label="Highest in the band">' +
+        '</div>' +
+        '<div class="rec-flow-ends"><span>$' + r.min + 'k</span><span>$' +
+          r.max + 'k+</span></div>' +
+      '</div>';
+    }
+
+    // The title, not the sentence: what someone types into the field runs
+    // "Senior backend engineer, Python + Django, 4+ years, remote India", and
+    // the tail is the three things the next screens asked for anyway. The
+    // whole sentence stays in the brief; only the designation is shown.
+    function title(role) {
+      var cut = role.indexOf(',');
+      return (cut > 0 ? role.slice(0, cut) : role).trim();
+    }
+
+    function review() {
+      var facts = [
+        ['Where', brief.location],
+        ['Budget', brief.salary],
+        ['Skills', brief.skills.join(', ')]
+      ].map(function (f) {
+        return '<span class="rec-flow-fact"><i>' + esc(f[0]) + '</i>' +
+          (f[1] ? '<b>' + esc(f[1]) + '</b>'
+                : '<b class="is-blank">Not given</b>') + '</span>';
+      }).join('');
+      return '<h2 class="rec-flow-q">Ready to publish.</h2>' +
+        '<p class="rec-flow-hint">This is what Mira has. Publish it and every ' +
+        'application is read and ranked against it from the moment it lands.</p>' +
+        '<p class="rec-flow-brief' + (brief.role ? '' : ' is-blank') + '">' +
+          (brief.role ? esc(title(brief.role)) : 'No description given') + '</p>' +
+        '<div class="rec-flow-facts">' + facts + '</div>' +
+        '<div class="rec-flow-act">' +
+          '<button type="button" class="rec-flow-back">Back</button>' +
+          '<button type="button" class="rec-flow-next">Publish role</button>' +
+        '</div>';
+    }
+
+    function signup() {
+      return '<h2 class="rec-flow-q">Create your account</h2>' +
+        '<p class="rec-flow-hint">The brief is ready. Add your work email and ' +
+        'Mira starts reading.</p>' +
+        '<button type="button" class="rec-flow-google"><svg viewBox=\"0 0 48 48\" aria-hidden=\"true\"><path fill=\"#FFC107\" d=\"M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z\"/><path fill=\"#FF3D00\" d=\"M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z\"/><path fill=\"#4CAF50\" d=\"M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.6C29.6 34.6 26.9 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.2 44 24 44z\"/><path fill=\"#1976D2\" d=\"M43.6 20.5H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.4 36.9 44 31 44 24c0-1.3-.1-2.4-.4-3.5z\"/></svg>' +
+        'Continue with Google</button>' +
+        '<div class="rec-flow-or">or</div>' +
+        '<input class="rec-flow-in rec-flow-mail" type="email" ' +
+        'inputmode="email" autocomplete="email" placeholder="you@company.com" ' +
+        'aria-label="Work email">' +
+        '<div class="rec-flow-act">' +
+          '<button type="button" class="rec-flow-back">Back</button>' +
+          '<button type="button" class="rec-flow-next">Create account</button>' +
+        '</div>';
+    }
+
+    function done() {
+      flow.querySelector('.rec-flow-bar span').style.setProperty('--at', '100%');
+      flow.querySelector('.rec-flow-step').textContent = '';
+      flow.querySelector('.rec-flow-card').innerHTML =
+        '<div class="rec-flow-done">' +
+          '<span class="rec-flow-tick"><svg viewBox="0 0 24 24" fill="none" ' +
+            'stroke="currentColor" stroke-width="2.4" stroke-linecap="round" ' +
+            'stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 7"/>' +
+          '</svg></span>' +
+          '<h2 class="rec-flow-q">The role is live.</h2>' +
+          '<p class="rec-flow-hint">Mira takes it from here: it reads every ' +
+          'application the day it lands, ranks it against your brief and books ' +
+          'the interviews.</p>' +
+          '<div class="rec-flow-act" style="justify-content:center">' +
+            '<button type="button" class="rec-flow-next">Done</button>' +
+          '</div>' +
+          '<p class="rec-flow-note">This is a walk-through of the flow. ' +
+          'Nothing has been posted.</p>' +
+        '</div>';
+      flow.querySelector('.rec-flow-next').addEventListener('click', close);
+    }
+
+    function wire(card) {
+      // The screens past the questions have no step behind them, and the
+      // chip-focus line below reads `step.multi` unconditionally: on the
+      // review screen that threw, and the throw landed before the Back and
+      // Publish buttons were bound, which left them dead. An empty object
+      // answers every `step.x` here with undefined, which is the answer each
+      // of those tests wants.
+      var step = STEPS[at] || {};
+      var input = card.querySelector('.rec-flow-in');
+      var next = card.querySelector('.rec-flow-next');
+      var back = card.querySelector('.rec-flow-back');
+
+      function ready() {
+        if (!next || at >= STEPS.length) return;
+        var has = step.range ? true
+                : (step.multi || step.tags) ? brief.skills.length > 0
+                : (input ? input.value.trim().length > 0
+                         : !!brief[step.key]);
+        next.disabled = !has;
+      }
+
+      function onward() { at++; draw(); }
+
+      function go() {
+        // hoisted: every screen's forward button is gated the same way
+        if (next && next.disabled) return;
+        if (at < STEPS.length) {
+          if (step.range) brief[step.key] = said(step.range);
+          else if (step.multi) { /* already in brief.skills */ }
+          else if (!step.tags && input) brief[step.key] = input.value.trim();
+        }
+        if (at > STEPS.length) { done(); return; }
+        onward();
+      }
+
+      if (input) {
+        input.addEventListener('input', ready);
+        input.addEventListener('keydown', function (e) {
+          if (e.key !== 'Enter') return;
+          e.preventDefault();
+          if (step.tags) {
+            var v = input.value.trim();
+            if (!v) return;
+            brief.skills.push(v);
+            input.value = '';
+            draw();
+            flow.querySelector('.rec-flow-in').focus();
+          } else {
+            go();
+          }
+        });
+        input.focus();
+      }
+
+      if (step && step.range) {
+        var lo = card.querySelector('.rec-flow-lo');
+        var hi = card.querySelector('.rec-flow-hi');
+        var fill = card.querySelector('.rec-flow-fill');
+        var out = card.querySelector('.rec-flow-range-val');
+        var span = step.range.max - step.range.min;
+        var show = function () {
+          band.from = +lo.value;
+          band.to = +hi.value;
+          fill.style.setProperty('--from',
+            ((band.from - step.range.min) / span * 100).toFixed(2) + '%');
+          fill.style.setProperty('--to',
+            ((step.range.max - band.to) / span * 100).toFixed(2) + '%');
+          out.textContent = said(step.range);
+        };
+        // Each end is clamped in its own handler, to the other end. Reading
+        // min and max off the pair instead would let the band say one thing
+        // while the handles sat somewhere else: whichever one had just been
+        // dragged past the other would be corrected, and the figure taken
+        // from where it had been a moment before.
+        lo.addEventListener('input', function () {
+          if (+lo.value > +hi.value) lo.value = hi.value;
+          show();
+        });
+        hi.addEventListener('input', function () {
+          if (+hi.value < +lo.value) hi.value = lo.value;
+          show();
+        });
+        show();
+      }
+
+      var google = card.querySelector('.rec-flow-google');
+      if (google) google.addEventListener('click', done);
+
+      var mail = card.querySelector('.rec-flow-mail');
+      if (mail) {
+        var looksLikeAddress = function () {
+          next.disabled =
+            !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail.value.trim());
+        };
+        mail.addEventListener('input', looksLikeAddress);
+        mail.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); go(); }
+        });
+        looksLikeAddress();
+        mail.focus();
+      }
+
+      var chips = card.querySelectorAll('.rec-flow-chip');
+      chips.forEach(function (chip) {
+        chip.addEventListener('click', function () {
+          var label = chip.textContent;
+          if (step.multi) {
+            var i = brief.skills.indexOf(label);
+            if (i > -1) brief.skills.splice(i, 1); else brief.skills.push(label);
+            draw();
+            // back onto the chip just toggled: without this every pick throws
+            // a keyboard user to the top of the stack
+            [].slice.call(flow.querySelectorAll('.rec-flow-chip'))
+              .forEach(function (c) { if (c.textContent === label) c.focus(); });
+            return;
+          }
+          brief[step.key] = label;
+          if (input) { input.value = label; draw(); return; }
+          // nothing left to confirm on a single-choice step: the choice is the
+          // answer, so it carries straight on
+          onward();
+        });
+      });
+      if (!input && !step.multi && chips.length) {
+        (card.querySelector('.rec-flow-chip.is-on') || chips[0]).focus();
+      }
+
+      card.querySelectorAll('[data-drop]').forEach(function (x) {
+        x.addEventListener('click', function () {
+          brief.skills.splice(parseInt(x.getAttribute('data-drop'), 10), 1);
+          draw();
+        });
+      });
+
+      if (next) next.addEventListener('click', go);
+      if (back) back.addEventListener('click', function () { at--; draw(); });
+      ready();
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      open();
+    });
+  }());
+
+  // Log in opens the product's own sign-in screen, lifted from
+  // Recruitment-frontend. What this page cannot honour -- the magic link, the
+  // Google credential, the "check your inbox" screen -- is dropped, and every
+  // way forward goes to the real one. Collecting an address here and sending
+  // nothing would be worse than not asking.
+  (function () {
+    var opener = document.querySelector('.rec-head .rec-login');
+    if (!opener) return;
+    var panel = null;
+
+    function build() {
+      panel = document.createElement('div');
+      panel.className = 'rec-auth';
+      panel.hidden = true;
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-modal', 'true');
+      panel.setAttribute('aria-label', 'Sign in');
+      panel.innerHTML =
+        '<div class="login-shell">' +
+          '<div class="login-left">' +
+            '<div class="login-form-wrap">' +
+              '<img class="login-mira" src="mira-mark.svg" alt="Mira" ' +
+                'width="412" height="300">' +
+              '<h1 class="login-title">Welcome to Wisemonk</h1>' +
+              '<p class="login-sub">Sign in or create your account to hire ' +
+                'with Mira AI.</p>' +
+              '<button type="button" class="login-google-btn">' + '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5h-1.9V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.5-2.1 14.3-5.5l-6.6-5.6C29.6 34.6 26.9 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H24v8h11.3c-.8 2.3-2.2 4.2-4.1 5.6l6.6 5.6C41.4 36.9 44 31 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>' +
+                'Continue with Google</button>' +
+              '<div class="login-divider">or</div>' +
+              '<form class="login-form">' +
+                '<div class="login-input login-float">' +
+                  '<input id="rec-auth-email" type="email" autocomplete="email" ' +
+                    'placeholder=" ">' +
+                  '<label for="rec-auth-email">Enter your email address</label>' +
+                '</div>' +
+                '<button type="submit" class="login-primary"><span>Sign in</span>' +
+                  '<svg class="login-primary-arrow" viewBox="0 0 24 24" fill="none" ' +
+                    'stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+                    'stroke-linejoin="round" aria-hidden="true">' +
+                    '<line x1="5" y1="12" x2="19" y2="12"/>' +
+                    '<polyline points="12 5 19 12 12 19"/></svg></button>' +
+              '</form>' +
+              '<p class="login-switch">Don\'t have an account? ' +
+                '<a class="login-switch-link" ' +
+                  'href="https://talent.wisemonk.io/login">Sign up</a></p>' +
+            '</div>' +
+            '<div class="login-foot"><p class="login-legal">By continuing, you ' +
+              'agree to our <a href="https://www.wisemonk.io/terms" ' +
+              'target="_blank" rel="noreferrer">Terms &amp; Conditions</a> and ' +
+              '<a href="https://www.wisemonk.io/privacy" target="_blank" ' +
+              'rel="noreferrer">Privacy Policy</a>.</p></div>' +
+          '</div>' +
+          '<aside class="login-right" aria-hidden="true">' +
+            '<iframe class="lr-frame" src="login-graphic.html" title="" ' +
+              'tabindex="-1" loading="lazy"></iframe>' +
+          '</aside>' +
+        '</div>';
+      document.body.appendChild(panel);
+
+      // nothing behind it to sign anyone in, and nowhere it is meant to
+      // send them: the submit is swallowed
+      panel.querySelector('.login-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel && !panel.hidden) close();
+      });
+      // the page behind is scroll-driven and should stay where it was
+      panel.addEventListener('wheel', function (e) { e.preventDefault(); },
+                             { passive: false });
+    }
+
+    function hide() {
+      panel.classList.add('is-out');
+      window.setTimeout(function () {
+        panel.hidden = true;
+        panel.classList.remove('is-out');
+      }, 180);
+      opener.focus();
+    }
+
+    // There is no close button on this screen, so opening it adds a history
+    // entry: Escape gives that entry back, and the browser's own Back button
+    // does the same thing. Without it a phone would have no way out at all.
+    function close() {
+      if (window.history.state && window.history.state.recAuth) {
+        window.history.back();
+        return;
+      }
+      hide();
+    }
+
+    window.addEventListener('popstate', function () {
+      if (panel && !panel.hidden) hide();
+    });
+
+    opener.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!panel) build();
+      panel.classList.remove('is-out');
+      panel.hidden = false;
+      panel.querySelector('#rec-auth-email').focus();
+      try {
+        window.history.pushState({ recAuth: 1 }, '', '#login');
+      } catch (err) {}
+    });
+  }());
+
+  // Mira in the corner. The replies are written, not generated: this page has
+  // no model behind it, so she answers from what the page already says and
+  // hands anything further to the two places that can act on it -- the brief,
+  // and the product. Improvising here would be putting words in its mouth.
+  (function () {
+    var ASKS = [
+      'What does Mira actually do?',
+      'How does pricing work?',
+      'Start a role'
+    ];
+
+    var SAYS = [
+      [/price|pricing|cost|fee|charge|pay/i,
+       'You pay when someone joins, and nothing before that. No retainer, ' +
+       'no fee for a search that does not end in a hire.'],
+      [/start|post|create|hire|role|job|vacancy|opening/i,
+       'Tell me the role in a sentence and I will ask for the rest. Opening ' +
+       'that for you now.'],
+      [/interview|schedule|book|calendar|slot/i,
+       'I book them. I hold your calendar and the panel\'s, offer the ' +
+       'candidate what is actually free, and write the notes up before you ' +
+       'are out of the room.'],
+      [/score|rank|shortlist|cv|resume|application|screen/i,
+       'Every application is read the day it lands and scored against your ' +
+       'scorecard. You see a ranked shortlist, not an inbox.'],
+      [/what|who|how|do|does|mira/i,
+       'I do the work of hiring: read every application as it arrives, rank ' +
+       'it against your scorecard, book the interviews and keep the record. ' +
+       'The calls stay yours.']
+    ];
+
+    var FALL = 'I can tell you what I do, how pricing works, or take the ' +
+      'brief for a role. For anything else the team will pick it up at ' +
+      'talent.wisemonk.io.';
+
+    var open, panel, log, field;
+
+    function el(tag, cls, text) {
+      var n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text) n.textContent = text;
+      return n;
+    }
+
+    function say(who, text) {
+      var m = el('div', 'rec-bot-msg ' + who, text);
+      log.appendChild(m);
+      log.scrollTop = log.scrollHeight;
+      return m;
+    }
+
+    function asks() {
+      var row = el('div', 'rec-bot-asks');
+      ASKS.forEach(function (q) {
+        var b = el('button', 'rec-bot-ask', q);
+        b.type = 'button';
+        b.addEventListener('click', function () { send(q); });
+        row.appendChild(b);
+      });
+      log.appendChild(row);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function answer(q) {
+      for (var i = 0; i < SAYS.length; i++) {
+        if (SAYS[i][0].test(q)) return SAYS[i][1];
+      }
+      return FALL;
+    }
+
+    function send(q) {
+      q = (q || '').trim();
+      if (!q) return;
+      say('you', q);
+      field.value = '';
+      var row = log.querySelector('.rec-bot-asks');
+      if (row) row.remove();
+      window.setTimeout(function () {
+        say('them', answer(q));
+        // the one answer that can do more than say something
+        if (/start|post|create|hire|role|job|vacancy|opening/i.test(q)) {
+          window.setTimeout(function () {
+            close();
+            var form = document.querySelector('.rec-compose');
+            if (form) {
+              form.dispatchEvent(new Event('submit', { cancelable: true,
+                                                       bubbles: true }));
+            }
+          }, 700);
+        }
+      }, 320);
+    }
+
+    function build() {
+      panel = el('div', 'rec-bot');
+      panel.hidden = true;
+      panel.setAttribute('role', 'dialog');
+      panel.setAttribute('aria-label', 'Chat with Mira');
+      panel.innerHTML =
+        '<div class="rec-bot-head">' +
+          '<img src="mira-logo.svg" alt="Mira" width="1152" height="365">' +
+          '<i>Usually replies instantly</i>' +
+        '</div>' +
+        '<div class="rec-bot-log"></div>' +
+        '<form class="rec-bot-say">' +
+          '<input type="text" aria-label="Ask Mira" ' +
+            'placeholder="Ask about hiring with Mira">' +
+          '<span class="rec-bot-mic" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="1.9" stroke-linecap="round" ' +
+              'stroke-linejoin="round" aria-hidden="true">' +
+              '<rect x="9" y="3" width="6" height="11" rx="3"/>' +
+              '<path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/>' +
+              '<path d="M12 18v3"/></svg>' +
+          '</span>' +
+          '<button type="submit" class="rec-bot-send" aria-label="Send">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+              'stroke-width="2.2" stroke-linecap="round" ' +
+              'stroke-linejoin="round" aria-hidden="true">' +
+              '<path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>' +
+          '</button>' +
+        '</form>';
+      document.body.appendChild(panel);
+
+      log = panel.querySelector('.rec-bot-log');
+      field = panel.querySelector('.rec-bot-say input');
+      panel.querySelector('.rec-bot-say').addEventListener('submit', function (e) {
+        e.preventDefault();
+        send(field.value);
+      });
+      // the same dictation the hero has; a span if the browser cannot
+      if (window.recDictate) {
+        window.recDictate(panel.querySelector('.rec-bot-mic'), field, null,
+                          'your question');
+      }
+
+      say('them', 'I am Mira. I read every application, book the interviews ' +
+                  'and keep the record. What would you like to know?');
+      asks();
+    }
+
+    function close() {
+      panel.classList.add('is-out');
+      open.classList.remove('is-on');
+      open.setAttribute('aria-expanded', 'false');
+      window.setTimeout(function () {
+        panel.hidden = true;
+        panel.classList.remove('is-out');
+      }, 160);
+    }
+
+    open = el('button', 'rec-bot-open');
+    open.type = 'button';
+    open.setAttribute('aria-label', 'Chat with Mira');
+    open.setAttribute('aria-expanded', 'false');
+    open.innerHTML = '<img src="mira-mark.svg" alt="" width="412" height="300">';
+    document.body.appendChild(open);
+
+    open.addEventListener('click', function () {
+      if (!panel) build();
+      if (!panel.hidden) { close(); return; }
+      panel.classList.remove('is-out');
+      panel.hidden = false;
+      open.classList.add('is-on');
+      open.setAttribute('aria-expanded', 'true');
+      field.focus();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && panel && !panel.hidden) close();
+    });
   }());
 </script>
 </body>

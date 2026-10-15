@@ -3789,7 +3789,6 @@
   (function () {
     var opener = document.querySelector('.rec-head .rec-login');
     if (!opener) return;
-    var APP = 'https://talent.wisemonk.io/login';
     var panel = null;
 
     function build() {
@@ -3825,7 +3824,8 @@
                     '<polyline points="12 5 19 12 12 19"/></svg></button>' +
               '</form>' +
               '<p class="login-switch">Don\'t have an account? ' +
-                '<a class="login-switch-link" href="' + APP + '">Sign up</a></p>' +
+                '<a class="login-switch-link" ' +
+                  'href="https://talent.wisemonk.io/login">Sign up</a></p>' +
             '</div>' +
             '<div class="login-foot"><p class="login-legal">By continuing, you ' +
               'agree to our <a href="https://www.wisemonk.io/terms" ' +

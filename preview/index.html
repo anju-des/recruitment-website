@@ -1550,7 +1550,7 @@
                              -webkit-mask-composite:source-in;
                              mask-composite:intersect; }
     /* the questions sit over it */
-    .rec-flow-card { position:relative; z-index:1; }
+    .rec-flow-card { position:relative; z-index:1; text-align:center; }
     .rec-flow-body { flex:1; min-height:0; overflow:auto;
                      display:flex; align-items:center; justify-content:center;
                      padding:clamp(24px, 4vw, 56px) clamp(18px, 3vw, 40px); }
@@ -1607,7 +1607,8 @@
                      margin-top:10px; color:#8A82A8; font-size:12.5px;
                      font-variant-numeric:tabular-nums; }
     .rec-flow-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
-                      max-width:640px; }
+                      justify-content:center; max-width:640px;
+                      margin-inline:auto; }
     .rec-flow-chips:first-of-type { margin-top:0; }
     .rec-flow-chip:focus-visible { outline:2px solid #7C5CF6; outline-offset:2px; }
     .rec-flow-chip { border:1px solid #DCD6EE; background:#FFFFFF;
@@ -1618,7 +1619,8 @@
     .rec-flow-chip.is-on { background:#1A1430; border-color:#1A1430;
                            color:#FFFFFF; }
     /* the skills already added, each with its own way out */
-    .rec-flow-tags { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .rec-flow-tags { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
+                     justify-content:center; }
     .rec-flow-tag { display:inline-flex; align-items:center; gap:8px;
                     background:#F2EFFB; border-radius:100px;
                     padding:8px 9px 8px 15px; font-size:13.5px; color:#2C2545; }
@@ -1628,8 +1630,8 @@
                            line-height:1; font-family:inherit;
                            transition:background .15s; }
     .rec-flow-tag button:hover { background:#C9BEF0; }
-    .rec-flow-act { display:flex; align-items:center; gap:12px;
-                    margin-top:clamp(26px, 3vw, 38px); }
+    .rec-flow-act { display:flex; align-items:center; justify-content:center;
+                    gap:12px; margin-top:clamp(26px, 3vw, 38px); }
     .rec-flow-next, .rec-flow-back {
       border:0; border-radius:10px; padding:13px 26px; cursor:pointer;
       font:inherit; font-size:15px; font-weight:600;
@@ -1640,12 +1642,8 @@
                                background:#1A1430; }
     .rec-flow-back { background:none; color:#6F6790; padding-inline:8px; }
     .rec-flow-back:hover { color:#1A1430; }
-    .rec-flow-skip { margin-left:auto; background:none; border:0; padding:8px;
-                     cursor:pointer; font:inherit; font-size:13.5px;
-                     color:#8A82A8; transition:color .15s; }
-    .rec-flow-skip:hover { color:#4B4270; }
     /* what it has understood */
-    .rec-flow-sum { margin:0 0 clamp(24px, 3vw, 34px);
+    .rec-flow-sum { text-align:left; margin:0 0 clamp(24px, 3vw, 34px);
                     border:1px solid #E7E2F6; border-radius:16px;
                     overflow:hidden; }
     .rec-flow-row { display:flex; gap:18px; padding:15px 20px;
@@ -3208,7 +3206,7 @@
     var STEPS = [
       { key: 'location',
         q: 'Where will they work from?',
-        hint: 'It is the first thing Mira filters on.',
+        hint: 'Remote opens the pool to the whole country; on-site narrows it to one city.',
         chipsOnly: true,
         chips: ['Remote', 'Hybrid', 'On-site'] },
       { key: 'salary',
@@ -3320,7 +3318,6 @@
           // does not, so a multi step keeps its Continue
           (step.chipsOnly && !step.multi ? '' :
             '<button type="button" class="rec-flow-next">Continue</button>') +
-          '<button type="button" class="rec-flow-skip">Skip for now</button>' +
         '</div>';
     }
 
@@ -3396,7 +3393,6 @@
       var input = card.querySelector('.rec-flow-in');
       var next = card.querySelector('.rec-flow-next');
       var back = card.querySelector('.rec-flow-back');
-      var skip = card.querySelector('.rec-flow-skip');
 
       function ready() {
         if (!next || at >= STEPS.length) return;
@@ -3504,11 +3500,6 @@
 
       if (next) next.addEventListener('click', go);
       if (back) back.addEventListener('click', function () { at--; draw(); });
-      if (skip) skip.addEventListener('click', function () {
-        if (!step.tags) brief[step.key] = '';
-        at++;
-        draw();
-      });
       ready();
     }
 

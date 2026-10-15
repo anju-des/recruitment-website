@@ -1557,10 +1557,6 @@
     .rec-step { flex-direction:column; align-items:flex-start; }
     .rec-step-row { display:flex; align-items:center; gap:10px; }
     .rec-done-slot { display:block; max-width:100%; }
-    .rec-step.is-link .rec-step-row { cursor:pointer; }
-    .rec-step.is-link .rec-step-row:hover b { color:#1A1430;
-                                              text-decoration:underline;
-                                              text-underline-offset:3px; }
 
 
     /* step two's board, built from step one */
@@ -1578,14 +1574,6 @@
     .rec-ready-who { display:inline-flex; align-items:center; gap:9px;
                      min-width:0; }
 
-    .rec-ready-in { margin:14px 0 0; text-align:center; font-size:13.5px;
-                    color:#8A82A8; }
-    .rec-ready-signin { border:0; padding:0 2px; background:none;
-                        font:inherit; font-size:13.5px; font-weight:600;
-                        color:#6B4BE8; cursor:pointer;
-                        text-decoration:underline;
-                        text-underline-offset:3px; }
-    .rec-ready-signin:hover { color:#4A32C0; }
 
     .rec-board-head { display:flex; align-items:center; gap:13px; }
     .rec-board-role { margin-top:18px; padding:14px 16px; border-radius:12px;
@@ -1608,12 +1596,12 @@
                            box-shadow:0 2px 12px rgba(18,22,32,.08); }
     .rec-done-card:focus-visible { outline:2px solid #7C5CF6;
                                    outline-offset:2px; }
-    /* the details are open: the chip is the thing holding them there */
-    .rec-flow:not(.is-found) .rec-done-card { border-color:#BCAEF0; }
+    /* this card is the one holding the details open */
+    .rec-done-card[aria-expanded="true"] { border-color:#BCAEF0; }
     .rec-done-go { flex:none; width:14px; height:14px; margin-left:auto;
                    color:#A49CC0; transition:transform .2s ease; }
-    .rec-flow:not(.is-found) .rec-done-go { transform:rotate(90deg);
-                                            color:#6B4BE8; }
+    .rec-done-card[aria-expanded="true"] .rec-done-go {
+      transform:rotate(90deg); color:#6B4BE8; }
     @media (prefers-reduced-motion: reduce) {
       .rec-done-go { transition:none; }
     }
@@ -3864,19 +3852,6 @@
       }
     }
 
-    // a step with a screen behind it and no chip of its own
-    function make_step_open(i) {
-      var step = flow.querySelectorAll('.rec-step')[i];
-      if (!step) return;
-      var row = step.querySelector('.rec-step-row');
-      if (!row || row.getAttribute('data-open') === '1') return;
-      row.setAttribute('data-open', '1');
-      step.classList.add('is-link');
-      row.addEventListener('click', function () {
-        show_details(i, open_i !== i);
-      });
-    }
-
     // what a finished step leaves behind, under that step
     function put_mini(i, label, sub, logo, html) {
       kept[i] = html;
@@ -4058,15 +4033,14 @@
 
         function ready() {
           at_step(2, true);
-          make_step_open(2);
           flow.querySelector('.rec-flow-bar span')
               .style.setProperty('--at', '100%');
           card.innerHTML =
             '<div class="rec-found-col">' +
               '<h2 class="rec-flow-q">Your account is ready to open</h2>' +
               '<p class="rec-flow-hint">Everything above is set up and ' +
-                'waiting. Open the account and Mira starts reading ' +
-                'applications the day they land.</p>' +
+                'waiting. Sign in and Mira starts reading applications ' +
+                'the day they land.</p>' +
               '<div class="rec-found-card">' +
                 '<ul class="rec-ready">' +
                   '<li><i>Workspace</i><span class="rec-ready-who">' +
@@ -4081,13 +4055,15 @@
                     : '') +
                 '</ul>' +
                 '<button type="button" class="rec-flow-next rec-ready-go" ' +
-                  'data-login="1">Open your account</button>' +
-                '<p class="rec-ready-in">Already with Mira? ' +
-                  '<button type="button" class="rec-ready-signin" ' +
-                    'data-login="1">Sign in</button></p>' +
+                  'data-login="1">Sign in to your account</button>' +
               '</div>' +
             '</div>';
-          kept[2] = card.innerHTML;
+          put_mini(2, 'Account', 'ready to open', found.logo,
+                   card.innerHTML);
+          // it is filed open: the screen it holds is the one on screen
+          open_i = 2;
+          var mine = flow.querySelector('.rec-done-card[data-for="2"]');
+          if (mine) mine.setAttribute('aria-expanded', 'true');
           remember();
           card.querySelectorAll('[data-login]').forEach(function (b) {
             b.addEventListener('click', open_account);
@@ -4762,7 +4738,9 @@
       if (screens[1]) { put_mini(1, 'Job board', board_addr(was.who),
                                  was.logo, screens[1]);
                         last = 1; }
-      if (screens[2]) { kept[2] = screens[2]; make_step_open(2); last = 2; }
+      if (screens[2]) { put_mini(2, 'Account', 'ready to open',
+                                 was.logo, screens[2]);
+                        last = 2; }
       at_step(last, true);
     }());
   }());

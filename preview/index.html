@@ -3722,6 +3722,19 @@
                     document.querySelector('.rec-compose-input'),
                     document.querySelector('.rec-suggest'), 'the role');
 
+  // the build that wrote a record, so a record from another one can be
+  // recognised and dropped. Taken from this script's own text: anything
+  // that changes how a screen is built changes this with it.
+  var FLOW_V = (function () {
+    var el = document.currentScript ||
+             document.scripts[document.scripts.length - 1];
+    var s = (el && el.textContent) || '';
+    var h = 5381;
+    var i = s.length;
+    while (i) { h = (h * 33 ^ s.charCodeAt(--i)) >>> 0; }
+    return h.toString(36);
+  }());
+
   // Send opens the brief: the role in a sentence is the start of it, and the
   // three things Mira still needs come one screen at a time.
   (function () {
@@ -3814,6 +3827,7 @@
     function remember() {
       try {
         window.sessionStorage.setItem('wm-flow', JSON.stringify({
+          v: FLOW_V,
           role: brief.role, website: brief.website,
           who: company.who, logo: company.logo, based: company.based || '',
           screens: kept
@@ -4713,7 +4727,8 @@
       // a record without the screens is from an older build and would
       // restore half a flow, so it goes rather than confuses
       var screens = (was && was.screens) || {};
-      if (!was || !was.who || !screens[0]) {
+      // a record from another build holds that build's markup
+      if (!was || was.v !== FLOW_V || !was.who || !screens[0]) {
         try { window.sessionStorage.removeItem('wm-flow'); } catch (e) {}
         return;
       }

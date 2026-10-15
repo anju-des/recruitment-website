@@ -3762,6 +3762,7 @@
         var refs = [];            // item ids whose names need a second call
         var vals = {};            // label -> value, filled from both calls
         var links = [];           // where else they are on the record
+        var li_id = '';           // linkedin, for the headcount fallback
 
         // one order, so two companies never lay out differently
         var ORDER = ['Founded', 'People', 'Type', 'Industry', 'Based',
@@ -3915,8 +3916,34 @@
           rest();
         }
 
+        // the register has no figure for plenty of companies; their own
+        // LinkedIn page does
+        function head_count() {
+          if (vals.People || !li_id) { lay_out(); return; }
+          busy = 'counting the team on LinkedIn';
+          screen();
+          var answered = false;
+          function once(n) {
+            if (answered) return;
+            answered = true;
+            if (n) vals.People = n;
+            lay_out();
+          }
+          window.setTimeout(function () { once(''); }, 6000);
+          window.fetch('https://r.jina.ai/https://www.linkedin.com/company/' +
+                       encodeURIComponent(li_id),
+                       { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              var dat = (d && d.data) || d || {};
+              var m = String(dat.content || '')
+                        .match(/([\d,]{1,12})\s*(?:\+\s*)?employees/i);
+              once(m ? m[1] : '');
+            }, function () { once(''); });
+        }
+
         function read_more() {
-          if (!refs.length) { lay_out(); return; }
+          if (!refs.length) { head_count(); return; }
           ask_json(API + 'action=wbgetentities&props=labels&languages=en&ids=' +
                    refs.map(function (r) { return r.id; }).join('|'))
             .then(function (d) {
@@ -3937,8 +3964,8 @@
                 return v && a.indexOf(v) === i;
               });
               if (where.length) vals.Based = where.join(', ');
-              lay_out();
-            }, lay_out);
+              head_count();
+            }, head_count);
         }
 
         function ask_json(url) {
@@ -4031,6 +4058,9 @@
           });
 
           // and where else the record puts them
+          var li = one('P4264');
+          if (typeof li === 'string') li_id = li;
+
           [['P4264', 'LinkedIn', 'https://www.linkedin.com/company/'],
            ['P2088', 'Crunchbase', 'https://www.crunchbase.com/organization/'],
            ['P2002', 'X', 'https://x.com/']].forEach(function (l) {

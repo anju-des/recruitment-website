@@ -1533,20 +1533,21 @@
                      justify-content:space-between; gap:16px;
                      padding:clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 40px); }
     .rec-flow-head img { display:block; width:92px; height:auto; }
-    /* the three steps, in the header */
-    .rec-steps { flex:none; display:flex; align-items:center; width:100%;
-                 box-sizing:border-box; margin:0; list-style:none;
-                 padding:15px clamp(18px, 3vw, 40px);
-                 /* the sand is positioned and this row was not, so without
-                    a layer of its own the gradient paints over the text */
+    /* the three steps, as a rail down the left */
+    .rec-flow-main { flex:1; min-height:0; display:flex; }
+    .rec-steps { flex:none; display:flex; flex-direction:column;
+                 align-items:flex-start; box-sizing:border-box; margin:0;
+                 list-style:none; width:clamp(200px, 22vw, 250px);
+                 padding:clamp(22px, 3vw, 34px) clamp(18px, 2.4vw, 32px);
+                 /* the sand is positioned and this was not, so without a
+                    layer of its own the gradient paints over the text */
                  position:relative; z-index:1; }
-    .rec-step { display:flex; align-items:center; gap:8px; flex:none;
-                color:#A49CC0; font-size:12.5px; }
-    /* the rule takes the slack, so the labels keep their own size */
-    .rec-step + .rec-step { flex:1; }
-    .rec-step + .rec-step::before { content:""; flex:1; min-width:16px;
-                                    height:1px; background:#E2DCF4;
-                                    margin-right:8px; }
+    .rec-step { position:relative; display:flex; align-items:center;
+                gap:10px; padding:14px 0; color:#A49CC0; font-size:12.5px; }
+    /* a line from the circle above to this one, at the circle's centre */
+    .rec-step + .rec-step::before { content:""; position:absolute;
+                                    left:9.5px; top:-14px; width:1px;
+                                    height:28px; background:#E2DCF4; }
     .rec-step i { font-style:normal; display:grid; place-items:center;
                   width:20px; height:20px; flex:none; border-radius:50%;
                   background:#F1EEFA; color:#9A93B8; font-size:11px;
@@ -1567,9 +1568,18 @@
     }
     .rec-step.is-done { color:#6B6392; }
     .rec-step.is-done i { background:#EDE8FD; color:#5A4BD8; }
-    @media (max-width:760px) {
+    /* a 220px column off the side of a phone leaves nothing for the
+       content, so the rail lies back down */
+    @media (max-width:860px) {
+      .rec-flow-main { flex-direction:column; }
+      .rec-steps { width:100%; flex-direction:row; align-items:center;
+                   padding:12px 18px; }
+      .rec-step { padding:0; flex:none; }
       .rec-step b { display:none; }
-      .rec-steps { padding:12px 18px; }
+      .rec-step + .rec-step { flex:1; }
+      .rec-step + .rec-step::before { position:static; flex:1; width:auto;
+                                      min-width:14px; height:1px;
+                                      margin-right:8px; }
     }
     .rec-flow-x { width:36px; height:36px; border-radius:50%; border:0;
                   display:grid; place-items:center; cursor:pointer;
@@ -3649,14 +3659,16 @@
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
         '<div class="rec-flow-sand" aria-hidden="true"></div>' +
-        '<ol class="rec-steps">' +
-          ['Company details', 'Job board', 'Account']
-            .map(function (s, i) {
-              return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
-                '<b>' + s + '</b></li>';
-            }).join('') +
-        '</ol>' +
-        '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>';
+        '<div class="rec-flow-main">' +
+          '<ol class="rec-steps">' +
+            ['Company details', 'Job board', 'Account']
+              .map(function (s, i) {
+                return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
+                  '<b>' + s + '</b></li>';
+              }).join('') +
+          '</ol>' +
+          '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>' +
+        '</div>';
       document.body.appendChild(flow);
 
       flow.querySelector('.rec-flow-x').addEventListener('click', close);

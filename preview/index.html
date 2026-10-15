@@ -1836,24 +1836,7 @@
     }
 
     /* ---- what comes back from Claude ------------------------------------ */
-    .rec-cx[hidden], .rec-cx-take[hidden], .rec-co[hidden] { display:none; }
-    .rec-cx-take { width:100%; max-width:560px; margin:14px auto 0;
-                   text-align:left; }
-    .rec-cx-take textarea { width:100%; box-sizing:border-box; min-height:92px;
-                            resize:vertical; padding:13px 15px;
-                            border:1px solid #DCD6EE; border-radius:14px;
-                            background:#FFFFFF; font:inherit; font-size:14px;
-                            line-height:1.5; color:var(--text-primary); }
-    .rec-cx-take textarea:focus { outline:2px solid #7C5CF6;
-                                  outline-offset:1px; border-color:#7C5CF6; }
-    .rec-cx-take textarea::placeholder { color:#A49CC0; }
-    .rec-cx-tip { display:flex; align-items:center; gap:10px; margin:8px 2px 0;
-                  font-size:12.5px; color:var(--text-muted); }
-    .rec-cx-drop { margin-left:auto; border:0; background:none; padding:2px;
-                   font:inherit; font-size:12.5px; color:#8A82A8;
-                   cursor:pointer; }
-    .rec-cx-drop:hover { color:#5A4BD8; }
-
+    .rec-cx[hidden], .rec-co[hidden] { display:none; }
     .rec-co { display:flex; gap:14px; width:100%; max-width:560px;
               margin:14px auto 0; padding:16px 18px; box-sizing:border-box;
               border:1px solid rgba(124,92,246,.2); border-radius:16px;
@@ -4179,7 +4162,7 @@
         'know who it is hiring for.'
     ].join('\n');
 
-    var take, card;
+    var card;
 
     function esc(t) {
       return String(t == null ? '' : t)
@@ -4281,41 +4264,18 @@
       card.querySelector('.rec-co-x').addEventListener('click', function () {
         try { window.localStorage.removeItem(KEY); } catch (e) {}
         card.hidden = true;
-        take.hidden = true;
         ask.hidden = false;
       });
 
       ask.hidden = true;
-      take.hidden = true;
       card.hidden = false;
     }
 
     function build() {
-      take = document.createElement('div');
-      take.className = 'rec-cx-take';
-      take.hidden = true;
-      take.innerHTML =
-        '<textarea aria-label="Claude\'s reply" placeholder="Paste what ' +
-          'Claude wrote here"></textarea>' +
-        '<p class="rec-cx-tip">Paste the whole reply — Mira reads it ' +
-          'into a profile.' +
-          '<button type="button" class="rec-cx-drop">Cancel</button></p>';
-      row.appendChild(take);
-
       card = document.createElement('div');
       card.className = 'rec-co';
       card.hidden = true;
       row.appendChild(card);
-
-      var box = take.querySelector('textarea');
-      box.addEventListener('input', function () {
-        var co = shape(box.value);
-        if (co.company || co.about) { keep(co); show(co); }
-      });
-      take.querySelector('.rec-cx-drop').addEventListener('click', function () {
-        take.hidden = true;
-        ask.hidden = false;
-      });
     }
 
     build();
@@ -4326,9 +4286,6 @@
     ask.addEventListener('click', function () {
       window.open('https://claude.ai/new?q=' + encodeURIComponent(PROMPT),
                   '_blank', 'noopener');
-      ask.hidden = true;
-      take.hidden = false;
-      take.querySelector('textarea').focus();
     });
   }());
 

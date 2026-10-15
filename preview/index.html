@@ -1979,7 +1979,7 @@
     /* the lookup's result, as one card in the corner */
     .rec-flow.is-found .rec-flow-body { align-items:flex-start;
                                         justify-content:flex-start; }
-    .rec-flow.is-found .rec-flow-card { width:min(470px, 100%); }
+    .rec-flow.is-found .rec-flow-card { width:min(520px, 100%); }
     /* content first; the card draws itself once the facts have landed */
     .rec-found-card { padding:0; border-radius:18px;
                       border:1px solid transparent; background:transparent;
@@ -2002,7 +2002,7 @@
     .rec-found-card .rec-found-facts { margin-top:22px; }
     .rec-found-card .rec-found-links { margin-top:20px; }
     /* the found screen shares one left edge */
-    .rec-found-col { width:min(420px, 100%); margin-inline:auto;
+    .rec-found-col { width:min(520px, 100%); margin-inline:auto;
                      text-align:left; }
     .rec-found-col .rec-flow-q { text-align:left; }
     .rec-found-col .rec-flow-found { width:100%; margin-left:0;
@@ -3908,11 +3908,10 @@
         if (!found.who) return;
         step_busy(1);
 
-        var title = (brief.role || '').split(',')[0].trim() ||
-                    'Your first role';
+        var title = (brief.role || '').split(',')[0].trim();
         var jobs = [
           'taking the Wisemonk logo and name',
-          'writing up ' + title,
+          title ? 'writing up ' + title : 'setting it up for your roles',
           'laying out the board'
         ];
         jobs[0] = 'taking the ' + found.who + ' logo and name';
@@ -3948,7 +3947,10 @@
         function made() {
           card.innerHTML =
             '<div class="rec-found-col">' +
-              '<h2 class="rec-flow-q is-alone">Your job board</h2>' +
+              '<h2 class="rec-flow-q">Your custom job board is ready' +
+                '</h2>' +
+              '<p class="rec-flow-hint">Built from your logo, your name and ' +
+                'the role you described. It goes live with your account.</p>' +
               '<div class="rec-found-card">' +
                 '<div class="rec-board-head">' +
                   '<span class="rec-flow-found-mark">' +
@@ -3960,12 +3962,12 @@
                     '<i>' + esc(found.who.toLowerCase().replace(/[^a-z0-9]/g,
                       '')) + '.mira.jobs</i></span>' +
                 '</div>' +
-                '<div class="rec-board-role">' +
-                  '<b>' + esc(title) + '</b>' +
-                  (found.based ? '<i>' + esc(found.based) + '</i>' : '') +
-                '</div>' +
-                '<p class="rec-board-note">A preview. The board goes live ' +
-                  'with your account.</p>' +
+                (title
+                  ? '<div class="rec-board-role">' +
+                      '<b>' + esc(title) + '</b>' +
+                      (found.based ? '<i>' + esc(found.based) + '</i>' : '') +
+                    '</div>'
+                  : '') +
               '</div>' +
             '</div>';
           at_step(1, true);      // built: stop spinning now, not at the tuck
@@ -4119,7 +4121,17 @@
         function rest() {
           busy = '';
           finished = true;
-          at_step(0, true);
+          var nothing = !got.about && !(got.facts && got.facts.length);
+
+          // a miss leaves the step current, not done: there is no company
+          at_step(0, !nothing);
+          screen();
+
+          if (nothing) return;
+
+          flow.querySelector('.rec-flow-bar span')
+              .style.setProperty('--at', '100%');
+
           // let it be read at full size before it becomes a card
           window.setTimeout(function () {
             if (!flow || flow.hidden) return;
@@ -4131,6 +4143,7 @@
             step_busy(1);          // no dead "2" in the gap
             window.setTimeout(board, 700);
           }, 1600);
+
           window.setTimeout(function () {
             try {
               window.sessionStorage.setItem('wm-flow', JSON.stringify({
@@ -4139,9 +4152,6 @@
               }));
             } catch (e) {}
           }, 0);
-          screen();
-          flow.querySelector('.rec-flow-bar span')
-              .style.setProperty('--at', '100%');
         }
 
         // part one: who. then two real fetches, each behind its own line.

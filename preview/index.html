@@ -3968,9 +3968,9 @@
                   'with your account.</p>' +
               '</div>' +
             '</div>';
+          at_step(1, true);      // built: stop spinning now, not at the tuck
           window.setTimeout(function () {
             if (!flow || flow.hidden) return;
-            at_step(1, true);
             flow.classList.add('is-found');
             open_i = null;
             put_mini(1, 'Job board', found.logo, card.innerHTML);
@@ -4128,6 +4128,7 @@
             open_i = null;
             put_mini(0, who, logo, card.innerHTML);
             card.innerHTML = '';
+            step_busy(1);          // no dead "2" in the gap
             window.setTimeout(board, 700);
           }, 1600);
           window.setTimeout(function () {

@@ -4148,17 +4148,18 @@
     // comes back as a hiring profile and gets read as fact.
     var PROMPT = [
       'I am briefing a role to Wisemonk\'s AI recruiter, Mira, and it works ' +
-        'better when it knows how we hire.',
+        'better when it knows who it is hiring for.',
       '',
-      'Write me a short hiring profile I can paste in \u2014 around 150 words, ' +
-        'plain prose, no headings or bullet points. Cover what you already ' +
-        'know about:',
+      'Write me a short profile I can paste in \u2014 around 120 words, plain ' +
+        'prose, no headings or bullet points. Cover these two things only, ' +
+        'and only what you already know:',
       '',
-      '- the company: what we do, roughly how big we are, where the team works',
-      '- the team this hire would join, and the stack they would work in',
-      '- how we hire: the levels we use, what we hold the bar on, what the ' +
-        'last search got wrong',
-      '- me: my name and what I do here',
+      '- the company: what we do, what we sell and who we sell it to, roughly ' +
+        'how big we are, and where the team works from',
+      '- me: my name, my role, and what I am responsible for here',
+      '',
+      'Nothing else \u2014 no hiring advice, no role description, no ' +
+        'suggestions.',
       '',
       'Do not guess. If you do not know something, leave it out and ask me ' +
         'instead.'
@@ -4236,20 +4237,21 @@
               '×</button>' +
           '</div>' +
           '<h2>Connect your Claude</h2>' +
-          '<p>Your team already works out the hard parts of a role in Claude ' +
-            '— the scorecard, the levels, what the last search got wrong. ' +
-            'Connect it and Mira hires against that, instead of against a job ' +
-            'title.</p>' +
-          '<p>You choose what Mira can see, and you can disconnect it at any ' +
-            'time.</p>' +
+          '<p>Your Claude already knows your company — what you build, ' +
+            'who buys it, how big the team is, where everyone sits. Bring ' +
+            'that across and the role goes out for your company, not for a ' +
+            'job title.</p>' +
+          '<p>Nothing is connected and nothing is stored. Claude writes it, ' +
+            'you read it, and you decide what to paste.</p>' +
           '<ul class="rec-cxp-gains">' +
-            '<li><b>Briefs in your words.</b> The role goes out at your levels ' +
-              'and your bar, not a template’s.</li>' +
+            '<li><b>A role that sounds like you.</b> The brief carries what ' +
+              'your company actually does, not a template’s version of ' +
+              'it.</li>' +
             '<li><b>Fewer questions back.</b> Mira stops asking what it could ' +
-              'have read — the stack, the team shape, who the hire reports ' +
-              'to.</li>' +
-            '<li><b>A shortlist that fits.</b> Every application is ranked ' +
-              'against your context, not a title match.</li>' +
+              'have read — what you build, how big you are, where the ' +
+              'team works.</li>' +
+            '<li><b>Candidates get the real pitch.</b> Your company goes out ' +
+              'with the role, in your words.</li>' +
           '</ul>' +
           '<button type="button" class="rec-cxp-do">Open it in Claude</button>' +
           '<button type="button" class="rec-cxp-copy">or copy the prompt' +

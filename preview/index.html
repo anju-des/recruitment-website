@@ -1534,12 +1534,17 @@
                      padding:clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 40px); }
     .rec-flow-head img { display:block; width:92px; height:auto; }
     /* the three steps, in the header */
-    .rec-steps { display:flex; align-items:center; gap:10px; margin:0;
-                 padding:0; list-style:none; }
-    .rec-step { display:flex; align-items:center; gap:7px; color:#A49CC0;
-                font-size:12.5px; }
-    .rec-step + .rec-step::before { content:""; width:22px; height:1px;
-                                    background:#E2DCF4; margin-right:3px; }
+    .rec-steps { flex:none; display:flex; align-items:center; width:100%;
+                 box-sizing:border-box; margin:0; list-style:none;
+                 padding:15px clamp(18px, 3vw, 40px);
+                 border-bottom:1px solid #F2EEFB; }
+    .rec-step { display:flex; align-items:center; gap:8px; flex:none;
+                color:#A49CC0; font-size:12.5px; }
+    /* the rule takes the slack, so the labels keep their own size */
+    .rec-step + .rec-step { flex:1; }
+    .rec-step + .rec-step::before { content:""; flex:1; min-width:16px;
+                                    height:1px; background:#E2DCF4;
+                                    margin-right:8px; }
     .rec-step i { font-style:normal; display:grid; place-items:center;
                   width:20px; height:20px; flex:none; border-radius:50%;
                   background:#F1EEFA; color:#9A93B8; font-size:11px;
@@ -1552,8 +1557,7 @@
     .rec-step.is-done i { background:#EDE8FD; color:#5A4BD8; }
     @media (max-width:760px) {
       .rec-step b { display:none; }
-      .rec-steps { gap:6px; }
-      .rec-step + .rec-step::before { width:14px; }
+      .rec-steps { padding:12px 18px; }
     }
     .rec-flow-x { width:36px; height:36px; border-radius:50%; border:0;
                   display:grid; place-items:center; cursor:pointer;
@@ -3605,16 +3609,16 @@
       flow.innerHTML =
         '<div class="rec-flow-head">' +
           '<img src="mira-logo.svg" width="1152" height="365" alt="Mira">' +
-          '<ol class="rec-steps">' +
-            ['Company details', 'Job board', 'Account']
-              .map(function (s, i) {
-                return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
-                  '<b>' + s + '</b></li>';
-              }).join('') +
-          '</ol>' +
           '<button type="button" class="rec-flow-x" aria-label="Close">&#215;</button>' +
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
+        '<ol class="rec-steps">' +
+          ['Company details', 'Job board', 'Account']
+            .map(function (s, i) {
+              return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
+                '<b>' + s + '</b></li>';
+            }).join('') +
+        '</ol>' +
         '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>';
       document.body.appendChild(flow);

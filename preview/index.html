@@ -1560,6 +1560,8 @@
                   line-height:1.16; letter-spacing:-0.028em; text-wrap:balance; }
     .rec-flow-hint { margin:0 0 clamp(22px, 2.6vw, 34px); color:#6F6790;
                      font-size:15px; }
+    /* with no line under it, the question carries the whole gap itself */
+    .rec-flow-q.is-alone { margin-bottom:clamp(26px, 3vw, 40px); }
     .rec-flow-in { width:100%; box-sizing:border-box; display:block;
                    border:1px solid #DCD6EE; border-radius:12px;
                    padding:15px 18px; font:inherit; font-size:17px;
@@ -3206,16 +3208,13 @@
     var STEPS = [
       { key: 'location',
         q: 'Where will they work from?',
-        hint: 'Remote widens the search. On-site narrows it.',
         chipsOnly: true,
         chips: ['Remote', 'Hybrid', 'On-site'] },
       { key: 'salary',
         q: 'What is the budget?',
-        hint: 'Drag the band. Mira keeps every offer inside it.',
         range: { min: 20, max: 300, step: 5 } },
       { key: 'skills',
         q: 'What must they be good at?',
-        hint: 'Pick as many as apply. Every application is scored against them.',
         chipsOnly: true,
         multi: true,
         chips: ['Python', 'Django', 'Go', 'Node.js', 'TypeScript', 'React', 'PostgreSQL', 'AWS', 'Kubernetes', 'System design', 'Figma', 'Design systems', 'User research', 'Product strategy', 'SQL', 'Machine learning'] }
@@ -3295,8 +3294,9 @@
 
     function ask(step) {
       var val = step.tags ? '' : brief[step.key];
-      return '<h2 class="rec-flow-q">' + esc(step.q) + '</h2>' +
-        '<p class="rec-flow-hint">' + esc(step.hint) + '</p>' +
+      return '<h2 class="rec-flow-q' + (step.hint ? '' : ' is-alone') +
+        '">' + esc(step.q) + '</h2>' +
+        (step.hint ? '<p class="rec-flow-hint">' + esc(step.hint) + '</p>' : '') +
         (step.range ? rail(step.range) : step.chipsOnly ? '' :
           '<input class="rec-flow-in" type="text" value="' + esc(val) + '"' +
           ' placeholder="' + esc(step.placeholder) + '" aria-label="' +

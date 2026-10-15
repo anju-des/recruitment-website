@@ -1575,6 +1575,18 @@
     .rec-ready b { min-width:0; font-size:14.5px; font-weight:600;
                    color:#1A1430; }
     .rec-ready-go { width:100%; margin-top:18px; }
+    .rec-ready-who { display:inline-flex; align-items:center; gap:9px;
+                     min-width:0; }
+
+    .rec-ready-in { margin:14px 0 0; text-align:center; font-size:13.5px;
+                    color:#8A82A8; }
+    .rec-ready-signin { border:0; padding:0 2px; background:none;
+                        font:inherit; font-size:13.5px; font-weight:600;
+                        color:#6B4BE8; cursor:pointer;
+                        text-decoration:underline;
+                        text-underline-offset:3px; }
+    .rec-ready-signin:hover { color:#4A32C0; }
+
     .rec-board-head { display:flex; align-items:center; gap:13px; }
     .rec-board-role { margin-top:18px; padding:14px 16px; border-radius:12px;
                       background:#F6F4FD; display:flex;
@@ -1583,8 +1595,9 @@
     .rec-board-role i { font-style:normal; font-size:12.5px;
                         color:#8A82A8; }
     .rec-board-note { margin:14px 0 0; font-size:12.5px; color:#8A82A8; }
-    .rec-done-card { display:flex; align-items:center; gap:9px; font:inherit;
-                     margin:2px 0 0 30px; padding:9px 12px; max-width:100%;
+    .rec-done-card { display:flex; align-items:center; gap:11px;
+                     font:inherit;
+                     margin:3px 0 0 30px; padding:11px 13px; max-width:100%;
                      box-sizing:border-box; border-radius:12px; cursor:pointer;
                      border:1px solid #ECE7F9; background:#FFFFFF;
                      text-align:left;
@@ -1606,38 +1619,43 @@
     }
     @keyframes rec-mini-in { from { opacity:0; transform:translateY(-4px); }
                              to { opacity:1; transform:none; } }
-    .rec-done-mark { flex:none; width:22px; height:22px; border-radius:7px;
+    .rec-done-mark { flex:none; width:30px; height:30px; border-radius:9px;
                      overflow:hidden; display:grid; place-items:center;
                      background:linear-gradient(135deg,#8B5CF6,#2684FF);
-                     color:#FFFFFF; font-size:11px; font-weight:700; }
+                     color:#FFFFFF; font-size:13px; font-weight:700; }
     .rec-done-mark img { width:100%; height:100%; object-fit:cover;
                          display:block; }
-    .rec-done-card b { min-width:0; font-size:13px; font-weight:600;
+    .rec-done-text { display:flex; flex-direction:column; gap:1px;
+                      min-width:0; }
+    .rec-done-card b { min-width:0; font-size:13.5px; font-weight:600;
                        color:#1A1430; white-space:nowrap; overflow:hidden;
+                       text-overflow:ellipsis; }
+    .rec-done-card i { min-width:0; font-style:normal; font-size:11.5px;
+                       color:#8A82A8; white-space:nowrap; overflow:hidden;
                        text-overflow:ellipsis; }
     @media (prefers-reduced-motion: reduce) {
       .rec-done-card { animation:none; }
     }
-    .rec-step i { font-style:normal; display:grid; place-items:center;
+    .rec-step-row i { font-style:normal; display:grid; place-items:center;
                   width:20px; height:20px; flex:none; border-radius:50%;
                   background:#F1EEFA; color:#9A93B8; font-size:11px;
                   font-weight:700; }
-    .rec-step b { font-weight:500; }
+    .rec-step-row b { font-weight:500; }
     .rec-step.is-on { color:#1A1430; }
-    .rec-step.is-on i { background:#7C5CF6; color:#FFFFFF; }
-    .rec-step.is-on b { font-weight:600; }
-    .rec-step.is-busy i { background:#7C5CF6; color:transparent;
+    .rec-step.is-on .rec-step-row i { background:#7C5CF6; color:#FFFFFF; }
+    .rec-step.is-on .rec-step-row b { font-weight:600; }
+    .rec-step.is-busy .rec-step-row i { background:#7C5CF6; color:transparent;
                           position:relative; }
-    .rec-step.is-busy i::after { content:""; position:absolute; inset:3px;
+    .rec-step.is-busy .rec-step-row i::after { content:""; position:absolute; inset:3px;
                                  border-radius:50%;
                                  border:2px solid rgba(255,255,255,.4);
                                  border-top-color:#FFFFFF;
                                  animation:rec-flow-turn .7s linear infinite; }
     @media (prefers-reduced-motion: reduce) {
-      .rec-step.is-busy i::after { animation:none; }
+      .rec-step.is-busy .rec-step-row i::after { animation:none; }
     }
     .rec-step.is-done { color:#6B6392; }
-    .rec-step.is-done i { background:#EDE8FD; color:#5A4BD8; }
+    .rec-step.is-done .rec-step-row i { background:#EDE8FD; color:#5A4BD8; }
     /* a 220px column off the side of a phone leaves nothing for the
        content, so the rail lies back down */
     @media (max-width:860px) {
@@ -1646,7 +1664,7 @@
                    flex-wrap:wrap; padding:12px 18px; }
       .rec-done-card { margin:0 0 0 10px; }
       .rec-step { padding:0; flex:none; }
-      .rec-step b { display:none; }
+      .rec-step-row b { display:none; }
       .rec-step + .rec-step { flex:1; }
       .rec-step + .rec-step::before { position:static; flex:1; width:auto;
                                       min-width:14px; height:1px;
@@ -3801,7 +3819,25 @@
 
     // the screens the chips put back, one per step
     var kept = {};
+    var company = {};         // step one's result, for the record
     var open_i = null;        // which chip is showing, if any
+
+    // written at each of the three moments a step finishes
+    function remember() {
+      try {
+        window.sessionStorage.setItem('wm-flow', JSON.stringify({
+          role: brief.role, website: brief.website,
+          who: company.who, logo: company.logo, based: company.based || '',
+          screens: kept
+        }));
+      } catch (e) {}
+    }
+
+    // the board's address, from the one place that decides it
+    function board_addr(who) {
+      return String(who || '').toLowerCase().replace(/[^a-z0-9]/g, '') +
+             '.mira.jobs';
+    }
 
     // the account screen's one action, defined where a reopen can find it
     function open_account() {
@@ -3817,8 +3853,9 @@
       flow.classList.toggle('is-found', !on);
       face.innerHTML = on ? kept[i] : '';
       // re-injected HTML has no listeners of its own
-      var back = face.querySelector('.rec-ready-go');
-      if (back) back.addEventListener('click', open_account);
+      face.querySelectorAll('[data-login]').forEach(function (b) {
+        b.addEventListener('click', open_account);
+      });
       var chips = flow.querySelectorAll('.rec-done-card');
       for (var k = 0; k < chips.length; k++) {
         chips[k].setAttribute('aria-expanded',
@@ -3841,7 +3878,7 @@
     }
 
     // what a finished step leaves behind, under that step
-    function put_mini(i, label, logo, html) {
+    function put_mini(i, label, sub, logo, html) {
       kept[i] = html;
       var step = flow.querySelectorAll('.rec-step')[i];
       if (!step) return;
@@ -3857,7 +3894,9 @@
           '<span class="rec-done-mark">' +
             (logo ? '<img src="' + esc(logo) + '" alt="">'
                   : esc(String(label || '?').charAt(0))) +
-          '</span><b>' + esc(label) + '</b>' +
+          '</span>' +
+          '<span class="rec-done-text"><b>' + esc(label) + '</b>' +
+            (sub ? '<i>' + esc(sub) + '</i>' : '') + '</span>' +
           '<svg class="rec-done-go" viewBox="0 0 24 24" fill="none" ' +
             'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" ' +
             'stroke-linejoin="round" aria-hidden="true">' +
@@ -3983,8 +4022,7 @@
         step_busy(2);
 
         var title = (brief.role || '').split(',')[0].trim();
-        var addr = found.who.toLowerCase().replace(/[^a-z0-9]/g, '') +
-                   '.mira.jobs';
+        var addr = board_addr(found.who);
         var jobs = [
           'naming your workspace ' + found.who,
           'attaching ' + addr,
@@ -4031,19 +4069,29 @@
                 'applications the day they land.</p>' +
               '<div class="rec-found-card">' +
                 '<ul class="rec-ready">' +
-                  '<li><i>Workspace</i><b>' + esc(found.who) + '</b></li>' +
+                  '<li><i>Workspace</i><span class="rec-ready-who">' +
+                    '<span class="rec-done-mark">' +
+                      (found.logo
+                        ? '<img src="' + esc(found.logo) + '" alt="">'
+                        : esc(String(found.who || '?').charAt(0))) +
+                    '</span><b>' + esc(found.who) + '</b></span></li>' +
                   '<li><i>Job board</i><b>' + esc(addr) + '</b></li>' +
                   (title
                     ? '<li><i>First role</i><b>' + esc(title) + '</b></li>'
                     : '') +
                 '</ul>' +
-                '<button type="button" class="rec-flow-next rec-ready-go">' +
-                  'Open your account</button>' +
+                '<button type="button" class="rec-flow-next rec-ready-go" ' +
+                  'data-login="1">Open your account</button>' +
+                '<p class="rec-ready-in">Already with Mira? ' +
+                  '<button type="button" class="rec-ready-signin" ' +
+                    'data-login="1">Sign in</button></p>' +
               '</div>' +
             '</div>';
           kept[2] = card.innerHTML;
-          var go = card.querySelector('.rec-ready-go');
-          if (go) go.addEventListener('click', open_account);
+          remember();
+          card.querySelectorAll('[data-login]').forEach(function (b) {
+            b.addEventListener('click', open_account);
+          });
         }
 
         panel();
@@ -4114,8 +4162,7 @@
                   '</span>' +
                   '<span class="rec-flow-found-say">' +
                     '<b>' + esc(found.who) + ' careers</b>' +
-                    '<i>' + esc(found.who.toLowerCase().replace(/[^a-z0-9]/g,
-                      '')) + '.mira.jobs</i></span>' +
+                    '<i>' + esc(board_addr(found.who)) + '</i></span>' +
                 '</div>' +
                 (title
                   ? '<div class="rec-board-role">' +
@@ -4130,7 +4177,9 @@
             if (!flow || flow.hidden) return;
             flow.classList.add('is-found');
             open_i = null;
-            put_mini(1, 'Job board', found.logo, card.innerHTML);
+            put_mini(1, 'Job board', board_addr(found.who),
+                     found.logo, card.innerHTML);
+            remember();
             card.innerHTML = '';
             step_busy(2);
             window.setTimeout(account, 700);
@@ -4293,22 +4342,16 @@
           window.setTimeout(function () {
             if (!flow || flow.hidden) return;
             found = { who: who, logo: logo, based: vals.Based || '' };
+            company = found;
             flow.classList.add('is-found');
             open_i = null;
-            put_mini(0, who, logo, card.innerHTML);
+            put_mini(0, who, brief.website, logo, card.innerHTML);
+            remember();
             card.innerHTML = '';
             step_busy(1);          // no dead "2" in the gap
             window.setTimeout(board, 700);
           }, 1600);
 
-          window.setTimeout(function () {
-            try {
-              window.sessionStorage.setItem('wm-flow', JSON.stringify({
-                role: brief.role, website: brief.website,
-                who: who, logo: logo, html: card.innerHTML
-              }));
-            } catch (e) {}
-          }, 0);
         }
 
         // part one: who. then two real fetches, each behind its own line.
@@ -4552,7 +4595,8 @@
         var hold = 0;
         var WD = 'https://www.wikidata.org/w/api.php?origin=*&format=json&';
 
-        function shut() { sug.hidden = true; sug.innerHTML = ''; }
+        // taking a turn invalidates anything already on its way back
+        function shut() { seq++; sug.hidden = true; sug.innerHTML = ''; }
 
         function offer(rows) {
           sug.innerHTML = rows.slice(0, 4).map(function (r) {
@@ -4576,7 +4620,7 @@
         // later one, so every search carries its turn
         function search(q) {
           var mine = ++seq;
-          window.fetch(WD + 'action=wbsearchentities&type=item&limit=6' +
+          window.fetch(WD + 'action=wbsearchentities&type=item&limit=5' +
                        '&language=en&search=' + encodeURIComponent(q))
             .then(function (r) { return r.json(); })
             .then(function (d) {
@@ -4597,10 +4641,17 @@
                     var c = ent.claims || {};
                     var w = c.P856 && c.P856[0].mainsnak.datavalue;
                     if (!w) return;          // no domain, nothing to offer
+                    // a country has a website too: ask for something only a
+                    // company carries
+                    if (!(c.P452 || c.P2088 || c.P4264)) return;
                     var host = String(w.value)
                       .replace(/^https?:\/\//i, '').replace(/^www\./i, '')
                       .replace(/[\/?#].*$/, '').toLowerCase();
                     if (!host) return;
+                    // two names for one domain is one suggestion
+                    for (var k = 0; k < rows.length; k++) {
+                      if (rows[k].host === host) return;
+                    }
                     rows.push({
                       host: host,
                       name: (ent.labels && ent.labels.en &&
@@ -4620,7 +4671,7 @@
           window.clearTimeout(hold);
           // a dot means they are typing the domain itself
           if (q.length < 3 || q.indexOf('.') > -1) { shut(); return; }
-          hold = window.setTimeout(function () { search(q); }, 320);
+          hold = window.setTimeout(function () { search(q); }, 200);
         });
         input.addEventListener('keydown', function (e) {
           if (e.key === 'Escape') shut();
@@ -4677,14 +4728,16 @@
 
     // a reload should not cost someone the lookup they just waited for
     (function () {
-      var kept;
-      try { kept = window.sessionStorage.getItem('wm-flow'); } catch (e) { return; }
-      if (!kept) return;
+      // not `kept`: that name holds the map of screens one scope out
+      var raw;
+      try { raw = window.sessionStorage.getItem('wm-flow'); } catch (e) { return; }
+      if (!raw) return;
       var was;
-      try { was = JSON.parse(kept); } catch (e) { return; }
-      // a record from a build that did not keep the screen cannot be
-      // reopened, so it is not worth restoring
-      if (!was || !was.who || !was.html) {
+      try { was = JSON.parse(raw); } catch (e) { return; }
+      // a record without the screens is from an older build and would
+      // restore half a flow, so it goes rather than confuses
+      var screens = (was && was.screens) || {};
+      if (!was || !was.who || !screens[0]) {
         try { window.sessionStorage.removeItem('wm-flow'); } catch (e) {}
         return;
       }
@@ -4703,7 +4756,14 @@
       flow.querySelector('.rec-flow-bar span')
           .style.setProperty('--at', '100%');
       flow.querySelector('.rec-flow-card').innerHTML = '';
-      put_mini(0, was.who, was.logo, was.html || '');
+      company = { who: was.who, logo: was.logo, based: was.based || '' };
+      put_mini(0, was.who, was.website || '', was.logo, screens[0]);
+      var last = 0;
+      if (screens[1]) { put_mini(1, 'Job board', board_addr(was.who),
+                                 was.logo, screens[1]);
+                        last = 1; }
+      if (screens[2]) { kept[2] = screens[2]; make_step_open(2); last = 2; }
+      at_step(last, true);
     }());
   }());
 

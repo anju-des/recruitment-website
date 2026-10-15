@@ -1813,7 +1813,7 @@
     }
 
     /* the website step: skip, lookup, and what came back */
-    .rec-flow-skip { display:block; margin:18px auto 0; border:0; padding:2px;
+    .rec-flow-skip { margin:0; border:0; padding:2px 4px;
                      background:none; font:inherit; font-size:13.5px;
                      color:#8A82A8; cursor:pointer;
                      text-decoration:underline; text-underline-offset:3px; }
@@ -3593,9 +3593,9 @@
           // does not, so a multi step keeps its Continue
           (step.chipsOnly && !step.multi ? '' :
             '<button type="button" class="rec-flow-next">Continue</button>') +
-        '</div>' +
-        (step.skip ? '<button type="button" class="rec-flow-skip">' +
-          esc(step.skip) + '</button>' : '');
+          (step.skip ? '<button type="button" class="rec-flow-skip">' +
+            esc(step.skip) + '</button>' : '') +
+        '</div>';
     }
 
     function money(n, top) {

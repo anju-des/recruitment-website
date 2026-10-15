@@ -1559,6 +1559,17 @@
     .rec-done-slot { display:block; max-width:100%; }
 
     /* step two's board, built from step one */
+    /* step three: what the first two steps made, as a list */
+    .rec-ready { margin:0; padding:0; list-style:none; }
+    .rec-ready li { display:flex; align-items:baseline; gap:12px;
+                    padding:11px 0; border-top:1px solid #F1EDFA; }
+    .rec-ready li:first-child { border-top:0; padding-top:0; }
+    .rec-ready i { font-style:normal; flex:none; width:86px; font-size:11px;
+                   letter-spacing:.09em; text-transform:uppercase;
+                   color:#8A82A8; }
+    .rec-ready b { min-width:0; font-size:14.5px; font-weight:600;
+                   color:#1A1430; }
+    .rec-ready-go { width:100%; margin-top:18px; }
     .rec-board-head { display:flex; align-items:center; gap:13px; }
     .rec-board-role { margin-top:18px; padding:14px 16px; border-radius:12px;
                       background:#F6F4FD; display:flex;
@@ -1776,6 +1787,13 @@
                                background:#1A1430; }
     .rec-flow-back { background:none; color:#6F6790; padding-inline:8px; }
     .rec-flow-back:hover { color:#1A1430; }
+    /* alone on the miss screen it is the only control, so it looks like one */
+    .rec-flow-again { border:1.5px solid #DCD6EE; background:#FFFFFF;
+                      color:#4B4270; padding-inline:22px;
+                      transition:background .15s, border-color .15s,
+                                 color .15s; }
+    .rec-flow-again:hover { border-color:#BCAEF0; background:#F7F5FE;
+                            color:#1A1430; }
     /* what it has understood, read back rather than tabled */
     .rec-flow-brief { max-width:34ch; margin:0 auto clamp(20px, 2.4vw, 30px);
                       color:#1A1430; font-size:clamp(17px, 0.6vw + 13px, 22px);
@@ -3717,7 +3735,7 @@
         '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
-            ['Company details', 'Job board']
+            ['Company details', 'Job board', 'Account']
               .map(function (s, i) {
                 return '<li class="rec-step">' +
                   '<span class="rec-step-row"><i>' + (i + 1) + '</i>' +
@@ -3900,12 +3918,95 @@
       function onward() { at++; draw(); }
 
       var found = {};
+      // Step three. Nothing is fetched: it names what the first two steps
+      // already made, and ends on the one screen with something to ask.
+      function account() {
+        if (!found.who) return;
+        flow.classList.remove('is-found');
+        open_i = null;
+        step_busy(2);
+
+        var title = (brief.role || '').split(',')[0].trim();
+        var addr = found.who.toLowerCase().replace(/[^a-z0-9]/g, '') +
+                   '.mira.jobs';
+        var jobs = [
+          'naming your workspace ' + found.who,
+          'attaching ' + addr,
+          title ? 'adding ' + title : 'leaving room for your first role'
+        ];
+        var ran = [];
+        var now = 0;
+
+        function panel() {
+          card.innerHTML =
+            '<h2 class="rec-flow-q is-alone">Preparing your account</h2>' +
+            '<div class="rec-work" role="status" aria-live="polite">' +
+              '<p class="rec-work-head"><span class="rec-work-dot"></span>' +
+                'Mira is working on step ' + Math.min(now + 1, jobs.length) +
+                ' of ' + jobs.length + '</p>' +
+              ran.map(function (r) {
+                return '<p class="rec-work-line is-done"><i>\u2713</i>' +
+                  '<span>' + esc(r) + '</span></p>';
+              }).join('') +
+              (now < jobs.length
+                ? '<p class="rec-work-line is-now"><i>\u203a</i><span>' +
+                  esc(jobs[now]) + '\u2026</span><b></b></p>'
+                : '') +
+            '</div>';
+        }
+
+        function step(then) {
+          ran.push(jobs[now]);
+          now++;
+          panel();
+          window.setTimeout(then, 620);
+        }
+
+        function ready() {
+          at_step(2, true);
+          flow.querySelector('.rec-flow-bar span')
+              .style.setProperty('--at', '100%');
+          card.innerHTML =
+            '<div class="rec-found-col">' +
+              '<h2 class="rec-flow-q">Your account is ready to open</h2>' +
+              '<p class="rec-flow-hint">Everything above is set up and ' +
+                'waiting. Open the account and Mira starts reading ' +
+                'applications the day they land.</p>' +
+              '<div class="rec-found-card">' +
+                '<ul class="rec-ready">' +
+                  '<li><i>Workspace</i><b>' + esc(found.who) + '</b></li>' +
+                  '<li><i>Job board</i><b>' + esc(addr) + '</b></li>' +
+                  (title
+                    ? '<li><i>First role</i><b>' + esc(title) + '</b></li>'
+                    : '') +
+                '</ul>' +
+                '<button type="button" class="rec-flow-next rec-ready-go">' +
+                  'Open your account</button>' +
+              '</div>' +
+            '</div>';
+          var go = card.querySelector('.rec-ready-go');
+          if (go) go.addEventListener('click', function () {
+            close();
+            var login = document.querySelector('.rec-head .rec-login');
+            if (login) window.setTimeout(function () { login.click(); }, 200);
+          });
+        }
+
+        panel();
+        window.setTimeout(function () {
+          step(function () { step(function () { step(ready); }); });
+        }, 500);
+      }
+
       // Step two. It builds a board out of step one's company and the
       // role that was typed on the way in -- nothing invented, nothing
       // published, which is why the address below it is text and not a
       // link.
       function board() {
         if (!found.who) return;
+        // step one tucked itself away; step two gets the middle back
+        flow.classList.remove('is-found');
+        open_i = null;
         step_busy(1);
 
         var title = (brief.role || '').split(',')[0].trim();
@@ -3977,6 +4078,8 @@
             open_i = null;
             put_mini(1, 'Job board', found.logo, card.innerHTML);
             card.innerHTML = '';
+            step_busy(2);
+            window.setTimeout(account, 700);
           }, 2000);
         }
 
@@ -4106,8 +4209,8 @@
               ? '<p class="rec-found-about is-thin">No public record for ' +
                   'that one. Check the spelling, or try another.</p>' +
                 '<div class="rec-flow-act">' +
-                  '<button type="button" class="rec-flow-back">Try another ' +
-                    'website</button>' +
+                  '<button type="button" class="rec-flow-back rec-flow-again">' +
+                    'Try another website</button>' +
                 '</div>'
               : '') +
             '</div>' +

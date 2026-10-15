@@ -4167,29 +4167,24 @@
 
     var KEY = 'wm-company';
 
-    // seven lines, because the page has to read this back
+    // four lines: who they are and which company. The rest is looked up.
     var PROMPT = [
-      'I am briefing a role to Wisemonk\'s AI recruiter, Mira. Give it the ' +
-        'basics about my company and about me.',
+      'I am briefing a role to Wisemonk\'s AI recruiter, Mira. Tell it who I ' +
+        'am and which company I work for.',
       '',
-      'Reply with exactly these seven lines and nothing else:',
+      'Reply with exactly these four lines and nothing else:',
       '',
       'Company:',
       'Website:',
-      'About:',
-      'Size:',
-      'Based:',
       'Name:',
       'Role:',
       '',
-      'Website is the domain on its own, like example.com. About is one or ' +
-        'two sentences on what the company does and who it sells to. Size is ' +
-        'roughly how many people work there. Based is where the team works ' +
-        'from. Name and Role are mine.',
+      'Website is the company domain on its own, like example.com. Name and ' +
+        'Role are mine.',
       '',
-      'Use what you already know. If you are unsure of the website, look it ' +
-        'up rather than guessing. Leave a value empty if you do not know it ' +
-        'and cannot find it.',
+      'Use what you already know, and leave a value empty if you do not know ' +
+        'it. Do not describe the company \u2014 the name and the domain are ' +
+        'all that is wanted.',
       '',
       'No preamble, no extra lines, no questions.'
     ].join('\n');

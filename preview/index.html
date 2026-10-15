@@ -179,6 +179,19 @@
     /* ---- announcement chip ------------------------------------------- */
     /* a white card holding the news, with the action as a filled pill inside
        it rather than a link sitting beside a divider */
+    /* the pill turns over; the words change while it is edge-on */
+    .rec-chip-flip { display:inline-block; margin-bottom:32px; }
+    .rec-chip-flip > .rec-chip { margin-bottom:0; }
+    .rec-chip-flip.is-turn { animation:rec-chip-turn .62s ease both; }
+    @keyframes rec-chip-turn {
+      0%   { transform:perspective(620px) rotateX(0deg); }
+      49%  { transform:perspective(620px) rotateX(90deg); }
+      51%  { transform:perspective(620px) rotateX(-90deg); }
+      100% { transform:perspective(620px) rotateX(0deg); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-chip-flip.is-turn { animation:none; }
+    }
     .rec-chip { display:inline-flex; align-items:center; gap:14px; margin-bottom:32px;
                 padding:8px 16px; border-radius:6px; background:var(--neutral-0);
                 box-shadow:0 2px 12px rgba(18,22,32,.10);
@@ -1981,13 +1994,15 @@
         <!-- HERO -->
         <section class="rec-hero">
           <div class="rec-hero-inner">
+          <span class="rec-chip-flip">
           <a class="rec-chip" href="#mira">
             <span class="rec-chip-dot" aria-hidden="true"></span>
-            Mira, your AI recruiting agent
+            <span class="rec-chip-text">Mira, your AI recruiting agent</span>
             <span class="rec-chip-more">Read more<svg viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true"><path d="M7.5 16.5L16.5 7.5"/><path d="M9.4 7.5h7.1v7.1"/></svg></span>
           </a>
+          </span>
           <h1>Hire the right talent, anywhere in the
               <span class="rec-grad">world</span><span class="rec-cursor" aria-hidden="true"><svg viewBox="0 0 20 22"><path d="M2 1.6 L2 19.6 L7.2 14.8 L16.2 13.2 Z"/></svg><b>Mira</b></span></h1>
           <p class="rec-hero-sub">Mira AI ranks every application against your scorecard as
@@ -4135,6 +4150,36 @@
       window.clearTimeout(back);
       back = window.setTimeout(function () { say.innerHTML = resting; }, 12000);
     });
+  }());
+
+  // The hero chip carries two messages. The words change at the halfway
+  // frame, where the pill is edge-on, so the width difference is never seen.
+  (function () {
+    var flip = document.querySelector('.rec-chip-flip');
+    var text = flip && flip.querySelector('.rec-chip-text');
+    if (!flip || !text) return;
+
+    var SAYS = ['Mira, your AI recruiting agent', 'Pay only on a hire'];
+    var at = 0;
+    var held = false;
+    var still = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    function turn() {
+      if (held) return;
+      at = (at + 1) % SAYS.length;
+      if (still.matches) { text.textContent = SAYS[at]; return; }
+      flip.classList.add('is-turn');
+      window.setTimeout(function () { text.textContent = SAYS[at]; }, 300);
+      window.setTimeout(function () { flip.classList.remove('is-turn'); }, 640);
+    }
+
+    window.setInterval(turn, 5200);
+
+    // leave it alone while someone is reading it or tabbing through it
+    flip.addEventListener('mouseenter', function () { held = true; });
+    flip.addEventListener('mouseleave', function () { held = false; });
+    flip.addEventListener('focusin', function () { held = true; });
+    flip.addEventListener('focusout', function () { held = false; });
   }());
 </script>
 <style>

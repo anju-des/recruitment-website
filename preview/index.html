@@ -1858,8 +1858,10 @@
                   background:linear-gradient(135deg, #6B4BE8, #8B5CF6);
                   transition:filter .15s; }
     .rec-cxp-do:hover { filter:brightness(0.94); }
-    .rec-cxp-note { margin:14px 0 0; font-size:13px; line-height:1.55;
-                    color:#8A82A8; text-align:center; }
+    .rec-cxp-copy { display:block; width:100%; margin-top:9px; padding:4px;
+                    border:0; background:none; cursor:pointer; font:inherit;
+                    font-size:13px; color:#8A82A8; text-align:center; }
+    .rec-cxp-copy:hover { color:#5A4BD8; }
     @media (prefers-reduced-motion: reduce) {
       .rec-cx { transition:none; }
       .rec-cx:hover { transform:none; }
@@ -4142,6 +4144,27 @@
   // is for, not how it is built -- there is nothing behind it yet, and a
   // page that names a mechanism is a page that has to be right about one.
   (function () {
+    // what we put in their box. "Do not guess" is load-bearing: this text
+    // comes back as a hiring profile and gets read as fact.
+    var PROMPT = [
+      'I am briefing a role to Wisemonk\'s AI recruiter, Mira, and it works ' +
+        'better when it knows how we hire.',
+      '',
+      'Write me a short hiring profile I can paste in \u2014 around 150 words, ' +
+        'plain prose, no headings or bullet points. Cover what you already ' +
+        'know about:',
+      '',
+      '- the company: what we do, roughly how big we are, where the team works',
+      '- the team this hire would join, and the stack they would work in',
+      '- how we hire: the levels we use, what we hold the bar on, what the ' +
+        'last search got wrong',
+      '- me: my name and what I do here',
+      '',
+      'Do not guess. If you do not know something, leave it out and ask me ' +
+        'instead.'
+    ].join('\n');
+    var ASK_URL = 'https://claude.ai/new?q=' + encodeURIComponent(PROMPT);
+
     var opener = document.querySelector('.rec-cx');
     if (!opener) return;
     var panel = null;
@@ -4155,6 +4178,32 @@
       }, 160);
     }
 
+    function step_two() {
+      var card = panel.querySelector('.rec-cxp-card');
+      card.innerHTML =
+        '<div class="rec-cxp-top">' + '<svg class="rec-cx-mark" viewBox="0 0 24 24" fill="currentColor" ' +
+          'aria-hidden="true"><path d="M12 3c.6 4.2 1.8 5.4 6 6-4.2.6-5.4 ' +
+          '1.8-6 6-.6-4.2-1.8-5.4-6-6 4.2-.6 5.4-1.8 6-6z"/></svg>' +
+          '<button type="button" class="rec-cxp-x" aria-label="Close">' +
+            '\u00d7</button>' +
+        '</div>' +
+        '<h2>Now bring it back</h2>' +
+        '<p>Claude is writing your hiring profile in the tab that just ' +
+          'opened. Send the message, then paste what comes back into the box ' +
+          'here, along with the role.</p>' +
+        '<p>Nothing was sent anywhere. It goes from your Claude to your ' +
+          'clipboard to this page, and no further until you post the role.</p>' +
+        '<button type="button" class="rec-cxp-do rec-cxp-back">Back to the ' +
+          'brief</button>';
+      card.querySelector('.rec-cxp-x').addEventListener('click', close);
+      card.querySelector('.rec-cxp-back').addEventListener('click', function () {
+        close();
+        var field = document.querySelector('.rec-compose-input');
+        if (field) window.setTimeout(function () { field.focus(); }, 200);
+      });
+      card.focus();
+    }
+
     function build() {
       panel = document.createElement('div');
       panel.className = 'rec-cxp';
@@ -4162,6 +4211,21 @@
       panel.setAttribute('role', 'dialog');
       panel.setAttribute('aria-modal', 'true');
       panel.setAttribute('aria-label', 'Connect your Claude');
+      document.body.appendChild(panel);
+
+      panel.addEventListener('click', function (e) {
+        if (e.target === panel) close();      // the ground behind the card
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && panel && !panel.hidden) close();
+      });
+      // the page behind is scroll-driven and should stay where it was
+      panel.addEventListener('wheel', function (e) { e.preventDefault(); },
+                             { passive: false });
+    }
+
+    // the first screen, rebuilt on every open
+    function render_one() {
       panel.innerHTML =
         '<div class="rec-cxp-card" tabindex="-1">' +
           '<div class="rec-cxp-top">' +
@@ -4187,32 +4251,46 @@
             '<li><b>A shortlist that fits.</b> Every application is ranked ' +
               'against your context, not a title match.</li>' +
           '</ul>' +
-          '<button type="button" class="rec-cxp-do">Connect your Claude</button>' +
-          '<p class="rec-cxp-note">Connecting is tied to your workspace, so ' +
-            'your account comes first.</p>' +
+          '<button type="button" class="rec-cxp-do">Open it in Claude</button>' +
+          '<button type="button" class="rec-cxp-copy">or copy the prompt' +
+            '</button>' +
         '</div>';
-      document.body.appendChild(panel);
-
       panel.querySelector('.rec-cxp-x').addEventListener('click', close);
       panel.querySelector('.rec-cxp-do').addEventListener('click', function () {
-        close();
-        // connecting is account-shaped, so it starts where accounts start
-        var login = document.querySelector('.rec-head .rec-login');
-        if (login) window.setTimeout(function () { login.click(); }, 180);
+        window.open(ASK_URL, '_blank', 'noopener');
+        step_two();
       });
-      panel.addEventListener('click', function (e) {
-        if (e.target === panel) close();      // the ground behind the card
+
+      var copy = panel.querySelector('.rec-cxp-copy');
+      copy.addEventListener('click', function () {
+        var done = function () { copy.textContent = 'Copied \u2014 paste it ' +
+                                 'into Claude'; };
+        // the asynchronous one wants the document focused and throws when it
+        // is not; the old one does not care
+        var old_way = function () {
+          var box = document.createElement('textarea');
+          box.value = PROMPT;
+          box.setAttribute('readonly', '');
+          box.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+          document.body.appendChild(box);
+          box.select();
+          var won = false;
+          try { won = document.execCommand('copy'); } catch (e) {}
+          box.remove();
+          copy.textContent = won ? 'Copied \u2014 paste it into Claude'
+                                 : 'Could not copy here';
+        };
+        try {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(PROMPT).then(done, old_way);
+          } else { old_way(); }
+        } catch (e) { old_way(); }
       });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && panel && !panel.hidden) close();
-      });
-      // the page behind is scroll-driven and should stay where it was
-      panel.addEventListener('wheel', function (e) { e.preventDefault(); },
-                             { passive: false });
     }
 
     opener.addEventListener('click', function () {
       if (!panel) build();
+      render_one();
       panel.classList.remove('is-out');
       panel.hidden = false;
       panel.querySelector('.rec-cxp-card').focus();

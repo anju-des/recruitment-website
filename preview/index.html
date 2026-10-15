@@ -3481,10 +3481,6 @@
             .replace(/^https?:\/\//i, '').replace(/^www\./i, '')
             .replace(/\/+$/, '');
         } },
-      { key: 'location',
-        q: 'Where will they work from?',
-        chipsOnly: true,
-        chips: ['Remote', 'Hybrid', 'On-site'] },
       { key: 'salary',
         q: 'What is the budget?',
         range: { min: 20, max: 300, step: 5 } },
@@ -3495,8 +3491,7 @@
         chips: ['Python', 'Django', 'Go', 'Node.js', 'TypeScript', 'React', 'PostgreSQL', 'AWS', 'Kubernetes', 'System design', 'Figma', 'Design systems', 'User research', 'Product strategy', 'SQL', 'Machine learning'] }
     ];
 
-    var brief = { role: '', website: '', location: '', salary: '',
-                  skills: [] };
+    var brief = { role: '', website: '', salary: '', skills: [] };
     var band = { from: 90, to: 120 };   // thousands a year
     var at = 0;
     var flow = null;
@@ -3537,7 +3532,6 @@
     function open() {
       brief.role = field.value.trim();
       brief.website = '';
-      brief.location = '';
       brief.salary = '';
       brief.skills = [];
       at = 0;
@@ -3635,7 +3629,6 @@
     function review() {
       var facts = [
         ['Website', brief.website],
-        ['Where', brief.location],
         ['Budget', brief.salary],
         ['Skills', brief.skills.join(', ')]
       ].map(function (f) {
@@ -3760,7 +3753,7 @@
       function found(site, logo) {
         var who = named(site);
         card.innerHTML =
-          '<h2 class="rec-flow-q is-alone">Is this you?</h2>' +
+          '<h2 class="rec-flow-q is-alone">Found your company</h2>' +
           '<div class="rec-flow-found">' +
             '<span class="rec-flow-found-mark">' +
               (logo ? '<img src="' + esc(logo) + '" alt="">'
@@ -3771,7 +3764,7 @@
           '</div>' +
           '<div class="rec-flow-act">' +
             '<button type="button" class="rec-flow-back">Change</button>' +
-            '<button type="button" class="rec-flow-next">Yes, continue' +
+            '<button type="button" class="rec-flow-next">Continue' +
               '</button>' +
           '</div>';
         card.querySelector('.rec-flow-next')

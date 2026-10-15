@@ -1553,6 +1553,16 @@
     .rec-step.is-on { color:#1A1430; }
     .rec-step.is-on i { background:#7C5CF6; color:#FFFFFF; }
     .rec-step.is-on b { font-weight:600; }
+    .rec-step.is-busy i { background:#7C5CF6; color:transparent;
+                          position:relative; }
+    .rec-step.is-busy i::after { content:""; position:absolute; inset:3px;
+                                 border-radius:50%;
+                                 border:2px solid rgba(255,255,255,.4);
+                                 border-top-color:#FFFFFF;
+                                 animation:rec-flow-turn .7s linear infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-step.is-busy i::after { animation:none; }
+    }
     .rec-step.is-done { color:#6B6392; }
     .rec-step.is-done i { background:#EDE8FD; color:#5A4BD8; }
     @media (max-width:760px) {
@@ -3651,11 +3661,19 @@
       var all = flow.querySelectorAll('.rec-step');
       for (var k = 0; k < all.length; k++) {
         var over = k < i || (k === i && done);
+        all[k].classList.remove('is-busy');
         all[k].classList.toggle('is-on', k === i && !done);
         all[k].classList.toggle('is-done', over);
         var mark = all[k].querySelector('i');
         mark.textContent = over ? '\u2713' : String(k + 1);
       }
+    }
+
+    // the step is working, not merely current
+    function step_busy(i) {
+      at_step(i, false);
+      var one = flow.querySelectorAll('.rec-step')[i];
+      if (one) one.classList.add('is-busy');
     }
 
     function open() {
@@ -3762,6 +3780,7 @@
       }
 
       function look() {
+        step_busy(0);
         var site = brief.website;
         var who = named(site);
         var API = 'https://www.wikidata.org/w/api.php?origin=*&format=json&';

@@ -1533,7 +1533,6 @@
                      justify-content:space-between; gap:16px;
                      padding:clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 40px); }
     .rec-flow-head img { display:block; width:92px; height:auto; }
-    .rec-flow-step { font-size:12.5px; color:#8A82A8; letter-spacing:.01em; }
     .rec-flow-x { width:36px; height:36px; border-radius:50%; border:0;
                   display:grid; place-items:center; cursor:pointer;
                   background:#F2EFFB; color:#4E4470; font-size:19px;
@@ -3440,6 +3439,15 @@
     if (!form || !field) return;
 
     var STEPS = [
+      { key: 'website',
+        q: 'What is your company website?',
+        placeholder: 'yourcompany.com',
+        looks: /[a-z0-9][a-z0-9-]*\.[a-z]{2,}/i,
+        tidy: function (v) {
+          return String(v).trim()
+            .replace(/^https?:\/\//i, '').replace(/^www\./i, '')
+            .replace(/\/+$/, '');
+        } },
       { key: 'location',
         q: 'Where will they work from?',
         chipsOnly: true,
@@ -3454,7 +3462,8 @@
         chips: ['Python', 'Django', 'Go', 'Node.js', 'TypeScript', 'React', 'PostgreSQL', 'AWS', 'Kubernetes', 'System design', 'Figma', 'Design systems', 'User research', 'Product strategy', 'SQL', 'Machine learning'] }
     ];
 
-    var brief = { role: '', location: '', salary: '', skills: [] };
+    var brief = { role: '', website: '', location: '', salary: '',
+                  skills: [] };
     var band = { from: 90, to: 120 };   // thousands a year
     var at = 0;
     var flow = null;
@@ -3475,7 +3484,6 @@
       flow.innerHTML =
         '<div class="rec-flow-head">' +
           '<img src="mira-logo.svg" width="1152" height="365" alt="Mira">' +
-          '<span class="rec-flow-step"></span>' +
           '<button type="button" class="rec-flow-x" aria-label="Close">&#215;</button>' +
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
@@ -3495,6 +3503,7 @@
 
     function open() {
       brief.role = field.value.trim();
+      brief.website = '';
       brief.location = '';
       brief.salary = '';
       brief.skills = [];
@@ -3518,9 +3527,6 @@
     function draw() {
       var card = flow.querySelector('.rec-flow-card');
       var total = STEPS.length + 1;
-      // the gate is not one of the questions, so it takes no number
-      flow.querySelector('.rec-flow-step').textContent =
-        at > STEPS.length ? '' : 'Step ' + (at + 1) + ' of ' + total;
       flow.querySelector('.rec-flow-bar span').style.setProperty(
         '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
       card.innerHTML = at < STEPS.length ? ask(STEPS[at])
@@ -3593,6 +3599,7 @@
 
     function review() {
       var facts = [
+        ['Website', brief.website],
         ['Where', brief.location],
         ['Budget', brief.salary],
         ['Skills', brief.skills.join(', ')]
@@ -3631,7 +3638,6 @@
 
     function done() {
       flow.querySelector('.rec-flow-bar span').style.setProperty('--at', '100%');
-      flow.querySelector('.rec-flow-step').textContent = '';
       flow.querySelector('.rec-flow-card').innerHTML =
         '<div class="rec-flow-done">' +
           '<span class="rec-flow-tick"><svg viewBox="0 0 24 24" fill="none" ' +
@@ -3667,7 +3673,9 @@
         if (!next || at >= STEPS.length) return;
         var has = step.range ? true
                 : (step.multi || step.tags) ? brief.skills.length > 0
-                : (input ? input.value.trim().length > 0
+                : (input ? (step.looks
+                              ? step.looks.test(input.value.trim())
+                              : input.value.trim().length > 0)
                          : !!brief[step.key]);
         next.disabled = !has;
       }
@@ -3680,7 +3688,10 @@
         if (at < STEPS.length) {
           if (step.range) brief[step.key] = said(step.range);
           else if (step.multi) { /* already in brief.skills */ }
-          else if (!step.tags && input) brief[step.key] = input.value.trim();
+          else if (!step.tags && input) {
+            brief[step.key] = step.tidy ? step.tidy(input.value)
+                                        : input.value.trim();
+          }
         }
         if (at > STEPS.length) { done(); return; }
         onward();

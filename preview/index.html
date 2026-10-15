@@ -1823,10 +1823,15 @@
                           border:2.5px solid #E7E2F6; border-top-color:#7C5CF6;
                           animation:rec-flow-turn .8s linear infinite; }
     @keyframes rec-flow-turn { to { transform:rotate(360deg); } }
-    .rec-flow-found { display:inline-flex; align-items:center; gap:13px;
-                      margin-top:24px; padding:14px 20px 14px 14px;
+    .rec-flow-found { display:flex; align-items:center; gap:13px;
+                      width:min(420px, 100%); box-sizing:border-box;
+                      margin:24px auto 0; padding:14px 18px 14px 14px;
                       border:1px solid #E7E2F6; border-radius:16px;
                       background:#FFFFFF; text-align:left; }
+    .rec-flow-found-badge { margin-left:auto; flex:none; padding:5px 11px;
+                            border-radius:100px; background:#F1EDFE;
+                            color:#5A4BD8; font-size:11px; font-weight:700;
+                            letter-spacing:.07em; text-transform:uppercase; }
     .rec-flow-found-mark { flex:none; width:44px; height:44px;
                            border-radius:12px; overflow:hidden; display:grid;
                            place-items:center; color:#FFFFFF; font-size:19px;
@@ -3755,6 +3760,7 @@
               '</span>' +
               '<span class="rec-flow-found-say"><b>' + esc(who) + '</b>' +
                 '<i>' + esc(site) + '</i></span>' +
+              '<span class="rec-flow-found-badge">Found</span>' +
             '</div>' +
             (got.about
               ? '<p class="rec-found-about">' + esc(got.about) + '</p>' : '') +
@@ -3793,7 +3799,7 @@
           screen();
           window.setTimeout(function () {
             busy = article ? 'reading about ' + who
-                           : 'looking for a write-up';
+                           : 'reading ' + site;
             screen();
             window.setTimeout(read_about, 520);
           }, 620);
@@ -3802,16 +3808,32 @@
         function read_about() {
           function then(text) {
             got.about = text || brief_line;
-            if (!refs.length && !base.length) { rest(); return; }
             busy = 'reading the rest of the record';
             screen();
             window.setTimeout(read_more, 520);
           }
-          if (!article) { then(''); return; }
-          ask_json('https://en.wikipedia.org/api/rest_v1/page/summary/' +
-                   encodeURIComponent(article))
-            .then(function (d) { then((d && d.extract) || ''); },
-                  function () { then(''); });
+          if (article) {
+            ask_json('https://en.wikipedia.org/api/rest_v1/page/summary/' +
+                     encodeURIComponent(article))
+              .then(function (d) { then((d && d.extract) || ''); },
+                    function () { then(''); });
+            return;
+          }
+          // no article: read what the company says about itself
+          var answered = false;
+          function once(text) {
+            if (answered) return;
+            answered = true;
+            then(text);
+          }
+          window.setTimeout(function () { once(''); }, 6000);
+          window.fetch('https://r.jina.ai/https://' + site,
+                       { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              var dat = (d && d.data) || d || {};
+              once(String(dat.description || '').trim());
+            }, function () { once(''); });
         }
 
         function lay_out() {

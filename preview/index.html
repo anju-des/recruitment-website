@@ -1537,7 +1537,9 @@
     .rec-steps { flex:none; display:flex; align-items:center; width:100%;
                  box-sizing:border-box; margin:0; list-style:none;
                  padding:15px clamp(18px, 3vw, 40px);
-                 border-bottom:1px solid #F2EEFB; }
+                 /* the sand is positioned and this row was not, so without
+                    a layer of its own the gradient paints over the text */
+                 position:relative; z-index:1; }
     .rec-step { display:flex; align-items:center; gap:8px; flex:none;
                 color:#A49CC0; font-size:12.5px; }
     /* the rule takes the slack, so the labels keep their own size */
@@ -1913,9 +1915,21 @@
     .rec-flow.is-found .rec-flow-body { align-items:flex-start;
                                         justify-content:flex-start; }
     .rec-flow.is-found .rec-flow-card { width:min(470px, 100%); }
-    .rec-found-card { padding:20px 22px 22px; border-radius:18px;
-                      border:1px solid #ECE7F9; background:#FFFFFF;
-                      box-shadow:0 2px 18px rgba(18,22,32,.05); }
+    /* content first; the card draws itself once the facts have landed */
+    .rec-found-card { padding:0; border-radius:18px;
+                      border:1px solid transparent; background:transparent;
+                      box-shadow:0 2px 18px rgba(18,22,32,0);
+                      transition:padding .34s ease, background .34s ease,
+                                 border-color .34s ease, box-shadow .34s ease; }
+    .rec-flow.is-found .rec-found-card { padding:20px 22px 22px;
+                                         border-color:#ECE7F9;
+                                         background:#FFFFFF;
+                                         box-shadow:0 2px 18px
+                                                    rgba(18,22,32,.05); }
+    .rec-flow.is-found .rec-found-col { width:100%; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-found-card { transition:none; }
+    }
     /* flattened: a card inside a card reads as two objects */
     .rec-found-card .rec-flow-found { width:100%; margin:0; padding:0;
                                       border:0; background:none; }
@@ -3634,6 +3648,7 @@
           '<button type="button" class="rec-flow-x" aria-label="Close">&#215;</button>' +
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
+        '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<ol class="rec-steps">' +
           ['Company details', 'Job board', 'Account']
             .map(function (s, i) {
@@ -3641,7 +3656,6 @@
                 '<b>' + s + '</b></li>';
             }).join('') +
         '</ol>' +
-        '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>';
       document.body.appendChild(flow);
 
@@ -3901,6 +3915,10 @@
           busy = '';
           finished = true;
           at_step(0, true);
+          // let it be read at full size before it becomes a card
+          window.setTimeout(function () {
+            if (flow && !flow.hidden) flow.classList.add('is-found');
+          }, 1600);
           window.setTimeout(function () {
             try {
               window.sessionStorage.setItem('wm-flow', JSON.stringify({
@@ -3916,7 +3934,6 @@
 
         // part one: who. then two real fetches, each behind its own line.
         function stage() {
-          flow.classList.add('is-found');
           screen();
           window.setTimeout(function () {
             busy = article ? 'reading about ' + who

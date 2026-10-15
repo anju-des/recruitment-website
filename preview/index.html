@@ -1568,7 +1568,46 @@
     .rec-flow-in::placeholder { color:#A49CC0; }
     .rec-flow-in:focus { border-color:#7C5CF6;
                          box-shadow:0 0 0 3px rgba(124,92,246,.16); }
-    .rec-flow-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    /* a band you drag: two range inputs stacked, each contributing one end */
+    .rec-flow-range { margin-top:4px; }
+    .rec-flow-range-val { display:block; color:#1A1430; font-size:30px;
+                          font-weight:600; letter-spacing:-0.02em;
+                          font-variant-numeric:tabular-nums;
+                          margin-bottom:clamp(18px, 2vw, 26px); }
+    .rec-flow-range-val small { font-size:17px; font-weight:500;
+                                color:#6F6790; margin-left:6px; }
+    .rec-flow-track { position:relative; height:26px; }
+    .rec-flow-track::before { content:""; position:absolute; left:0; right:0;
+                              top:11px; height:4px; border-radius:100px;
+                              background:#E7E2F6; }
+    .rec-flow-fill { position:absolute; top:11px; height:4px;
+                     border-radius:100px; background:#7C5CF6;
+                     left:var(--from, 0%); right:var(--to, 0%); }
+    /* the inputs are invisible rails; only the thumbs answer the pointer */
+    .rec-flow-track input { position:absolute; left:0; top:0; width:100%;
+                            height:26px; margin:0; background:none;
+                            pointer-events:none; -webkit-appearance:none;
+                            appearance:none; }
+    .rec-flow-track input:focus { outline:none; }
+    .rec-flow-track input::-webkit-slider-thumb {
+      -webkit-appearance:none; appearance:none; pointer-events:auto;
+      width:22px; height:22px; border-radius:50%; cursor:grab;
+      background:#FFFFFF; border:2px solid #7C5CF6;
+      box-shadow:0 2px 6px rgba(58,38,116,.22); }
+    .rec-flow-track input::-moz-range-thumb {
+      pointer-events:auto; width:22px; height:22px; border-radius:50%;
+      cursor:grab; background:#FFFFFF; border:2px solid #7C5CF6;
+      box-shadow:0 2px 6px rgba(58,38,116,.22); }
+    .rec-flow-track input:active::-webkit-slider-thumb { cursor:grabbing; }
+    .rec-flow-track input:focus-visible::-webkit-slider-thumb {
+      box-shadow:0 0 0 4px rgba(124,92,246,.28); }
+    .rec-flow-track input:focus-visible::-moz-range-thumb {
+      box-shadow:0 0 0 4px rgba(124,92,246,.28); }
+    .rec-flow-ends { display:flex; justify-content:space-between;
+                     margin-top:10px; color:#8A82A8; font-size:12.5px;
+                     font-variant-numeric:tabular-nums; }
+    .rec-flow-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
+                      max-width:640px; }
     .rec-flow-chips:first-of-type { margin-top:0; }
     .rec-flow-chip:focus-visible { outline:2px solid #7C5CF6; outline-offset:2px; }
     .rec-flow-chip { border:1px solid #DCD6EE; background:#FFFFFF;
@@ -3174,16 +3213,18 @@
         chips: ['Remote', 'Hybrid', 'On-site'] },
       { key: 'salary',
         q: 'What is the budget?',
-        hint: 'A range is fine. Mira keeps every offer inside the band you set.',
-        placeholder: 'e.g. 18-24 LPA, or $90k-$120k' },
+        hint: 'Drag the band. Mira keeps every offer inside it.',
+        range: { min: 4, max: 80, step: 1 } },
       { key: 'skills',
         q: 'What must they be good at?',
-        hint: 'Add a few. Every application is scored against these as it arrives.',
-        placeholder: 'Type a skill and press Enter',
-        tags: true }
+        hint: 'Pick as many as apply. Every application is scored against them.',
+        chipsOnly: true,
+        multi: true,
+        chips: ['Python', 'Django', 'Go', 'Node.js', 'TypeScript', 'React', 'PostgreSQL', 'AWS', 'Kubernetes', 'System design', 'Figma', 'Design systems', 'User research', 'Product strategy', 'SQL', 'Machine learning'] }
     ];
 
     var brief = { role: '', location: '', salary: '', skills: [] };
+    var band = { from: 18, to: 24 };
     var at = 0;
     var flow = null;
 
@@ -3258,13 +3299,15 @@
       var val = step.tags ? '' : brief[step.key];
       return '<h2 class="rec-flow-q">' + esc(step.q) + '</h2>' +
         '<p class="rec-flow-hint">' + esc(step.hint) + '</p>' +
-        (step.chipsOnly ? '' :
+        (step.range ? rail(step.range) : step.chipsOnly ? '' :
           '<input class="rec-flow-in" type="text" value="' + esc(val) + '"' +
           ' placeholder="' + esc(step.placeholder) + '" aria-label="' +
           esc(step.q) + '">') +
         (step.chips ? '<div class="rec-flow-chips">' + step.chips.map(function (c) {
+          var picked = step.multi ? brief.skills.indexOf(c) > -1
+                                  : brief[step.key] === c;
           return '<button type="button" class="rec-flow-chip' +
-            (brief[step.key] === c ? ' is-on' : '') + '">' + esc(c) + '</button>';
+            (picked ? ' is-on' : '') + '">' + esc(c) + '</button>';
         }).join('') + '</div>' : '') +
         (step.tags ? '<div class="rec-flow-tags">' + brief.skills.map(function (s, i) {
           return '<span class="rec-flow-tag">' + esc(s) +
@@ -3273,10 +3316,37 @@
         }).join('') + '</div>' : '') +
         '<div class="rec-flow-act">' +
           (at > 0 ? '<button type="button" class="rec-flow-back">Back</button>' : '') +
-          (step.chipsOnly ? '' :
+          // a single choice answers and carries on by itself; picking several
+          // does not, so a multi step keeps its Continue
+          (step.chipsOnly && !step.multi ? '' :
             '<button type="button" class="rec-flow-next">Continue</button>') +
           '<button type="button" class="rec-flow-skip">Skip for now</button>' +
         '</div>';
+    }
+
+    function money(n, top) {
+      return n >= top ? n + '+' : String(n);
+    }
+
+    function said(r) {
+      return money(band.from, r.max) + '\u2013' + money(band.to, r.max) + ' LPA';
+    }
+
+    function rail(r) {
+      return '<div class="rec-flow-range">' +
+        '<output class="rec-flow-range-val"></output>' +
+        '<div class="rec-flow-track">' +
+          '<span class="rec-flow-fill"></span>' +
+          '<input type="range" class="rec-flow-lo" min="' + r.min + '" max="' +
+            r.max + '" step="' + r.step + '" value="' + band.from +
+            '" aria-label="Lowest in the band">' +
+          '<input type="range" class="rec-flow-hi" min="' + r.min + '" max="' +
+            r.max + '" step="' + r.step + '" value="' + band.to +
+            '" aria-label="Highest in the band">' +
+        '</div>' +
+        '<div class="rec-flow-ends"><span>' + r.min + ' LPA</span><span>' +
+          r.max + '+ LPA</span></div>' +
+      '</div>';
     }
 
     function review() {
@@ -3330,7 +3400,8 @@
 
       function ready() {
         if (!next || at >= STEPS.length) return;
-        var has = step.tags ? brief.skills.length > 0
+        var has = step.range ? true
+                : (step.multi || step.tags) ? brief.skills.length > 0
                 : (input ? input.value.trim().length > 0
                          : !!brief[step.key]);
         next.disabled = !has;
@@ -3340,7 +3411,9 @@
 
       function go() {
         if (at < STEPS.length) {
-          if (!step.tags && input) brief[step.key] = input.value.trim();
+          if (step.range) brief[step.key] = said(step.range);
+          else if (step.multi) { /* already in brief.skills */ }
+          else if (!step.tags && input) brief[step.key] = input.value.trim();
           if (next && next.disabled) return;
         }
         if (at >= STEPS.length) { done(); return; }
@@ -3366,17 +3439,59 @@
         input.focus();
       }
 
+      if (step && step.range) {
+        var lo = card.querySelector('.rec-flow-lo');
+        var hi = card.querySelector('.rec-flow-hi');
+        var fill = card.querySelector('.rec-flow-fill');
+        var out = card.querySelector('.rec-flow-range-val');
+        var span = step.range.max - step.range.min;
+        var show = function () {
+          band.from = +lo.value;
+          band.to = +hi.value;
+          fill.style.setProperty('--from',
+            ((band.from - step.range.min) / span * 100).toFixed(2) + '%');
+          fill.style.setProperty('--to',
+            ((step.range.max - band.to) / span * 100).toFixed(2) + '%');
+          out.textContent = said(step.range);
+        };
+        // Each end is clamped in its own handler, to the other end. Reading
+        // min and max off the pair instead would let the band say one thing
+        // while the handles sat somewhere else: whichever one had just been
+        // dragged past the other would be corrected, and the figure taken
+        // from where it had been a moment before.
+        lo.addEventListener('input', function () {
+          if (+lo.value > +hi.value) lo.value = hi.value;
+          show();
+        });
+        hi.addEventListener('input', function () {
+          if (+hi.value < +lo.value) hi.value = lo.value;
+          show();
+        });
+        show();
+      }
+
       var chips = card.querySelectorAll('.rec-flow-chip');
       chips.forEach(function (chip) {
         chip.addEventListener('click', function () {
-          brief[step.key] = chip.textContent;
-          if (input) { input.value = chip.textContent; draw(); return; }
-          // nothing left to confirm on a chips-only step: the choice is the
+          var label = chip.textContent;
+          if (step.multi) {
+            var i = brief.skills.indexOf(label);
+            if (i > -1) brief.skills.splice(i, 1); else brief.skills.push(label);
+            draw();
+            // back onto the chip just toggled: without this every pick throws
+            // a keyboard user to the top of the stack
+            [].slice.call(flow.querySelectorAll('.rec-flow-chip'))
+              .forEach(function (c) { if (c.textContent === label) c.focus(); });
+            return;
+          }
+          brief[step.key] = label;
+          if (input) { input.value = label; draw(); return; }
+          // nothing left to confirm on a single-choice step: the choice is the
           // answer, so it carries straight on
           onward();
         });
       });
-      if (!input && chips.length) {
+      if (!input && !step.multi && chips.length) {
         (card.querySelector('.rec-flow-chip.is-on') || chips[0]).focus();
       }
 

@@ -1844,22 +1844,21 @@
     }
 
     /* the lookup, showing its working */
-    .rec-work { display:inline-block; margin-top:26px; padding:16px 22px;
-                border-radius:14px; background:#F6F5FC; text-align:left;
+    .rec-work { display:inline-block; margin-top:26px; text-align:left;
                 font-family:ui-monospace, SFMono-Regular, Menlo, Consolas,
                             monospace;
                 font-size:13px; line-height:1.95; color:#6B6392; }
     .rec-work-head { margin:0 0 4px; display:flex; align-items:center;
                      gap:9px; font-weight:600; color:#1A1430; }
     .rec-work-dot { width:8px; height:8px; border-radius:50%; flex:none;
-                    background:#12B76A;
+                    background:#7C5CF6;
                     animation:rec-work-pulse 1.5s ease-in-out infinite; }
     .rec-work-dot.is-off { background:#C4CAD6; animation:none; }
     @keyframes rec-work-pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
     .rec-work-line { margin:0; display:flex; align-items:baseline; gap:9px; }
     .rec-work-line i { font-style:normal; flex:none; width:10px; }
     .rec-work-line.is-done { color:#9A93B8; }
-    .rec-work-line.is-done i { color:#12B76A; }
+    .rec-work-line.is-done i { color:#7C5CF6; }
     .rec-work-line.is-now { color:#1A1430; }
     .rec-work-line.is-now b { display:inline-block; width:7px; height:13px;
                               background:#1A1430; translate:0 1px;
@@ -1881,7 +1880,7 @@
       .rec-work-dot, .rec-work-line.is-now b { animation:none; }
     }
     @media (max-width:600px) {
-      .rec-work { font-size:12px; padding:14px 16px; }
+      .rec-work { font-size:12px; }
       .rec-found-facts span { min-width:0; flex:1 1 128px; }
     }
 
@@ -3523,18 +3522,9 @@
             .replace(/^https?:\/\//i, '').replace(/^www\./i, '')
             .replace(/\/+$/, '');
         } },
-      { key: 'salary',
-        q: 'What is the budget?',
-        range: { min: 20, max: 300, step: 5 } },
-      { key: 'skills',
-        q: 'What must they be good at?',
-        chipsOnly: true,
-        multi: true,
-        chips: ['Python', 'Django', 'Go', 'Node.js', 'TypeScript', 'React', 'PostgreSQL', 'AWS', 'Kubernetes', 'System design', 'Figma', 'Design systems', 'User research', 'Product strategy', 'SQL', 'Machine learning'] }
     ];
 
-    var brief = { role: '', website: '', salary: '', skills: [] };
-    var band = { from: 90, to: 120 };   // thousands a year
+    var brief = { role: '', website: '', skills: [] };
     var at = 0;
     var flow = null;
 
@@ -3574,7 +3564,6 @@
     function open() {
       brief.role = field.value.trim();
       brief.website = '';
-      brief.salary = '';
       brief.skills = [];
       at = 0;
       if (!flow) build();
@@ -3598,8 +3587,7 @@
       var total = STEPS.length + 1;
       flow.querySelector('.rec-flow-bar span').style.setProperty(
         '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
-      card.innerHTML = at < STEPS.length ? ask(STEPS[at])
-                     : at === STEPS.length ? review() : signup();
+      card.innerHTML = at < STEPS.length ? ask(STEPS[at]) : signup();
       wire(card);
     }
 
@@ -3631,62 +3619,6 @@
             '<button type="button" class="rec-flow-next">Continue</button>') +
           (step.skip ? '<button type="button" class="rec-flow-skip">' +
             esc(step.skip) + '</button>' : '') +
-        '</div>';
-    }
-
-    function money(n, top) {
-      return '$' + n + 'k' + (n >= top ? '+' : '');
-    }
-
-    function said(r) {
-      return money(band.from, r.max) + '\u2013' + money(band.to, r.max);
-    }
-
-    function rail(r) {
-      return '<div class="rec-flow-range">' +
-        '<output class="rec-flow-range-val"></output>' +
-        '<div class="rec-flow-track">' +
-          '<span class="rec-flow-fill"></span>' +
-          '<input type="range" class="rec-flow-lo" min="' + r.min + '" max="' +
-            r.max + '" step="' + r.step + '" value="' + band.from +
-            '" aria-label="Lowest in the band">' +
-          '<input type="range" class="rec-flow-hi" min="' + r.min + '" max="' +
-            r.max + '" step="' + r.step + '" value="' + band.to +
-            '" aria-label="Highest in the band">' +
-        '</div>' +
-        '<div class="rec-flow-ends"><span>$' + r.min + 'k</span><span>$' +
-          r.max + 'k+</span></div>' +
-      '</div>';
-    }
-
-    // The title, not the sentence: what someone types into the field runs
-    // "Senior backend engineer, Python + Django, 4+ years, remote India", and
-    // the tail is the three things the next screens asked for anyway. The
-    // whole sentence stays in the brief; only the designation is shown.
-    function title(role) {
-      var cut = role.indexOf(',');
-      return (cut > 0 ? role.slice(0, cut) : role).trim();
-    }
-
-    function review() {
-      var facts = [
-        ['Website', brief.website],
-        ['Budget', brief.salary],
-        ['Skills', brief.skills.join(', ')]
-      ].map(function (f) {
-        return '<span class="rec-flow-fact"><i>' + esc(f[0]) + '</i>' +
-          (f[1] ? '<b>' + esc(f[1]) + '</b>'
-                : '<b class="is-blank">Not given</b>') + '</span>';
-      }).join('');
-      return '<h2 class="rec-flow-q">Ready to publish.</h2>' +
-        '<p class="rec-flow-hint">This is what Mira has. Publish it and every ' +
-        'application is read and ranked against it from the moment it lands.</p>' +
-        '<p class="rec-flow-brief' + (brief.role ? '' : ' is-blank') + '">' +
-          (brief.role ? esc(title(brief.role)) : 'No description given') + '</p>' +
-        '<div class="rec-flow-facts">' + facts + '</div>' +
-        '<div class="rec-flow-act">' +
-          '<button type="button" class="rec-flow-back">Back</button>' +
-          '<button type="button" class="rec-flow-next">Publish role</button>' +
         '</div>';
     }
 
@@ -3741,8 +3673,7 @@
 
       function ready() {
         if (!next || at >= STEPS.length) return;
-        var has = step.range ? true
-                : (step.multi || step.tags) ? brief.skills.length > 0
+        var has = (step.multi || step.tags) ? brief.skills.length > 0
                 : (input ? (step.looks
                               ? step.looks.test(input.value.trim())
                               : input.value.trim().length > 0)
@@ -3945,15 +3876,11 @@
       function go() {
         // hoisted: every screen's forward button is gated the same way
         if (next && next.disabled) return;
-        if (at < STEPS.length) {
-          if (step.range) brief[step.key] = said(step.range);
-          else if (step.multi) { /* already in brief.skills */ }
-          else if (!step.tags && input) {
-            brief[step.key] = step.tidy ? step.tidy(input.value)
-                                        : input.value.trim();
-          }
+        if (at < STEPS.length && !step.multi && !step.tags && input) {
+          brief[step.key] = step.tidy ? step.tidy(input.value)
+                                      : input.value.trim();
         }
-        if (at > STEPS.length) { done(); return; }
+        if (at >= STEPS.length) { done(); return; }
         if (step.key === 'website' && brief.website) { look(); return; }
         onward();
       }

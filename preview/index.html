@@ -3212,7 +3212,7 @@
       { key: 'salary',
         q: 'What is the budget?',
         hint: 'Drag the band. Mira keeps every offer inside it.',
-        range: { min: 4, max: 80, step: 1 } },
+        range: { min: 20, max: 300, step: 5 } },
       { key: 'skills',
         q: 'What must they be good at?',
         hint: 'Pick as many as apply. Every application is scored against them.',
@@ -3222,7 +3222,7 @@
     ];
 
     var brief = { role: '', location: '', salary: '', skills: [] };
-    var band = { from: 18, to: 24 };
+    var band = { from: 90, to: 120 };   // thousands a year
     var at = 0;
     var flow = null;
 
@@ -3322,11 +3322,11 @@
     }
 
     function money(n, top) {
-      return n >= top ? n + '+' : String(n);
+      return '$' + n + 'k' + (n >= top ? '+' : '');
     }
 
     function said(r) {
-      return money(band.from, r.max) + '\u2013' + money(band.to, r.max) + ' LPA';
+      return money(band.from, r.max) + '\u2013' + money(band.to, r.max);
     }
 
     function rail(r) {
@@ -3341,8 +3341,8 @@
             r.max + '" step="' + r.step + '" value="' + band.to +
             '" aria-label="Highest in the band">' +
         '</div>' +
-        '<div class="rec-flow-ends"><span>' + r.min + ' LPA</span><span>' +
-          r.max + '+ LPA</span></div>' +
+        '<div class="rec-flow-ends"><span>$' + r.min + 'k</span><span>$' +
+          r.max + 'k+</span></div>' +
       '</div>';
     }
 

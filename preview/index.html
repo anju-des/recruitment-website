@@ -1554,6 +1554,19 @@
 
     /* what the finished step keeps: the company, and nothing else */
     .rec-done-slot { list-style:none; max-width:100%; }
+    .rec-step { flex-direction:column; align-items:flex-start; }
+    .rec-step-row { display:flex; align-items:center; gap:10px; }
+    .rec-done-slot { display:block; max-width:100%; }
+
+    /* step two's board, built from step one */
+    .rec-board-head { display:flex; align-items:center; gap:13px; }
+    .rec-board-role { margin-top:18px; padding:14px 16px; border-radius:12px;
+                      background:#F6F4FD; display:flex;
+                      flex-direction:column; gap:3px; }
+    .rec-board-role b { font-size:14.5px; font-weight:600; color:#1A1430; }
+    .rec-board-role i { font-style:normal; font-size:12.5px;
+                        color:#8A82A8; }
+    .rec-board-note { margin:14px 0 0; font-size:12.5px; color:#8A82A8; }
     .rec-done-card { display:flex; align-items:center; gap:9px; font:inherit;
                      margin:2px 0 0 30px; padding:9px 12px; max-width:100%;
                      box-sizing:border-box; border-radius:12px; cursor:pointer;
@@ -3704,10 +3717,11 @@
         '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
-            ['Company details']
+            ['Company details', 'Job board']
               .map(function (s, i) {
-                return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
-                  '<b>' + s + '</b></li>';
+                return '<li class="rec-step">' +
+                  '<span class="rec-step-row"><i>' + (i + 1) + '</i>' +
+                  '<b>' + s + '</b></span></li>';
               }).join('') +
           '</ol>' +
           '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>' +
@@ -3738,34 +3752,42 @@
       }
     }
 
-    // the screen the chip puts back
-    var kept_html = '';
+    // the screens the chips put back, one per step
+    var kept = {};
+    var open_i = null;        // which chip is showing, if any
 
-    function show_details(on) {
-      // an older record can name a company without carrying its screen
-      if (on && !kept_html) return;
+    function show_details(i, on) {
+      if (on && !kept[i]) return;
       var face = flow.querySelector('.rec-flow-card');
-      var chip = flow.querySelector('.rec-done-card');
+      open_i = on ? i : null;
       flow.classList.toggle('is-found', !on);
-      face.innerHTML = on ? kept_html : '';
-      if (chip) chip.setAttribute('aria-expanded', on ? 'true' : 'false');
+      face.innerHTML = on ? kept[i] : '';
+      var chips = flow.querySelectorAll('.rec-done-card');
+      for (var k = 0; k < chips.length; k++) {
+        chips[k].setAttribute('aria-expanded',
+          (on && Number(chips[k].getAttribute('data-for')) === i)
+            ? 'true' : 'false');
+      }
     }
 
-    // what a finished lookup leaves behind in the rail
-    function put_mini(who, logo) {
-      var rail = flow.querySelector('.rec-steps');
-      var slot = rail.querySelector('.rec-done-slot');
+    // what a finished step leaves behind, under that step
+    function put_mini(i, label, logo, html) {
+      kept[i] = html;
+      var step = flow.querySelectorAll('.rec-step')[i];
+      if (!step) return;
+      var slot = step.querySelector('.rec-done-slot');
       if (!slot) {
-        slot = document.createElement('li');
+        slot = document.createElement('span');
         slot.className = 'rec-done-slot';
-        rail.appendChild(slot);
+        step.appendChild(slot);
       }
       slot.innerHTML =
-        '<button type="button" class="rec-done-card" aria-expanded="false">' +
+        '<button type="button" class="rec-done-card" data-for="' + i +
+          '" aria-expanded="false">' +
           '<span class="rec-done-mark">' +
             (logo ? '<img src="' + esc(logo) + '" alt="">'
-                  : esc(String(who || '?').charAt(0))) +
-          '</span><b>' + esc(who) + '</b>' +
+                  : esc(String(label || '?').charAt(0))) +
+          '</span><b>' + esc(label) + '</b>' +
           '<svg class="rec-done-go" viewBox="0 0 24 24" fill="none" ' +
             'stroke="currentColor" stroke-width="2.2" stroke-linecap="round" ' +
             'stroke-linejoin="round" aria-hidden="true">' +
@@ -3773,7 +3795,8 @@
         '</button>';
       slot.querySelector('.rec-done-card').addEventListener('click',
         function () {
-          show_details(flow.classList.contains('is-found'));
+          // the open one closes; any other one takes its place
+          show_details(i, open_i !== i);
         });
     }
 
@@ -3875,6 +3898,92 @@
       }
 
       function onward() { at++; draw(); }
+
+      var found = {};
+      // Step two. It builds a board out of step one's company and the
+      // role that was typed on the way in -- nothing invented, nothing
+      // published, which is why the address below it is text and not a
+      // link.
+      function board() {
+        if (!found.who) return;
+        step_busy(1);
+
+        var title = (brief.role || '').split(',')[0].trim() ||
+                    'Your first role';
+        var jobs = [
+          'taking the Wisemonk logo and name',
+          'writing up ' + title,
+          'laying out the board'
+        ];
+        jobs[0] = 'taking the ' + found.who + ' logo and name';
+
+        var ran = [];
+        var now = 0;
+
+        function panel() {
+          card.innerHTML =
+            '<h2 class="rec-flow-q is-alone">Building your job board</h2>' +
+            '<div class="rec-work" role="status" aria-live="polite">' +
+              '<p class="rec-work-head"><span class="rec-work-dot"></span>' +
+                'Mira is working on step ' + Math.min(now + 1, jobs.length) +
+                ' of ' + jobs.length + '</p>' +
+              ran.map(function (r) {
+                return '<p class="rec-work-line is-done"><i>\u2713</i>' +
+                  '<span>' + esc(r) + '</span></p>';
+              }).join('') +
+              (now < jobs.length
+                ? '<p class="rec-work-line is-now"><i>\u203a</i><span>' +
+                  esc(jobs[now]) + '\u2026</span><b></b></p>'
+                : '') +
+            '</div>';
+        }
+
+        function step(then) {
+          ran.push(jobs[now]);
+          now++;
+          panel();
+          window.setTimeout(then, 620);
+        }
+
+        function made() {
+          card.innerHTML =
+            '<div class="rec-found-col">' +
+              '<h2 class="rec-flow-q is-alone">Your job board</h2>' +
+              '<div class="rec-found-card">' +
+                '<div class="rec-board-head">' +
+                  '<span class="rec-flow-found-mark">' +
+                    (found.logo ? '<img src="' + esc(found.logo) + '" alt="">'
+                                : esc(found.who.charAt(0))) +
+                  '</span>' +
+                  '<span class="rec-flow-found-say">' +
+                    '<b>' + esc(found.who) + ' careers</b>' +
+                    '<i>' + esc(found.who.toLowerCase().replace(/[^a-z0-9]/g,
+                      '')) + '.mira.jobs</i></span>' +
+                '</div>' +
+                '<div class="rec-board-role">' +
+                  '<b>' + esc(title) + '</b>' +
+                  (found.based ? '<i>' + esc(found.based) + '</i>' : '') +
+                '</div>' +
+                '<p class="rec-board-note">A preview. The board goes live ' +
+                  'with your account.</p>' +
+              '</div>' +
+            '</div>';
+          window.setTimeout(function () {
+            if (!flow || flow.hidden) return;
+            at_step(1, true);
+            flow.classList.add('is-found');
+            open_i = null;
+            put_mini(1, 'Job board', found.logo, card.innerHTML);
+            card.innerHTML = '';
+          }, 2000);
+        }
+
+        panel();
+        window.setTimeout(function () {
+          step(function () { step(function () { step(made); }); });
+        }, 500);
+      }
+
 
       // The lookup, shown as it happens. Every line is a real call; the
       // match is what stops a name search attaching the wrong company to
@@ -4014,10 +4123,12 @@
           // let it be read at full size before it becomes a card
           window.setTimeout(function () {
             if (!flow || flow.hidden) return;
-            kept_html = card.innerHTML;
+            found = { who: who, logo: logo, based: vals.Based || '' };
             flow.classList.add('is-found');
-            put_mini(who, logo);
+            open_i = null;
+            put_mini(0, who, logo, card.innerHTML);
             card.innerHTML = '';
+            window.setTimeout(board, 700);
           }, 1600);
           window.setTimeout(function () {
             try {
@@ -4343,8 +4454,7 @@
       flow.querySelector('.rec-flow-bar span')
           .style.setProperty('--at', '100%');
       flow.querySelector('.rec-flow-card').innerHTML = '';
-      kept_html = was.html || '';
-      put_mini(was.who, was.logo);
+      put_mini(0, was.who, was.logo, was.html || '');
     }());
   }());
 

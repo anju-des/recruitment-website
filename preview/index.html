@@ -1868,6 +1868,14 @@
     .rec-found-about { max-width:34ch; margin:16px auto 0; font-size:14px;
                        line-height:1.55; color:var(--text-secondary); }
     .rec-found-about.is-thin { color:var(--text-muted); font-size:13.5px; }
+    .rec-found-links { display:flex; flex-wrap:wrap; justify-content:center;
+                       gap:8px; margin-top:14px; }
+    .rec-found-links a { padding:6px 13px; border-radius:100px;
+                         border:1px solid #E7E2F6; background:#FFFFFF;
+                         font-size:12.5px; color:#6B4BE8;
+                         text-decoration:none;
+                         transition:background .15s, border-color .15s; }
+    .rec-found-links a:hover { background:#F7F5FE; border-color:#BCAEF0; }
     .rec-found-facts { display:flex; flex-wrap:wrap; justify-content:center;
                        gap:10px; margin-top:18px; }
     .rec-found-facts span { display:flex; flex-direction:column; gap:3px;
@@ -3691,10 +3699,15 @@
         var brief_line = '';      // wikidata's one clause
         var article = '';         // the enwiki title, when there is one
         var refs = [];            // item ids whose names need a second call
+        var vals = {};            // label -> value, filled from both calls
+        var links = [];           // where else they are on the record
+
+        // one order, so two companies never lay out differently
+        var ORDER = ['Founded', 'People', 'Type', 'Industry', 'Based',
+                     'Legal form', 'Founder', 'CEO', 'Parent', 'Legal name'];
         var got = { about: '', facts: null };
         var busy = '';
         var finished = false;
-        var base = [];            // facts already in hand from the claims
 
         function panel() {
           card.innerHTML =
@@ -3751,6 +3764,12 @@
                     '</b></span>';
                 }).join('') + '</div>'
               : '') +
+            (got.facts && links.length
+              ? '<div class="rec-found-links">' + links.map(function (l) {
+                  return '<a href="' + esc(l[1]) + '" target="_blank" ' +
+                    'rel="noreferrer noopener">' + esc(l[0]) + '</a>';
+                }).join('') + '</div>'
+              : '') +
             (busy
               ? '<p class="rec-tell"><i>›</i><span>' + esc(busy) +
                 '…</span><b></b></p>'
@@ -3784,7 +3803,7 @@
           function then(text) {
             got.about = text || brief_line;
             if (!refs.length && !base.length) { rest(); return; }
-            busy = 'reading industry and location';
+            busy = 'reading the rest of the record';
             screen();
             window.setTimeout(read_more, 520);
           }
@@ -3795,9 +3814,14 @@
                   function () { then(''); });
         }
 
+        function lay_out() {
+          got.facts = ORDER.filter(function (k) { return vals[k]; })
+                           .map(function (k) { return [k, vals[k]]; });
+          rest();
+        }
+
         function read_more() {
-          got.facts = base.slice();
-          if (!refs.length) { rest(); return; }
+          if (!refs.length) { lay_out(); return; }
           ask_json(API + 'action=wbgetentities&props=labels&languages=en&ids=' +
                    refs.map(function (r) { return r.id; }).join('|'))
             .then(function (d) {
@@ -3805,16 +3829,21 @@
               var by = {};
               refs.forEach(function (r) {
                 var l = all[r.id] && all[r.id].labels && all[r.id].labels.en;
-                if (l) by[r.p] = l.value;
+                if (l) by[r.p] = (by[r.p] ? by[r.p] + ', ' : '') + l.value;
               });
-              if (by.P452) got.facts.push(['Industry', by.P452]);
+              if (by.P31) vals.Type = by.P31;
+              if (by.P452) vals.Industry = by.P452;
+              if (by.P1454) vals['Legal form'] = by.P1454;
+              if (by.P112) vals.Founder = by.P112;
+              if (by.P169) vals.CEO = by.P169;
+              if (by.P749) vals.Parent = by.P749;
               // the city and its country are one answer, not two facts
               var where = [by.P159, by.P17].filter(function (v, i, a) {
                 return v && a.indexOf(v) === i;
               });
-              if (where.length) got.facts.push(['Based', where.join(', ')]);
-              rest();
-            }, rest);
+              if (where.length) vals.Based = where.join(', ');
+              lay_out();
+            }, lay_out);
         }
 
         function ask_json(url) {
@@ -3886,16 +3915,32 @@
           }
 
           var born = one('P571');
-          if (born && born.time) base.push(['Founded', born.time.slice(1, 5)]);
+          if (born && born.time) vals.Founded = born.time.slice(1, 5);
           var staff = one('P1128');
           if (staff && staff.amount) {
-            base.push(['People',
-              Number(String(staff.amount).replace('+', ''))
-                .toLocaleString('en')]);
+            vals.People = Number(String(staff.amount).replace('+', ''))
+                            .toLocaleString('en');
           }
-          ['P452', 'P159', 'P17'].forEach(function (p) {
-            var v = one(p);
-            if (v && v.id) refs.push({ p: p, id: v.id });
+          var legal = one('P1448');
+          if (legal && legal.text) vals['Legal name'] = legal.text;
+
+          // names of referenced items arrive in the one call that follows
+          // two only where two is the answer: people and industries
+          [['P452', 2], ['P112', 2], ['P159', 1], ['P17', 1], ['P31', 1],
+           ['P1454', 1], ['P169', 1], ['P749', 1]].forEach(function (r) {
+            (c[r[0]] || []).slice(0, r[1]).forEach(function (claim) {
+              var v = claim.mainsnak.datavalue &&
+                      claim.mainsnak.datavalue.value;
+              if (v && v.id) refs.push({ p: r[0], id: v.id });
+            });
+          });
+
+          // and where else the record puts them
+          [['P4264', 'LinkedIn', 'https://www.linkedin.com/company/'],
+           ['P2088', 'Crunchbase', 'https://www.crunchbase.com/organization/'],
+           ['P2002', 'X', 'https://x.com/']].forEach(function (l) {
+            var v = one(l[0]);
+            if (typeof v === 'string' && v) links.push([l[1], l[2] + v]);
           });
         }
       }

@@ -1771,13 +1771,6 @@
                              background:linear-gradient(142deg, #F6F9FF 0%,
                                #FAF8FE 52%, #F8F5FD 100%); }
     .rec-auth .lr-frame { display:block; width:100%; height:100%; border:0; }
-    /* a route needs no way out; an overlay does */
-    .rec-auth-x { position:absolute; z-index:2; top:26px; right:30px; width:36px;
-                  height:36px; border-radius:50%; border:0; display:grid;
-                  place-items:center; cursor:pointer; background:#F2EFFB;
-                  color:#4E4470; font-size:19px; line-height:1;
-                  font-family:inherit; transition:background .15s; }
-    .rec-auth-x:hover { background:#E6E0F7; }
     /* below tablet the panel goes and the form takes the width */
     @media (max-width:920px) {
       .rec-auth .login-shell { grid-template-columns:1fr; }
@@ -3680,7 +3673,6 @@
       panel.setAttribute('aria-modal', 'true');
       panel.setAttribute('aria-label', 'Sign in');
       panel.innerHTML =
-        '<button type="button" class="rec-auth-x" aria-label="Close">&#215;</button>' +
         '<div class="login-shell">' +
           '<div class="login-left">' +
             '<div class="login-form-wrap">' +
@@ -3721,7 +3713,6 @@
         '</div>';
       document.body.appendChild(panel);
 
-      panel.querySelector('.rec-auth-x').addEventListener('click', close);
       panel.querySelector('.login-form').addEventListener('submit', function (e) {
         e.preventDefault();
         window.location.href = APP;
@@ -3734,7 +3725,7 @@
                              { passive: false });
     }
 
-    function close() {
+    function hide() {
       panel.classList.add('is-out');
       window.setTimeout(function () {
         panel.hidden = true;
@@ -3743,12 +3734,30 @@
       opener.focus();
     }
 
+    // There is no close button on this screen, so opening it adds a history
+    // entry: Escape gives that entry back, and the browser's own Back button
+    // does the same thing. Without it a phone would have no way out at all.
+    function close() {
+      if (window.history.state && window.history.state.recAuth) {
+        window.history.back();
+        return;
+      }
+      hide();
+    }
+
+    window.addEventListener('popstate', function () {
+      if (panel && !panel.hidden) hide();
+    });
+
     opener.addEventListener('click', function (e) {
       e.preventDefault();
       if (!panel) build();
       panel.classList.remove('is-out');
       panel.hidden = false;
       panel.querySelector('#rec-auth-email').focus();
+      try {
+        window.history.pushState({ recAuth: 1 }, '', '#login');
+      } catch (err) {}
     });
   }());
 </script>

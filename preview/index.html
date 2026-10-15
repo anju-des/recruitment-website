@@ -2019,6 +2019,10 @@
     .rec-found-card .rec-found-about { margin-top:18px; }
     .rec-found-card .rec-found-facts { margin-top:22px; }
     .rec-found-card .rec-found-links { margin-top:20px; }
+    /* the question reads down the same edge every later screen does */
+    .rec-ask-col { width:min(520px, 100%); margin-inline:auto;
+                   text-align:left; }
+    .rec-ask-col .rec-flow-act { justify-content:space-between; }
     /* the found screen shares one left edge */
     .rec-found-col { width:min(520px, 100%); margin-inline:auto;
                      text-align:left; }
@@ -3864,7 +3868,8 @@
 
     function ask(step) {
       var val = step.tags ? '' : brief[step.key];
-      return '<h2 class="rec-flow-q' + (step.hint ? '' : ' is-alone') +
+      return '<div class="rec-ask-col">' +
+        '<h2 class="rec-flow-q' + (step.hint ? '' : ' is-alone') +
         '">' + esc(step.q) + '</h2>' +
         (step.hint ? '<p class="rec-flow-hint">' + esc(step.hint) + '</p>' : '') +
         (step.range ? rail(step.range) : step.chipsOnly ? '' :
@@ -3890,6 +3895,7 @@
             '<button type="button" class="rec-flow-next">Continue</button>') +
           (step.skip ? '<button type="button" class="rec-flow-skip">' +
             esc(step.skip) + '</button>' : '') +
+        '</div>' +
         '</div>';
     }
 

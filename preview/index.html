@@ -3587,7 +3587,7 @@
       var total = STEPS.length + 1;
       flow.querySelector('.rec-flow-bar span').style.setProperty(
         '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
-      if (at >= STEPS.length) { done(); return; }
+      if (at >= STEPS.length) { close(); return; }
       card.innerHTML = ask(STEPS[at]);
       wire(card);
     }
@@ -3621,27 +3621,6 @@
           (step.skip ? '<button type="button" class="rec-flow-skip">' +
             esc(step.skip) + '</button>' : '') +
         '</div>';
-    }
-
-    function done() {
-      flow.querySelector('.rec-flow-bar span').style.setProperty('--at', '100%');
-      flow.querySelector('.rec-flow-card').innerHTML =
-        '<div class="rec-flow-done">' +
-          '<span class="rec-flow-tick"><svg viewBox="0 0 24 24" fill="none" ' +
-            'stroke="currentColor" stroke-width="2.4" stroke-linecap="round" ' +
-            'stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 7"/>' +
-          '</svg></span>' +
-          '<h2 class="rec-flow-q">The role is live.</h2>' +
-          '<p class="rec-flow-hint">Mira takes it from here: it reads every ' +
-          'application the day it lands, ranks it against your brief and books ' +
-          'the interviews.</p>' +
-          '<div class="rec-flow-act" style="justify-content:center">' +
-            '<button type="button" class="rec-flow-next">Done</button>' +
-          '</div>' +
-          '<p class="rec-flow-note">This is a walk-through of the flow. ' +
-          'Nothing has been posted.</p>' +
-        '</div>';
-      flow.querySelector('.rec-flow-next').addEventListener('click', close);
     }
 
     function wire(card) {
@@ -3757,9 +3736,8 @@
                 'read from. Mira will take the rest from you.</p>');
           brief.company = { name: who, site: site, about: about,
                             facts: facts };
-          window.setTimeout(function () {
-            if (flow && !flow.hidden) onward();
-          }, facts.length ? 3200 : 2200);
+          flow.querySelector('.rec-flow-bar span')
+              .style.setProperty('--at', '100%');
         }
 
         function ask_json(url) {
@@ -3865,7 +3843,7 @@
           brief[step.key] = step.tidy ? step.tidy(input.value)
                                       : input.value.trim();
         }
-        if (at >= STEPS.length) { done(); return; }
+        if (at >= STEPS.length) { close(); return; }
         if (step.key === 'website' && brief.website) { look(); return; }
         onward();
       }

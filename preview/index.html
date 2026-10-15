@@ -1535,7 +1535,7 @@
     .rec-flow-head img { display:block; width:92px; height:auto; }
     /* the three steps, as a rail down the left */
     .rec-flow-main { flex:1; min-height:0; display:flex; }
-    .rec-steps { flex:none; display:flex; flex-direction:column;
+    .rec-steps { flex:none; display:none; flex-direction:column;
                  align-items:flex-start; box-sizing:border-box; margin:0;
                  list-style:none; width:clamp(200px, 22vw, 250px);
                  padding:clamp(22px, 3vw, 34px) clamp(18px, 2.4vw, 32px);
@@ -1548,6 +1548,31 @@
     .rec-step + .rec-step::before { content:""; position:absolute;
                                     left:9.5px; top:-14px; width:1px;
                                     height:28px; background:#E2DCF4; }
+    /* the rail is a record of work: nothing to show until there is */
+    .rec-flow.is-working .rec-steps,
+    .rec-flow.is-found .rec-steps { display:flex; }
+
+    /* what the finished step keeps: the company, and nothing else */
+    .rec-done-card { display:flex; align-items:center; gap:9px;
+                     margin:2px 0 0 30px; padding:9px 12px; max-width:100%;
+                     box-sizing:border-box; border-radius:12px;
+                     border:1px solid #ECE7F9; background:#FFFFFF;
+                     box-shadow:0 1px 8px rgba(18,22,32,.05);
+                     animation:rec-mini-in .32s ease both; }
+    @keyframes rec-mini-in { from { opacity:0; transform:translateY(-4px); }
+                             to { opacity:1; transform:none; } }
+    .rec-done-mark { flex:none; width:22px; height:22px; border-radius:7px;
+                     overflow:hidden; display:grid; place-items:center;
+                     background:linear-gradient(135deg,#8B5CF6,#2684FF);
+                     color:#FFFFFF; font-size:11px; font-weight:700; }
+    .rec-done-mark img { width:100%; height:100%; object-fit:cover;
+                         display:block; }
+    .rec-done-card b { min-width:0; font-size:13px; font-weight:600;
+                       color:#1A1430; white-space:nowrap; overflow:hidden;
+                       text-overflow:ellipsis; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-done-card { animation:none; }
+    }
     .rec-step i { font-style:normal; display:grid; place-items:center;
                   width:20px; height:20px; flex:none; border-radius:50%;
                   background:#F1EEFA; color:#9A93B8; font-size:11px;
@@ -1573,7 +1598,8 @@
     @media (max-width:860px) {
       .rec-flow-main { flex-direction:column; }
       .rec-steps { width:100%; flex-direction:row; align-items:center;
-                   padding:12px 18px; }
+                   flex-wrap:wrap; padding:12px 18px; }
+      .rec-done-card { margin:0 0 0 10px; }
       .rec-step { padding:0; flex:none; }
       .rec-step b { display:none; }
       .rec-step + .rec-step { flex:1; }
@@ -3661,7 +3687,7 @@
         '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
-            ['Company details', 'Job board', 'Account']
+            ['Company details']
               .map(function (s, i) {
                 return '<li class="rec-step"><i>' + (i + 1) + '</i>' +
                   '<b>' + s + '</b></li>';
@@ -3695,8 +3721,26 @@
       }
     }
 
-    // the step is working, not merely current
+    // what a finished lookup leaves behind in the rail
+    function put_mini(who, logo) {
+      var rail = flow.querySelector('.rec-steps');
+      var mini = rail.querySelector('.rec-done-card');
+      if (!mini) {
+        mini = document.createElement('li');
+        mini.className = 'rec-done-card';
+        rail.appendChild(mini);
+      }
+      mini.innerHTML =
+        '<span class="rec-done-mark">' +
+          (logo ? '<img src="' + esc(logo) + '" alt="">'
+                : esc(String(who || '?').charAt(0))) +
+        '</span><b>' + esc(who) + '</b>';
+    }
+
+    // the step is working, not merely current. The rail is only drawn
+    // from here on: before this there is nothing to report.
     function step_busy(i) {
+      flow.classList.add('is-working');
       at_step(i, false);
       var one = flow.querySelectorAll('.rec-step')[i];
       if (one) one.classList.add('is-busy');
@@ -3731,6 +3775,7 @@
         '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
       if (at >= STEPS.length) { close(); return; }
       flow.classList.remove('is-found');
+      flow.classList.remove('is-working');
       at_step(0, false);
       card.innerHTML = ask(STEPS[at]);
       wire(card);
@@ -3929,13 +3974,16 @@
           at_step(0, true);
           // let it be read at full size before it becomes a card
           window.setTimeout(function () {
-            if (flow && !flow.hidden) flow.classList.add('is-found');
+            if (!flow || flow.hidden) return;
+            flow.classList.add('is-found');
+            put_mini(who, logo);
+            card.innerHTML = '';
           }, 1600);
           window.setTimeout(function () {
             try {
               window.sessionStorage.setItem('wm-flow', JSON.stringify({
                 role: brief.role, website: brief.website,
-                html: card.innerHTML
+                who: who, logo: logo
               }));
             } catch (e) {}
           }, 0);
@@ -4263,7 +4311,7 @@
       if (!kept) return;
       var was;
       try { was = JSON.parse(kept); } catch (e) { return; }
-      if (!was || !was.html) return;
+      if (!was || !was.who) return;
 
       brief.role = was.role || '';
       brief.website = was.website || '';
@@ -4275,11 +4323,8 @@
       flow.classList.add('is-found');
       flow.querySelector('.rec-flow-bar span')
           .style.setProperty('--at', '100%');
-      var card = flow.querySelector('.rec-flow-card');
-      card.innerHTML = was.html;
-      // the only control the found screen can carry
-      var again = card.querySelector('.rec-flow-back');
-      if (again) again.addEventListener('click', function () { draw(); });
+      flow.querySelector('.rec-flow-card').innerHTML = '';
+      put_mini(was.who, was.logo);
     }());
   }());
 

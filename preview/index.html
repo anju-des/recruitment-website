@@ -1871,7 +1871,10 @@
     .rec-co-top a { font-size:13px; color:#6B4BE8; text-decoration:none; }
     .rec-co-top a:hover { text-decoration:underline; }
     .rec-co-about { margin:5px 0 0; font-size:13.5px; line-height:1.55;
-                    color:var(--text-secondary); }
+                    color:var(--text-secondary);
+                    /* prose can run long; the whole of it is still stored */
+                    display:-webkit-box; -webkit-line-clamp:5;
+                    -webkit-box-orient:vertical; overflow:hidden; }
     .rec-co-who { margin:8px 0 0; font-size:12.5px; color:var(--text-muted); }
     .rec-co-who span + span::before { content:"\00b7"; margin:0 7px;
                                       color:#C6BFE0; }
@@ -4167,26 +4170,13 @@
 
     var KEY = 'wm-company';
 
-    // four lines: who they are and which company. The rest is looked up.
+    // the whole prompt. Anything more is a form sent to someone who already
+    // knows the answer.
     var PROMPT = [
-      'I am briefing a role to Wisemonk\'s AI recruiter, Mira. Tell it who I ' +
-        'am and which company I work for.',
+      'Tell me about yourself and your company.',
       '',
-      'Reply with exactly these four lines and nothing else:',
-      '',
-      'Company:',
-      'Website:',
-      'Name:',
-      'Role:',
-      '',
-      'Website is the company domain on its own, like example.com. Name and ' +
-        'Role are mine.',
-      '',
-      'Use what you already know, and leave a value empty if you do not know ' +
-        'it. Do not describe the company \u2014 the name and the domain are ' +
-        'all that is wanted.',
-      '',
-      'No preamble, no extra lines, no questions.'
+      'I am briefing a role to Wisemonk\'s AI recruiter, Mira, and it should ' +
+        'know who it is hiring for.'
     ].join('\n');
 
     var take, card;
@@ -4209,6 +4199,27 @@
         }
       });
       return got;
+    }
+
+    // in free text the domain is the one thing worth finding: it carries the
+    // logo, the link, and a serviceable name for the company
+    var A_DOMAIN = /\b((?:[a-z0-9][a-z0-9-]*\.)+[a-z]{2,12})\b/i;
+
+    function named(domain) {
+      var core = domain.split('.')[0].replace(/[-_]+/g, ' ');
+      return core.charAt(0).toUpperCase() + core.slice(1);
+    }
+
+    // labels when Claude writes them, prose when it does not
+    function shape(text) {
+      var co = read(text);
+      if (co.company || co.website) return co;
+
+      var raw = String(text || '').trim();
+      if (!raw) return {};
+      var found = raw.match(A_DOMAIN);
+      var site = found ? host(found[1]) : '';
+      return { company: site ? named(site) : '', website: site, about: raw };
     }
 
     function host(w) {
@@ -4235,7 +4246,7 @@
       lines.forEach(function (l) { who.push(esc(l)); });
 
       card.innerHTML =
-        '<span class="rec-co-mark">' + esc((co.company || '?').charAt(0)) +
+        '<span class="rec-co-mark">' + esc((co.company || '').charAt(0)) +
         '</span>' +
         '<div class="rec-co-body">' +
           '<div class="rec-co-top"><b>' + esc(co.company || 'Your company') +
@@ -4298,8 +4309,8 @@
 
       var box = take.querySelector('textarea');
       box.addEventListener('input', function () {
-        var co = read(box.value);
-        if (co.company) { keep(co); show(co); }
+        var co = shape(box.value);
+        if (co.company || co.about) { keep(co); show(co); }
       });
       take.querySelector('.rec-cx-drop').addEventListener('click', function () {
         take.hidden = true;

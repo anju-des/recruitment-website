@@ -1899,6 +1899,18 @@
     .rec-found-about { max-width:34ch; margin:16px auto 0; font-size:14px;
                        line-height:1.55; color:var(--text-secondary); }
     .rec-found-about.is-thin { color:var(--text-muted); font-size:13.5px; }
+    /* the lookup's result, as one card in the corner */
+    .rec-flow.is-found .rec-flow-body { align-items:flex-start;
+                                        justify-content:flex-start; }
+    .rec-flow.is-found .rec-flow-card { width:min(470px, 100%); }
+    .rec-found-card { padding:20px 22px 22px; border-radius:18px;
+                      border:1px solid #ECE7F9; background:#FFFFFF;
+                      box-shadow:0 2px 18px rgba(18,22,32,.05); }
+    /* flattened: a card inside a card reads as two objects */
+    .rec-found-card .rec-flow-found { width:100%; margin:0; padding:0;
+                                      border:0; background:none; }
+    .rec-found-card .rec-found-about { margin-top:14px; }
+    .rec-found-card .rec-found-facts { margin-top:16px; }
     /* the found screen shares one left edge */
     .rec-found-col { width:min(420px, 100%); margin-inline:auto;
                      text-align:left; }
@@ -3638,8 +3650,11 @@
     function at_step(i, done) {
       var all = flow.querySelectorAll('.rec-step');
       for (var k = 0; k < all.length; k++) {
+        var over = k < i || (k === i && done);
         all[k].classList.toggle('is-on', k === i && !done);
-        all[k].classList.toggle('is-done', k < i || (k === i && done));
+        all[k].classList.toggle('is-done', over);
+        var mark = all[k].querySelector('i');
+        mark.textContent = over ? '\u2713' : String(k + 1);
       }
     }
 
@@ -3655,6 +3670,7 @@
     }
 
     function close() {
+      try { window.sessionStorage.removeItem('wm-flow'); } catch (e) {}
       if (!flow || flow.hidden) return;
       flow.classList.add('is-out');
       window.setTimeout(function () {
@@ -3670,6 +3686,7 @@
       flow.querySelector('.rec-flow-bar span').style.setProperty(
         '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
       if (at >= STEPS.length) { close(); return; }
+      flow.classList.remove('is-found');
       at_step(0, false);
       card.innerHTML = ask(STEPS[at]);
       wire(card);
@@ -3816,6 +3833,7 @@
             '<h2 class="rec-flow-q is-alone">' +
               (blank ? 'Nothing on that domain' : 'Found your company') +
             '</h2>' +
+            '<div class="rec-found-card">' +
             '<div class="rec-flow-found">' +
               '<span class="rec-flow-found-mark">' +
                 (logo ? '<img src="' + esc(logo) + '" alt="">'
@@ -3852,6 +3870,7 @@
                     'website</button>' +
                 '</div>'
               : '') +
+            '</div>' +
             '</div>';
 
           var again = card.querySelector('.rec-flow-back');
@@ -3863,6 +3882,14 @@
           busy = '';
           finished = true;
           at_step(0, true);
+          window.setTimeout(function () {
+            try {
+              window.sessionStorage.setItem('wm-flow', JSON.stringify({
+                role: brief.role, website: brief.website,
+                html: card.innerHTML
+              }));
+            } catch (e) {}
+          }, 0);
           screen();
           flow.querySelector('.rec-flow-bar span')
               .style.setProperty('--at', '100%');
@@ -3870,6 +3897,7 @@
 
         // part one: who. then two real fetches, each behind its own line.
         function stage() {
+          flow.classList.add('is-found');
           screen();
           window.setTimeout(function () {
             busy = article ? 'reading about ' + who
@@ -4179,6 +4207,32 @@
       e.preventDefault();
       open();
     });
+
+    // a reload should not cost someone the lookup they just waited for
+    (function () {
+      var kept;
+      try { kept = window.sessionStorage.getItem('wm-flow'); } catch (e) { return; }
+      if (!kept) return;
+      var was;
+      try { was = JSON.parse(kept); } catch (e) { return; }
+      if (!was || !was.html) return;
+
+      brief.role = was.role || '';
+      brief.website = was.website || '';
+      at = 0;
+      if (!flow) build();
+      flow.classList.remove('is-out');
+      flow.hidden = false;
+      at_step(0, true);
+      flow.classList.add('is-found');
+      flow.querySelector('.rec-flow-bar span')
+          .style.setProperty('--at', '100%');
+      var card = flow.querySelector('.rec-flow-card');
+      card.innerHTML = was.html;
+      // the only control the found screen can carry
+      var again = card.querySelector('.rec-flow-back');
+      if (again) again.addEventListener('click', function () { draw(); });
+    }());
   }());
 
   // Log in opens the product's own sign-in screen, lifted from

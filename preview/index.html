@@ -1884,6 +1884,20 @@
       .rec-found-facts span { min-width:0; flex:1 1 128px; }
     }
 
+    /* the thinking line between the parts of the profile */
+    .rec-tell { display:flex; align-items:baseline; justify-content:center;
+                gap:9px; margin:18px 0 0;
+                font-family:ui-monospace, SFMono-Regular, Menlo, Consolas,
+                            monospace;
+                font-size:13px; color:#1A1430; }
+    .rec-tell i { font-style:normal; color:#7C5CF6; }
+    .rec-tell b { display:inline-block; width:7px; height:13px;
+                  background:#1A1430; translate:0 1px;
+                  animation:rec-work-blink 1s step-end infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-tell b { animation:none; }
+    }
+
     /* ---- Mira in the corner -------------------------------------------------- */
     .rec-bot-open { position:fixed; z-index:260; right:clamp(16px, 2.4vw, 32px);
                     bottom:clamp(16px, 2.4vw, 32px);
@@ -3647,9 +3661,9 @@
 
       function onward() { at++; draw(); }
 
-      // The lookup, shown as it happens. Every line below is a real
-      // call; the third is what stops a name search attaching the wrong
-      // company to a domain.
+      // The lookup, shown as it happens. Every line is a real call; the
+      // match is what stops a name search attaching the wrong company to
+      // a domain.
       function named(domain) {
         var core = String(domain).split('.')[0].replace(/[-_]+/g, ' ');
         return core.charAt(0).toUpperCase() + core.slice(1);
@@ -3668,17 +3682,21 @@
         var jobs = [
           'reading ' + site,
           'searching for ' + who,
-          'matching the official website',
-          'reading the company details'
+          'matching the official website'
         ];
         var ran = [];
         var now = 0;
         var stopped = false;
         var logo = '';
-        var about = '';
-        var facts = [];
+        var brief_line = '';      // wikidata's one clause
+        var article = '';         // the enwiki title, when there is one
+        var refs = [];            // item ids whose names need a second call
+        var got = { about: '', facts: null };
+        var busy = '';
+        var finished = false;
+        var base = [];            // facts already in hand from the claims
 
-        function paint() {
+        function panel() {
           card.innerHTML =
             '<h2 class="rec-flow-q is-alone">Looking up your company</h2>' +
             '<div class="rec-work" role="status" aria-live="polite">' +
@@ -3689,9 +3707,8 @@
                            Math.min(now + 1, jobs.length) + ' of ' +
                            jobs.length) + '</p>' +
               ran.map(function (r) {
-                return '<p class="rec-work-line is-done"><i>' +
-                  (r.ok ? '✓' : '×') + '</i><span>' + esc(r.say) +
-                  '</span></p>';
+                return '<p class="rec-work-line is-done"><i>✓</i><span>' +
+                  esc(r.say) + '</span></p>';
               }).join('') +
               (!stopped && now < jobs.length
                 ? '<p class="rec-work-line is-now"><i>›</i><span>' +
@@ -3700,22 +3717,22 @@
             '</div>';
         }
 
-        // each line stays up long enough to be read, whatever the network did
-        function step(ok, say, then) {
-          ran.push({ ok: ok, say: say || jobs[now] });
+        function step(say, then) {
+          ran.push({ say: say || jobs[now] });
           now++;
-          paint();
+          panel();
           window.setTimeout(then, 420);
         }
 
         function give_up(why) {
-          ran.push({ ok: false, say: why });
+          ran.push({ say: why });
           stopped = true;
-          paint();
-          window.setTimeout(show, 760);
+          panel();
+          window.setTimeout(function () { stage(); }, 760);
         }
 
-        function show() {
+        // ---- the found screen, filled in in three parts ----------------
+        function screen() {
           card.innerHTML =
             '<h2 class="rec-flow-q is-alone">Found your company</h2>' +
             '<div class="rec-flow-found">' +
@@ -3726,25 +3743,85 @@
               '<span class="rec-flow-found-say"><b>' + esc(who) + '</b>' +
                 '<i>' + esc(site) + '</i></span>' +
             '</div>' +
-            (about ? '<p class="rec-found-about">' + esc(about) + '</p>' : '') +
-            (facts.length
-              ? '<div class="rec-found-facts">' + facts.map(function (f) {
+            (got.about
+              ? '<p class="rec-found-about">' + esc(got.about) + '</p>' : '') +
+            (got.facts && got.facts.length
+              ? '<div class="rec-found-facts">' + got.facts.map(function (f) {
                   return '<span><i>' + esc(f[0]) + '</i><b>' + esc(f[1]) +
                     '</b></span>';
                 }).join('') + '</div>'
-              : '<p class="rec-found-about is-thin">No public record to ' +
-                'read from. Mira will take the rest from you.</p>');
-          brief.company = { name: who, site: site, about: about,
-                            facts: facts };
+              : '') +
+            (busy
+              ? '<p class="rec-tell"><i>›</i><span>' + esc(busy) +
+                '…</span><b></b></p>'
+              : '') +
+            (finished && !got.about && !(got.facts && got.facts.length)
+              ? '<p class="rec-found-about is-thin">No public record to ' +
+                'read from. Mira will take the rest from you.</p>'
+              : '');
+        }
+
+        function rest() {
+          busy = '';
+          finished = true;
+          screen();
           flow.querySelector('.rec-flow-bar span')
               .style.setProperty('--at', '100%');
+        }
+
+        // part one: who. then two real fetches, each behind its own line.
+        function stage() {
+          screen();
+          window.setTimeout(function () {
+            busy = article ? 'reading about ' + who
+                           : 'looking for a write-up';
+            screen();
+            window.setTimeout(read_about, 520);
+          }, 620);
+        }
+
+        function read_about() {
+          function then(text) {
+            got.about = text || brief_line;
+            if (!refs.length && !base.length) { rest(); return; }
+            busy = 'reading industry and location';
+            screen();
+            window.setTimeout(read_more, 520);
+          }
+          if (!article) { then(''); return; }
+          ask_json('https://en.wikipedia.org/api/rest_v1/page/summary/' +
+                   encodeURIComponent(article))
+            .then(function (d) { then((d && d.extract) || ''); },
+                  function () { then(''); });
+        }
+
+        function read_more() {
+          got.facts = base.slice();
+          if (!refs.length) { rest(); return; }
+          ask_json(API + 'action=wbgetentities&props=labels&languages=en&ids=' +
+                   refs.map(function (r) { return r.id; }).join('|'))
+            .then(function (d) {
+              var all = (d && d.entities) || {};
+              var by = {};
+              refs.forEach(function (r) {
+                var l = all[r.id] && all[r.id].labels && all[r.id].labels.en;
+                if (l) by[r.p] = l.value;
+              });
+              if (by.P452) got.facts.push(['Industry', by.P452]);
+              // the city and its country are one answer, not two facts
+              var where = [by.P159, by.P17].filter(function (v, i, a) {
+                return v && a.indexOf(v) === i;
+              });
+              if (where.length) got.facts.push(['Based', where.join(', ')]);
+              rest();
+            }, rest);
         }
 
         function ask_json(url) {
           return window.fetch(url).then(function (r) { return r.json(); });
         }
 
-        paint();
+        panel();
 
         // 1. the logo, straight off the domain
         var img = new Image();
@@ -3752,7 +3829,7 @@
         function logo_done() {
           if (settled) return;
           settled = true;
-          step(true, jobs[0], hunt);
+          step(jobs[0], hunt);
         }
         img.addEventListener('load', function () {
           if (img.naturalWidth >= 64) logo = img.src;
@@ -3770,15 +3847,16 @@
             .then(function (d) {
               var hits = (d && d.search) || [];
               if (!hits.length) { give_up('no company by that name'); return; }
-              step(true, jobs[1], function () { match(hits); });
+              step(jobs[1], function () { match(hits); });
             }, function () { give_up('could not reach the register'); });
         }
 
         // 3. and is it really them? the domain has to agree
         function match(hits) {
           var ids = hits.map(function (h) { return h.id; }).join('|');
-          ask_json(API + 'action=wbgetentities&props=claims|descriptions' +
-                   '&languages=en&ids=' + ids)
+          ask_json(API + 'action=wbgetentities&sitefilter=enwiki' +
+                   '&props=claims|descriptions|sitelinks&languages=en&ids=' +
+                   ids)
             .then(function (d) {
               var all = (d && d.entities) || {};
               var hit = null;
@@ -3789,50 +3867,36 @@
                 if (w && host(w.value) === site) hit = all[id];
               });
               if (!hit) { give_up('no public record for ' + site); return; }
-              step(true, jobs[2], function () { read(hit); });
+              keep_it(hit);
+              step(jobs[2], stage);
             }, function () { give_up('could not read the register'); });
         }
 
-        // 4. what it says about them
-        function read(ent) {
+        // what the entity gives us without another call
+        function keep_it(ent) {
           var c = ent.claims || {};
-          about = (ent.descriptions && ent.descriptions.en &&
-                   ent.descriptions.en.value) || '';
+          brief_line = (ent.descriptions && ent.descriptions.en &&
+                        ent.descriptions.en.value) || '';
+          article = (ent.sitelinks && ent.sitelinks.enwiki &&
+                     ent.sitelinks.enwiki.title) || '';
 
           function one(p) {
             return c[p] && c[p][0].mainsnak.datavalue &&
                    c[p][0].mainsnak.datavalue.value;
           }
 
+          var born = one('P571');
+          if (born && born.time) base.push(['Founded', born.time.slice(1, 5)]);
           var staff = one('P1128');
           if (staff && staff.amount) {
-            facts.push(['People',
+            base.push(['People',
               Number(String(staff.amount).replace('+', ''))
                 .toLocaleString('en')]);
           }
-          var born = one('P571');
-          if (born && born.time) facts.push(['Founded', born.time.slice(1, 5)]);
-
-          // industry and headquarters come back as item ids, so their names
-          // take one more call
-          var refs = [];
-          ['P452', 'P159'].forEach(function (p) {
+          ['P452', 'P159', 'P17'].forEach(function (p) {
             var v = one(p);
             if (v && v.id) refs.push({ p: p, id: v.id });
           });
-          if (!refs.length) { step(true, jobs[3], show); return; }
-
-          ask_json(API + 'action=wbgetentities&props=labels&languages=en&ids=' +
-                   refs.map(function (r) { return r.id; }).join('|'))
-            .then(function (d) {
-              var got = (d && d.entities) || {};
-              refs.forEach(function (r) {
-                var l = got[r.id] && got[r.id].labels && got[r.id].labels.en;
-                if (!l) return;
-                facts.push([r.p === 'P452' ? 'Industry' : 'Based', l.value]);
-              });
-              step(true, jobs[3], show);
-            }, function () { step(true, jobs[3], show); });
         }
       }
 

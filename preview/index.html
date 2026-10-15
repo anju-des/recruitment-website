@@ -1960,7 +1960,7 @@
                               animation:rec-work-blink 1s step-end infinite; }
     @keyframes rec-work-blink { 50% { opacity:0 } }
 
-    .rec-found-about { max-width:34ch; margin:16px auto 0; font-size:14px;
+    .rec-found-about { max-width:34ch; margin:18px auto 0; font-size:14px;
                        line-height:1.55; color:var(--text-secondary); }
     .rec-found-about.is-thin { color:var(--text-muted); font-size:13.5px; }
     /* the lookup's result, as one card in the corner */
@@ -1985,8 +1985,9 @@
     /* flattened: a card inside a card reads as two objects */
     .rec-found-card .rec-flow-found { width:100%; margin:0; padding:0;
                                       border:0; background:none; }
-    .rec-found-card .rec-found-about { margin-top:14px; }
-    .rec-found-card .rec-found-facts { margin-top:16px; }
+    .rec-found-card .rec-found-about { margin-top:18px; }
+    .rec-found-card .rec-found-facts { margin-top:22px; }
+    .rec-found-card .rec-found-links { margin-top:20px; }
     /* the found screen shares one left edge */
     .rec-found-col { width:min(420px, 100%); margin-inline:auto;
                      text-align:left; }
@@ -2008,7 +2009,7 @@
                          transition:background .15s, border-color .15s; }
     .rec-found-links a:hover { background:#F7F5FE; border-color:#BCAEF0; }
     .rec-found-facts { display:flex; flex-wrap:wrap; justify-content:center;
-                       gap:10px; margin-top:18px; }
+                       gap:10px; margin-top:22px; }
     .rec-found-facts span { display:flex; flex-direction:column; gap:3px;
                             min-width:104px; padding:11px 16px;
                             border-radius:12px; background:#F6F4FD; }
@@ -3959,7 +3960,7 @@
           card.innerHTML =
             '<div class="rec-found-col">' +
             '<h2 class="rec-flow-q is-alone">' +
-              (blank ? 'Nothing on that domain' : 'Found your company') +
+              (blank ? 'Nothing on that domain' : 'Your company') +
             '</h2>' +
             '<div class="rec-found-card">' +
             '<div class="rec-flow-found">' +
@@ -4335,6 +4336,9 @@
       flow.classList.remove('is-out');
       flow.hidden = false;
       at_step(0, true);
+      // the lookup has happened, even though this session did not run it:
+      // without this the rail leaves with the details
+      flow.classList.add('is-working');
       flow.classList.add('is-found');
       flow.querySelector('.rec-flow-bar span')
           .style.setProperty('--at', '100%');

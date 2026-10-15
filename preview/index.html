@@ -1608,6 +1608,7 @@
     .rec-flow-ends { display:flex; justify-content:space-between;
                      margin-top:10px; color:#8A82A8; font-size:12.5px;
                      font-variant-numeric:tabular-nums; }
+    .rec-flow-mail { max-width:380px; margin-inline:auto; text-align:center; }
     .rec-flow-chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px;
                       justify-content:center; max-width:640px;
                       margin-inline:auto; }
@@ -3284,11 +3285,13 @@
     function draw() {
       var card = flow.querySelector('.rec-flow-card');
       var total = STEPS.length + 1;
+      // the gate is not one of the questions, so it takes no number
       flow.querySelector('.rec-flow-step').textContent =
-        'Step ' + Math.min(at + 1, total) + ' of ' + total;
+        at > STEPS.length ? '' : 'Step ' + (at + 1) + ' of ' + total;
       flow.querySelector('.rec-flow-bar span').style.setProperty(
-        '--at', Math.round((at + 1) / total * 100) + '%');
-      card.innerHTML = at < STEPS.length ? ask(STEPS[at]) : review();
+        '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
+      card.innerHTML = at < STEPS.length ? ask(STEPS[at])
+                     : at === STEPS.length ? review() : signup();
       wire(card);
     }
 
@@ -3366,6 +3369,21 @@
         '</div>';
     }
 
+    function signup() {
+      return '<h2 class="rec-flow-q">Create your account</h2>' +
+        '<p class="rec-flow-hint">The brief is ready. Add your work email and ' +
+        'Mira starts reading.</p>' +
+        '<input class="rec-flow-in rec-flow-mail" type="email" ' +
+        'inputmode="email" autocomplete="email" placeholder="you@company.com" ' +
+        'aria-label="Work email">' +
+        '<div class="rec-flow-act">' +
+          '<button type="button" class="rec-flow-back">Back</button>' +
+          '<button type="button" class="rec-flow-next">Create account</button>' +
+        '</div>' +
+        '<p class="rec-flow-note">Nothing is sent anywhere. This is a ' +
+        'walk-through of the flow.</p>';
+    }
+
     function done() {
       flow.querySelector('.rec-flow-bar span').style.setProperty('--at', '100%');
       flow.querySelector('.rec-flow-step').textContent = '';
@@ -3389,7 +3407,13 @@
     }
 
     function wire(card) {
-      var step = STEPS[at];
+      // The screens past the questions have no step behind them, and the
+      // chip-focus line below reads `step.multi` unconditionally: on the
+      // review screen that threw, and the throw landed before the Back and
+      // Publish buttons were bound, which left them dead. An empty object
+      // answers every `step.x` here with undefined, which is the answer each
+      // of those tests wants.
+      var step = STEPS[at] || {};
       var input = card.querySelector('.rec-flow-in');
       var next = card.querySelector('.rec-flow-next');
       var back = card.querySelector('.rec-flow-back');
@@ -3406,13 +3430,14 @@
       function onward() { at++; draw(); }
 
       function go() {
+        // hoisted: every screen's forward button is gated the same way
+        if (next && next.disabled) return;
         if (at < STEPS.length) {
           if (step.range) brief[step.key] = said(step.range);
           else if (step.multi) { /* already in brief.skills */ }
           else if (!step.tags && input) brief[step.key] = input.value.trim();
-          if (next && next.disabled) return;
         }
-        if (at >= STEPS.length) { done(); return; }
+        if (at > STEPS.length) { done(); return; }
         onward();
       }
 
@@ -3464,6 +3489,20 @@
           show();
         });
         show();
+      }
+
+      var mail = card.querySelector('.rec-flow-mail');
+      if (mail) {
+        var looksLikeAddress = function () {
+          next.disabled =
+            !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail.value.trim());
+        };
+        mail.addEventListener('input', looksLikeAddress);
+        mail.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') { e.preventDefault(); go(); }
+        });
+        looksLikeAddress();
+        mail.focus();
       }
 
       var chips = card.querySelectorAll('.rec-flow-chip');

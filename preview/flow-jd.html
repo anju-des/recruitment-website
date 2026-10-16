@@ -1568,10 +1568,18 @@
                  align-items:flex-start; box-sizing:border-box; margin:0;
                  list-style:none; width:clamp(230px, 24vw, 292px);
                  padding:clamp(22px, 3vw, 34px) clamp(18px, 2.4vw, 32px);
-                 /* the sand is positioned and this was not, so without a
-                    layer of its own the gradient paints over the text */
-                 position:relative; z-index:1;
-                 border-right:1px solid #E7E2F6; }
+                 position:relative;
+                 border-right:1px solid #E7E2F6;
+                 /* taller than the window: scroll it, not the page */
+                 min-height:0; overflow-y:auto; overscroll-behavior:contain;
+                 scrollbar-width:thin;
+                 scrollbar-color:#DED8F2 transparent; }
+    .rec-steps::-webkit-scrollbar { width:9px; }
+    .rec-steps::-webkit-scrollbar-thumb { border-radius:9px;
+                                          border:3px solid transparent;
+                                          background-clip:content-box;
+                                          background-color:#DED8F2; }
+    .rec-steps::-webkit-scrollbar-track { background:transparent; }
     .rec-step { position:relative; display:flex; align-items:center;
                 gap:10px; padding:14px 0; color:#A49CC0; font-size:12.5px; }
     /* the rail is a record of work: nothing to show until there is */
@@ -1855,7 +1863,8 @@
       .rec-done-card { margin:0 0 0 10px; }
       .rec-rail-set { display:none; }
       /* lying down, the edge lies down with it */
-      .rec-steps { border-right:0; border-bottom:1px solid #E7E2F6; }
+      .rec-steps { border-right:0; border-bottom:1px solid #E7E2F6;
+                   overflow-y:visible; overflow-x:auto; }
       .rec-step { padding:0; flex:none; }
       .rec-step-row b { display:none; }
       .rec-step + .rec-step { flex:1; }
@@ -1877,27 +1886,7 @@
     .rec-flow-bar { flex:none; height:3px; background:#EFECF9; }
     .rec-flow-bar span { display:block; height:100%; background:#7C5CF6;
                          width:var(--at, 25%); transition:width .25s ease; }
-    /* Sand under the header, purple into blue. A zero-height element
-       between the rail and the body, painting downward out of itself: that
-       puts it at the top of the body without knowing how tall the header is,
-       and keeps it out of the body, which scrolls. */
-    .rec-flow-sand { position:relative; height:0; z-index:0; }
-    .rec-flow-sand::before { content:""; position:absolute;
-                             top:0; left:0; right:0;
-                             height:clamp(190px, 34vh, 360px);
-                             pointer-events:none;
-                             background:linear-gradient(118deg,
-                               rgba(168,138,255,.58) 0%,
-                               rgba(134,148,255,.50) 52%,
-                               rgba(118,178,255,.42) 100%);
-                             -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.17'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23b)'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 0%, rgba(0,0,0,.66) 42%, transparent 100%);
-                             mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.33 0.33 0.33 0 -0.17'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23b)'/%3E%3C/svg%3E"), linear-gradient(to bottom, #000 0%, rgba(0,0,0,.66) 42%, transparent 100%);
-                             -webkit-mask-size:150px 150px, auto;
-                             mask-size:150px 150px, auto;
-                             -webkit-mask-composite:source-in;
-                             mask-composite:intersect; }
-    /* the questions sit over it */
-    .rec-flow-card { position:relative; z-index:1; text-align:center; }
+    .rec-flow-card { text-align:center; }
     /* not align-items:center -- a flex item taller than its container
        overflows both ends and the top of it cannot be scrolled to. An auto
        margin centres the same way and stops as soon as it does not fit. */
@@ -4375,7 +4364,6 @@
             'Publish role for free</button>' +
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
-        '<div class="rec-flow-sand" aria-hidden="true"></div>' +
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
             ['Company details', 'Job board', 'Role details']

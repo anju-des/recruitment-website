@@ -1557,7 +1557,8 @@
     @keyframes rec-flow-out { from { opacity:1; } to { opacity:0; } }
     .rec-flow-head { flex:none; display:flex; align-items:center;
                      justify-content:space-between; gap:16px;
-                     padding:10px clamp(18px, 3vw, 40px); }
+                     padding:10px clamp(18px, 3vw, 40px);
+                     border-bottom:1px solid #E7E2F6; }
     .rec-flow-head img { display:block; width:78px; height:auto; }
     /* the three steps, as a rail down the left */
     .rec-flow-main { flex:1; min-height:0; display:flex; }
@@ -1868,26 +1869,10 @@
     @media (prefers-reduced-motion: reduce) {
       .rec-done-card { animation:none; }
     }
-    .rec-step-row i { font-style:normal; display:grid; place-items:center;
-                  width:20px; height:20px; flex:none; border-radius:50%;
-                  background:#F1EEFA; color:#9A93B8; font-size:11px;
-                  font-weight:700; }
     .rec-step-row b { font-weight:500; }
     .rec-step.is-on { color:#1A1430; }
-    .rec-step.is-on .rec-step-row i { background:#7C5CF6; color:#FFFFFF; }
     .rec-step.is-on .rec-step-row b { font-weight:600; }
-    .rec-step.is-busy .rec-step-row i { background:#7C5CF6; color:transparent;
-                          position:relative; }
-    .rec-step.is-busy .rec-step-row i::after { content:""; position:absolute; inset:3px;
-                                 border-radius:50%;
-                                 border:2px solid rgba(255,255,255,.4);
-                                 border-top-color:#FFFFFF;
-                                 animation:rec-flow-turn .7s linear infinite; }
-    @media (prefers-reduced-motion: reduce) {
-      .rec-step.is-busy .rec-step-row i::after { animation:none; }
-    }
     .rec-step.is-done { color:#6B6392; }
-    .rec-step.is-done .rec-step-row i { background:#EDE8FD; color:#5A4BD8; }
     /* a 220px column off the side of a phone leaves nothing for the
        content, so the rail lies back down */
     @media (max-width:860px) {
@@ -1905,10 +1890,17 @@
     }
     .rec-flow-acts { display:inline-flex; align-items:center; gap:10px; }
     .rec-invite-top[hidden] { display:none; }
+    /* beside the publish button, not inside a heading any more.
+       The border is the other two pixels: one has it and one does not,
+       so the publish button carries an invisible one of its own rather
+       than the padding being fudged to hide the difference. */
+    .rec-invite-top { padding:9px 16px; font-size:13.5px; }
+    .rec-invite-top svg { width:16px; height:16px; }
     .rec-invite-n { font-style:normal; font-weight:600; color:#A49CC0; }
     .rec-invite-n:not(:empty)::before { content:" b7"; margin:0 5px 0 2px;
                                         color:#CFC7E8; }
-    .rec-flow-cta { padding:9px 16px; border:0; border-radius:8px;
+    .rec-flow-cta { padding:9px 16px; border-radius:8px;
+                    border:1px solid transparent;
                     background:#1A1430; color:#FFFFFF; font:inherit;
                     font-size:13.5px; font-weight:600; cursor:pointer;
                     transition:background .15s, transform .15s; }
@@ -1921,24 +1913,6 @@
     @media (max-width:560px) {
       .rec-flow-cta { padding:9px 14px; font-size:12.5px; }
     }
-    /* the rail fills as the brief does */
-    .rec-flow-bar { flex:none; display:flex; gap:3px; height:3px;
-                    padding:0 3px; background:transparent; }
-    .rec-flow-bar i { flex:1; position:relative; overflow:hidden;
-                      border-radius:2px; background:#EFECF9;
-                      transition:background .25s ease; }
-    .rec-flow-bar i.is-done { background:#7C5CF6; }
-    /* the step being worked on: a sweep, so waiting looks like waiting */
-    .rec-flow-bar i.is-now::after { content:""; position:absolute; inset:0;
-                                    border-radius:2px;
-                                    background:linear-gradient(90deg,
-                                      rgba(124,92,246,0) 0%,
-                                      rgba(124,92,246,.95) 50%,
-                                      rgba(124,92,246,0) 100%);
-                                    animation:rec-bar-sweep 1.5s ease-in-out
-                                              infinite; }
-    @keyframes rec-bar-sweep { from { transform:translateX(-100%); }
-                               to { transform:translateX(100%); } }
     .rec-flow-card { text-align:center; }
     /* not align-items:center -- a flex item taller than its container
        overflows both ends and the top of it cannot be scrolled to. An auto
@@ -1947,9 +1921,9 @@
                      display:flex; align-items:flex-start;
                      justify-content:flex-start;
                      padding:clamp(24px, 4vw, 56px) clamp(18px, 3vw, 40px); }
-    /* no margin either way: beside the panel, at the top of the window,
-       and still scrollable when it is taller than one */
-    .rec-flow-card { width:min(680px, 100%); margin:0; }
+    /* auto across, nothing down: centred in the column, top of the
+       window, and still scrollable when it is taller than one */
+    .rec-flow-card { width:min(680px, 100%); margin:0 auto; }
     .rec-flow-q { margin:0 0 10px; color:#1A1430;
                   font-size:clamp(24px, 1.8vw + 14px, 40px); font-weight:600;
                   line-height:1.16; letter-spacing:-0.028em; text-wrap:balance; }
@@ -2089,8 +2063,6 @@
     .rec-flow-note { margin:18px 0 0; color:#8A82A8; font-size:13px; }
     @media (prefers-reduced-motion: reduce) {
       .rec-flow, .rec-flow.is-out { animation:none; }
-      .rec-flow-bar i { transition:none; }
-      .rec-flow-bar i.is-now::after { animation:none; opacity:.55; }
     }
     @media (max-width:600px) {
       .rec-flow-fact { min-width:0; flex:1 1 140px; }
@@ -4441,15 +4413,13 @@
               'Publish role for free</button>' +
           '</span>' +
         '</div>' +
-        '<div class="rec-flow-bar" aria-hidden="true">' +
-          '<i></i><i></i><i></i></div>' +
+
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
             ['Company details', 'Job board', 'Role details']
               .map(function (s, i) {
                 return '<li class="rec-step">' +
-                  '<span class="rec-step-row"><i>' + (i + 1) + '</i>' +
-                  '<b>' + s + '</b></span></li>';
+                  '<span class="rec-step-row"><b>' + s + '</b></span></li>';
               }).join('') +
           '</ol>' +
           '<div class="rec-flow-body"><div class="rec-flow-card"></div></div>' +
@@ -4478,14 +4448,7 @@
         all[k].classList.remove('is-busy');
         all[k].classList.toggle('is-on', k === i && !done);
         all[k].classList.toggle('is-done', over);
-        var mark = all[k].querySelector('i');
-        mark.textContent = over ? '\u2713' : String(k + 1);
-      }
-      // the bar is the same answer, drawn along the top
-      var segs = flow.querySelectorAll('.rec-flow-bar i');
-      for (var n = 0; n < segs.length; n++) {
-        segs[n].classList.toggle('is-done', n < i || (n === i && done));
-        segs[n].classList.toggle('is-now', n === i && !done);
+        // no mark to write into: the bar carries the progress now
       }
     }
 

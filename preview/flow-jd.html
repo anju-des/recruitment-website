@@ -1883,9 +1883,23 @@
       .rec-flow-cta { padding:9px 14px; font-size:12.5px; }
     }
     /* the rail fills as the brief does */
-    .rec-flow-bar { flex:none; height:3px; background:#EFECF9; }
-    .rec-flow-bar span { display:block; height:100%; background:#7C5CF6;
-                         width:var(--at, 25%); transition:width .25s ease; }
+    .rec-flow-bar { flex:none; display:flex; gap:3px; height:3px;
+                    padding:0 3px; background:transparent; }
+    .rec-flow-bar i { flex:1; position:relative; overflow:hidden;
+                      border-radius:2px; background:#EFECF9;
+                      transition:background .25s ease; }
+    .rec-flow-bar i.is-done { background:#7C5CF6; }
+    /* the step being worked on: a sweep, so waiting looks like waiting */
+    .rec-flow-bar i.is-now::after { content:""; position:absolute; inset:0;
+                                    border-radius:2px;
+                                    background:linear-gradient(90deg,
+                                      rgba(124,92,246,0) 0%,
+                                      rgba(124,92,246,.95) 50%,
+                                      rgba(124,92,246,0) 100%);
+                                    animation:rec-bar-sweep 1.5s ease-in-out
+                                              infinite; }
+    @keyframes rec-bar-sweep { from { transform:translateX(-100%); }
+                               to { transform:translateX(100%); } }
     .rec-flow-card { text-align:center; }
     /* not align-items:center -- a flex item taller than its container
        overflows both ends and the top of it cannot be scrolled to. An auto
@@ -1894,7 +1908,9 @@
                      display:flex; align-items:flex-start;
                      justify-content:flex-start;
                      padding:clamp(24px, 4vw, 56px) clamp(18px, 3vw, 40px); }
-    .rec-flow-card { width:min(680px, 100%); margin:auto; }
+    /* auto across, nothing down: centred in the column, top of the
+       window, and still scrollable when it is taller than one */
+    .rec-flow-card { width:min(680px, 100%); margin:0 auto; }
     .rec-flow-q { margin:0 0 10px; color:#1A1430;
                   font-size:clamp(24px, 1.8vw + 14px, 40px); font-weight:600;
                   line-height:1.16; letter-spacing:-0.028em; text-wrap:balance; }
@@ -2034,7 +2050,8 @@
     .rec-flow-note { margin:18px 0 0; color:#8A82A8; font-size:13px; }
     @media (prefers-reduced-motion: reduce) {
       .rec-flow, .rec-flow.is-out { animation:none; }
-      .rec-flow-bar span { transition:none; }
+      .rec-flow-bar i { transition:none; }
+      .rec-flow-bar i.is-now::after { animation:none; opacity:.55; }
     }
     @media (max-width:600px) {
       .rec-flow-fact { min-width:0; flex:1 1 140px; }
@@ -4363,7 +4380,8 @@
           '<button type="button" class="rec-flow-cta" data-login="1">' +
             'Publish role for free</button>' +
         '</div>' +
-        '<div class="rec-flow-bar"><span></span></div>' +
+        '<div class="rec-flow-bar" aria-hidden="true">' +
+          '<i></i><i></i><i></i></div>' +
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
             ['Company details', 'Job board', 'Role details']
@@ -4399,6 +4417,12 @@
         all[k].classList.toggle('is-done', over);
         var mark = all[k].querySelector('i');
         mark.textContent = over ? '\u2713' : String(k + 1);
+      }
+      // the bar is the same answer, drawn along the top
+      var segs = flow.querySelectorAll('.rec-flow-bar i');
+      for (var n = 0; n < segs.length; n++) {
+        segs[n].classList.toggle('is-done', n < i || (n === i && done));
+        segs[n].classList.toggle('is-now', n === i && !done);
       }
     }
 
@@ -5082,9 +5106,6 @@
 
     function draw() {
       var card = flow.querySelector('.rec-flow-card');
-      var total = STEPS.length + 1;
-      flow.querySelector('.rec-flow-bar span').style.setProperty(
-        '--at', Math.round(Math.min(at + 1, total) / total * 100) + '%');
       if (at >= STEPS.length) { close(); return; }
       flow.classList.remove('is-found');
       flow.classList.remove('is-working');
@@ -5210,8 +5231,6 @@
         function ready() {
           if (!flow || flow.hidden) return;
           at_step(2, true);
-          flow.querySelector('.rec-flow-bar span')
-              .style.setProperty('--at', '100%');
           show(3, '');
           // the card keeps the finished screen, not the part on show
           put_mini(2, 'Role details', role.title || 'as read', found.logo,
@@ -5460,8 +5479,6 @@
 
           if (nothing) return;
 
-          flow.querySelector('.rec-flow-bar span')
-              .style.setProperty('--at', '100%');
 
           // let it be read at full size before it becomes a card
           window.setTimeout(function () {
@@ -6058,8 +6075,6 @@
       // without this the rail leaves with the details
       flow.classList.add('is-working');
       flow.classList.add('is-found');
-      flow.querySelector('.rec-flow-bar span')
-          .style.setProperty('--at', '100%');
       flow.querySelector('.rec-flow-card').innerHTML = '';
       company = { who: was.who, logo: was.logo, based: was.based || '' };
       put_mini(0, was.who, was.website || '', was.logo, screens[0]);

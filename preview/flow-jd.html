@@ -1560,8 +1560,8 @@
     @keyframes rec-flow-out { from { opacity:1; } to { opacity:0; } }
     .rec-flow-head { flex:none; display:flex; align-items:center;
                      justify-content:space-between; gap:16px;
-                     padding:clamp(16px, 2.2vw, 26px) clamp(18px, 3vw, 40px); }
-    .rec-flow-head img { display:block; width:92px; height:auto; }
+                     padding:10px clamp(18px, 3vw, 40px); }
+    .rec-flow-head img { display:block; width:78px; height:auto; }
     /* the three steps, as a rail down the left */
     .rec-flow-main { flex:1; min-height:0; display:flex; }
     .rec-steps { flex:none; display:none; flex-direction:column;
@@ -1570,25 +1570,23 @@
                  padding:clamp(22px, 3vw, 34px) clamp(18px, 2.4vw, 32px);
                  /* the sand is positioned and this was not, so without a
                     layer of its own the gradient paints over the text */
-                 position:relative; z-index:1; }
+                 position:relative; z-index:1;
+                 border-right:1px solid #E7E2F6; }
     .rec-step { position:relative; display:flex; align-items:center;
                 gap:10px; padding:14px 0; color:#A49CC0; font-size:12.5px; }
-    /* a line from the circle above to this one, at the circle's centre */
-    .rec-step + .rec-step::before { content:""; position:absolute;
-                                    left:9.5px; top:-14px; width:1px;
-                                    height:28px; background:#E2DCF4; }
     /* the rail is a record of work: nothing to show until there is */
     .rec-flow.is-working .rec-steps,
     .rec-flow.is-found .rec-steps { display:flex; }
 
     /* what the finished step keeps: the company, and nothing else */
     .rec-done-slot { list-style:none; max-width:100%; }
-    .rec-step { flex-direction:column; align-items:flex-start; }
+    .rec-step { flex-direction:column; align-items:flex-start;
+                align-self:stretch; width:100%; box-sizing:border-box; }
     .rec-step-row { display:flex; align-items:center; gap:10px; }
     .rec-done-slot { display:block; max-width:100%; }
     /* what a step made, listed under it */
-    .rec-rail-set { width:100%; margin:8px 0 0 30px; padding-right:8px;
-                    box-sizing:border-box;
+    .rec-rail-set { align-self:stretch; margin:8px 0 0 30px;
+                    padding-right:8px; min-width:0; box-sizing:border-box;
                     animation:rec-mini-in .3s ease both; }
     .rec-rail-head { display:flex; align-items:center; gap:7px; margin:0 0 5px;
                      font-size:10px; font-weight:700; letter-spacing:.09em;
@@ -1856,14 +1854,13 @@
                    flex-wrap:wrap; padding:12px 18px; }
       .rec-done-card { margin:0 0 0 10px; }
       .rec-rail-set { display:none; }
+      /* lying down, the edge lies down with it */
+      .rec-steps { border-right:0; border-bottom:1px solid #E7E2F6; }
       .rec-step { padding:0; flex:none; }
       .rec-step-row b { display:none; }
       .rec-step + .rec-step { flex:1; }
-      .rec-step + .rec-step::before { position:static; flex:1; width:auto;
-                                      min-width:14px; height:1px;
-                                      margin-right:8px; }
     }
-    .rec-flow-cta { padding:10px 18px; border:0; border-radius:100px;
+    .rec-flow-cta { padding:9px 16px; border:0; border-radius:8px;
                     background:#1A1430; color:#FFFFFF; font:inherit;
                     font-size:13.5px; font-weight:600; cursor:pointer;
                     transition:background .15s, transform .15s; }
@@ -4950,16 +4947,17 @@
 
     // ---- what a step made, under that step --------------------------
 
-    // rows: [{ n, say, end }]. `n` is the small leading mark, `end` the
-    // figure on the right, both optional.
-    function rail_set(i, label, count, rows) {
+    // Several of these can sit under one step, each with its own key, so
+    // redrawing one leaves the rest alone. rows: [{ n, say, end, go }].
+    function rail_set(i, key, label, count, rows) {
       var step = flow.querySelectorAll('.rec-step')[i];
       if (!step) return;
-      var set = step.querySelector('.rec-rail-set');
+      var set = step.querySelector('.rec-rail-set[data-set="' + key + '"]');
       if (!rows || !rows.length) { if (set) set.remove(); return; }
       if (!set) {
         set = document.createElement('div');
         set.className = 'rec-rail-set';
+        set.setAttribute('data-set', key);
         step.appendChild(set);
       }
       set.innerHTML =
@@ -4974,35 +4972,61 @@
               '</button></li>';
           }).join('') +
         '</ul>';
-      set.querySelectorAll('.rec-rail-row').forEach(function (b) {
-        b.addEventListener('click', function () {
-          show_details(i, open_i !== i);
-        });
-      });
+      var all = set.querySelectorAll('.rec-rail-row');
+      for (var k = 0; k < all.length; k++) {
+        (function (b, go) {
+          b.addEventListener('click', go || function () {
+            show_details(i, open_i !== i);
+          });
+        }(all[k], rows[k].go));
+      }
     }
 
-    // the rail reads off the same state the screens do
+    // the panel reads off the same state the screens do
     function rail_draw() {
       if (!flow) return;
+
       if (kept[1]) {
         var said = (role.title || (brief.role || '').split(',')[0] || '')
           .trim();
-        rail_set(1, 'Board', said ? '1 role' : '', [
-          { say: board_addr(company.who || found_who()), end: 'live' }
+        rail_set(1, 'board', 'Board', said ? '1 role' : '', [
+          { say: board_addr((company && company.who) || ''), end: 'live' }
         ].concat(said ? [{ say: said }] : []));
       }
-      if (kept[2] && role.rounds && role.rounds.length) {
-        rail_set(2, 'Rounds', role.rounds.length,
-          role.rounds.map(function (r, n) {
-            return { n: String(n + 1), say: r.say,
-                     end: r.mins ? r.mins + 'm' : '' };
-          }));
-      }
-    }
 
-    // the company's name, wherever this run keeps it
-    function found_who() {
-      return (company && company.who) || '';
+      if (!kept[2]) return;
+
+      rail_set(2, 'qs', 'Screening questions',
+        (role.questions || []).length,
+        (role.questions || []).map(function (q, n) {
+          return { n: String(n + 1), say: q };
+        }));
+
+      rail_set(2, 'rounds', 'Interview rounds', (role.rounds || []).length,
+        (role.rounds || []).map(function (r, n) {
+          return { n: String(n + 1), say: r.say,
+                   end: r.mins ? r.mins + 'm' : '' };
+        }));
+
+      rail_set(2, 'pay', 'Salary range', '', role.pay
+        ? [{ say: role.pay,
+             end: role.pay_from === 'market' ? 'market' : 'yours' }]
+        : []);
+
+      rail_set(2, 'jd', 'Job description', '', jd
+        ? [{ say: jd_name || 'The job description', end: 'open',
+             go: show_jd }]
+        : []);
+
+      // a set that was empty once and filled later was appended last, so
+      // the order says when each one arrived rather than what it is.
+      // appendChild moves a node it already has: this puts them in order.
+      var step = flow.querySelectorAll('.rec-step')[2];
+      if (!step) return;
+      ['qs', 'rounds', 'pay', 'jd'].forEach(function (key) {
+        var set = step.querySelector('.rec-rail-set[data-set="' + key + '"]');
+        if (set) step.appendChild(set);
+      });
     }
 
     // what a finished step leaves behind, under that step

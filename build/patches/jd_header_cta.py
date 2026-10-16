@@ -23,7 +23,7 @@ EDITS = [
           .addEventListener('click', open_account);"""),
 ]
 
-CSS = """    .rec-flow-cta { padding:10px 18px; border:0; border-radius:100px;
+CSS = """    .rec-flow-cta { padding:10px 18px; border:0; border-radius:8px;
                     background:#1A1430; color:#FFFFFF; font:inherit;
                     font-size:13.5px; font-weight:600; cursor:pointer;
                     transition:background .15s, transform .15s; }

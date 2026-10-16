@@ -1566,7 +1566,7 @@
     .rec-flow-main { flex:1; min-height:0; display:flex; }
     .rec-steps { flex:none; display:none; flex-direction:column;
                  align-items:flex-start; box-sizing:border-box; margin:0;
-                 list-style:none; width:clamp(200px, 22vw, 250px);
+                 list-style:none; width:clamp(230px, 24vw, 292px);
                  padding:clamp(22px, 3vw, 34px) clamp(18px, 2.4vw, 32px);
                  /* the sand is positioned and this was not, so without a
                     layer of its own the gradient paints over the text */
@@ -1586,6 +1586,37 @@
     .rec-step { flex-direction:column; align-items:flex-start; }
     .rec-step-row { display:flex; align-items:center; gap:10px; }
     .rec-done-slot { display:block; max-width:100%; }
+    /* what a step made, listed under it */
+    .rec-rail-set { width:100%; margin:8px 0 0 30px; padding-right:8px;
+                    box-sizing:border-box;
+                    animation:rec-mini-in .3s ease both; }
+    .rec-rail-head { display:flex; align-items:center; gap:7px; margin:0 0 5px;
+                     font-size:10px; font-weight:700; letter-spacing:.09em;
+                     text-transform:uppercase; color:#A49CC0; }
+    .rec-rail-head b { font-weight:700; color:#6B4BE8; }
+    .rec-rail-rows { margin:0; padding:0; list-style:none;
+                     display:flex; flex-direction:column; gap:3px; }
+    .rec-rail-row { display:flex; align-items:center; gap:8px; width:100%;
+                    padding:6px 9px; border:1px solid transparent;
+                    border-radius:9px; background:none; font:inherit;
+                    text-align:left; cursor:pointer;
+                    transition:background .14s, border-color .14s; }
+    .rec-rail-row:hover { background:#FFFFFF; border-color:#ECE7F9; }
+    .rec-rail-row:focus-visible { outline:2px solid #7C5CF6;
+                                  outline-offset:1px; }
+    .rec-rail-row i { flex:none; width:15px; height:15px; border-radius:4px;
+                      display:grid; place-items:center; background:#EFEBFC;
+                      color:#7C5CF6; font-style:normal; font-size:9.5px;
+                      font-weight:700; }
+    .rec-rail-row span { flex:1; min-width:0; font-size:12px;
+                         color:#4E4766; white-space:nowrap;
+                         overflow:hidden; text-overflow:ellipsis; }
+    .rec-rail-row em { flex:none; font-style:normal; font-size:11px;
+                       color:#A49CC0; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-rail-set { animation:none; }
+    }
+
 
 
     /* step two's board, built from step one */
@@ -1646,6 +1677,20 @@
                      font-weight:700; color:#1A1430; }
     .rec-part-head span { font-size:12px; font-weight:500; color:#9A93B8; }
     .rec-part-say { margin:10px 0 0; font-size:12.5px; color:#9A93B8; }
+    /* a row straight under a part heading needs no rule above it:
+       the heading is already the separation */
+    .rec-part-head + .rec-role-row { border-top:0; padding-top:2px; }
+    .rec-pay-from { display:flex; flex-wrap:wrap; align-items:center;
+                    gap:6px; margin:10px 0 0; }
+    .rec-pay-for { padding:4px 10px; border-radius:100px; background:#F4F2FB;
+                   font-size:11.5px; color:#6B6487; }
+    .rec-pay-ref { padding:4px 10px; border-radius:100px;
+                   border:1px solid #E7E2F6; background:#FFFFFF;
+                   font-size:11.5px; color:#6B4BE8; text-decoration:none;
+                   transition:background .14s, border-color .14s; }
+    .rec-pay-ref:hover { background:#F7F5FE; border-color:#BCAEF0; }
+    .rec-pay-ref::after { content:"\2197"; margin-left:4px; opacity:.6; }
+
     .rec-part { animation:rec-part-in .34s ease both; }
     @keyframes rec-part-in { from { opacity:0; transform:translateY(6px); }
                              to { opacity:1; transform:none; } }
@@ -1810,6 +1855,7 @@
       .rec-steps { width:100%; flex-direction:row; align-items:center;
                    flex-wrap:wrap; padding:12px 18px; }
       .rec-done-card { margin:0 0 0 10px; }
+      .rec-rail-set { display:none; }
       .rec-step { padding:0; flex:none; }
       .rec-step-row b { display:none; }
       .rec-step + .rec-step { flex:1; }
@@ -1817,11 +1863,19 @@
                                       min-width:14px; height:1px;
                                       margin-right:8px; }
     }
-    .rec-flow-x { width:36px; height:36px; border-radius:50%; border:0;
-                  display:grid; place-items:center; cursor:pointer;
-                  background:#F2EFFB; color:#4E4470; font-size:19px;
-                  line-height:1; font-family:inherit; transition:background .15s; }
-    .rec-flow-x:hover { background:#E6E0F7; }
+    .rec-flow-cta { padding:10px 18px; border:0; border-radius:100px;
+                    background:#1A1430; color:#FFFFFF; font:inherit;
+                    font-size:13.5px; font-weight:600; cursor:pointer;
+                    transition:background .15s, transform .15s; }
+    .rec-flow-cta:hover { background:#2C2545; transform:translateY(-1px); }
+    .rec-flow-cta:focus-visible { outline:2px solid #7C5CF6;
+                                  outline-offset:3px; }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-flow-cta { transition:none; }
+    }
+    @media (max-width:560px) {
+      .rec-flow-cta { padding:9px 14px; font-size:12.5px; }
+    }
     /* the rail fills as the brief does */
     .rec-flow-bar { flex:none; height:3px; background:#EFECF9; }
     .rec-flow-bar span { display:block; height:100%; background:#7C5CF6;
@@ -4320,7 +4374,8 @@
       flow.innerHTML =
         '<div class="rec-flow-head">' +
           '<img src="mira-logo.svg" width="1152" height="365" alt="Mira">' +
-          '<button type="button" class="rec-flow-x" aria-label="Close">&#215;</button>' +
+          '<button type="button" class="rec-flow-cta" data-login="1">' +
+            'Publish role for free</button>' +
         '</div>' +
         '<div class="rec-flow-bar"><span></span></div>' +
         '<div class="rec-flow-sand" aria-hidden="true"></div>' +
@@ -4337,7 +4392,8 @@
         '</div>';
       document.body.appendChild(flow);
 
-      flow.querySelector('.rec-flow-x').addEventListener('click', close);
+      flow.querySelector('.rec-flow-cta')
+          .addEventListener('click', open_account);
       // the page behind is scroll-driven; it should stay where it was
       flow.addEventListener('wheel', function (e) {
         if (!flow.querySelector('.rec-flow-body').contains(e.target)) e.preventDefault();
@@ -4375,6 +4431,7 @@
           v: FLOW_V,
           role: brief.role, website: brief.website,
           who: company.who, logo: company.logo, based: company.based || '',
+          rounds: role.rounds,
           screens: kept
         }));
       } catch (e) {}
@@ -4414,8 +4471,8 @@
 
     // what the last step shows, and what a change to it touches
     var role = { title: '', place: '', mode: '', years: '',
-                 skills: '', pay: '', pay_from: '', pay_why: '',
-                 questions: [], rounds: [] };
+                 skills: '', pay: '', pay_from: '', pay_for: '',
+                 pay_refs: [], questions: [], rounds: [] };
     var jd_file = null;       // the file itself, to open the original
     var jd_name = '';         // what it was called
 
@@ -4494,12 +4551,19 @@
               '<input class="rec-role-in" data-k="pay" value="' +
                 esc(role.pay || '') + '" placeholder="' +
                 'Add what you are paying"></div>' +
-            (role.pay_why
-              ? '<p class="rec-part-say">' + esc(role.pay_why) + '</p>'
+            (role.pay_from === 'market'
+              ? '<p class="rec-pay-from">' +
+                  '<span class="rec-pay-for">' + esc(role.pay_for) +
+                  '</span>' +
+                  role.pay_refs.map(function (r) {
+                    return '<a class="rec-pay-ref" href="' + esc(r.href) +
+                      '" target="_blank" rel="noreferrer noopener">' +
+                      esc(r.say) + '</a>';
+                  }).join('') +
+                '</p>'
               : (role.pay ? '' :
                 '<p class="rec-part-say">No published range for this one ' +
-                'here. Add what you are paying — Mira will not guess ' +
-                'a number.</p>')) +
+                '— add what you are paying.</p>')) +
           '</div>' : '') +
 
           (tell
@@ -4679,7 +4743,23 @@
       ]
     };
 
-    var BAND_SRC = 'Glassdoor, Payscale and Levels.fyi, read October 2026';
+
+
+    // the pages those ranges were read from, by family
+    function PAY_REFS(kind) {
+      var levels = kind === 'engineering'
+        ? 'https://www.levels.fyi/t/software-engineer/locations/india'
+        : 'https://www.levels.fyi/t/product-designer/locations/india';
+      var glass = kind === 'engineering'
+        ? 'https://www.glassdoor.co.in/Salaries/india-software-engineer-salary-SRCH_IL.0,5_IN115_KO6,23.htm'
+        : 'https://www.glassdoor.co.in/Salaries/india-product-designer-salary-SRCH_IL.0,5_IN115_KO6,22.htm';
+      return [
+        { say: 'Glassdoor', href: glass },
+        { say: 'Payscale',
+          href: 'https://www.payscale.com/research/IN/Country=India/Salary' },
+        { say: 'Levels.fyi', href: levels }
+      ];
+    }
 
     // the bands are rupees a year: anywhere else and they say nothing
     var IN_INDIA = /\b(india|bengaluru|bangalore|mumbai|delhi|gurugram|gurgaon|noida|hyderabad|pune|chennai|kolkata|ahmedabad|jaipur|kochi|indore|chandigarh|trivandrum|thiruvananthapuram|coimbatore)\b/i;
@@ -4721,13 +4801,14 @@
       var band = market_band();
       if (band) {
         role.pay_from = 'market';
-        role.pay_why = 'Typical for ' + band.kind + ' at ' +
-          role.years.replace(/\s*years?$/, '') + ' years in India — ' +
-          BAND_SRC + '. Replace it with your own placement data.';
+        role.pay_for = band.kind + ' · ' +
+          role.years.replace(/\s*years?$/, '') + ' yrs · India';
+        role.pay_refs = PAY_REFS(family(role.title));
         return band.say;
       }
       role.pay_from = '';
-      role.pay_why = '';
+      role.pay_for = '';
+      role.pay_refs = [];
       return '';
     }
 
@@ -4735,7 +4816,11 @@
     function wire_role(root) {
       if (!root) return;
 
-      function kept_again() { kept[2] = role_html(); remember(); }
+      function kept_again() {
+        kept[2] = role_html();
+        rail_draw();
+        remember();
+      }
 
       root.querySelectorAll('.rec-role-in').forEach(function (box) {
         box.addEventListener('input', function () {
@@ -4744,12 +4829,14 @@
           if (k === 'pay' && role.pay_from === 'market') {
             // theirs now, not a market range
             role.pay_from = 'said';
-            role.pay_why = '';
+            role.pay_for = '';
+            role.pay_refs = [];
           }
           if (k === 'title') {
             var said = box.value.split(',')[0].trim();
             brief.role = box.value;
             retitle_board(said || 'Your first role');
+            rail_draw();
             put_mini(2, 'Role details', said || 'as read',
                      (company && company.logo) || '', role_html());
             remember();
@@ -4859,6 +4946,63 @@
         if (e.target === box) shut();
       });
       document.addEventListener('keydown', esc_shut);
+    }
+
+    // ---- what a step made, under that step --------------------------
+
+    // rows: [{ n, say, end }]. `n` is the small leading mark, `end` the
+    // figure on the right, both optional.
+    function rail_set(i, label, count, rows) {
+      var step = flow.querySelectorAll('.rec-step')[i];
+      if (!step) return;
+      var set = step.querySelector('.rec-rail-set');
+      if (!rows || !rows.length) { if (set) set.remove(); return; }
+      if (!set) {
+        set = document.createElement('div');
+        set.className = 'rec-rail-set';
+        step.appendChild(set);
+      }
+      set.innerHTML =
+        '<p class="rec-rail-head">' + esc(label) +
+          (count ? '<b>' + esc(String(count)) + '</b>' : '') + '</p>' +
+        '<ul class="rec-rail-rows">' +
+          rows.map(function (r) {
+            return '<li><button type="button" class="rec-rail-row">' +
+              (r.n ? '<i>' + esc(r.n) + '</i>' : '') +
+              '<span>' + esc(r.say) + '</span>' +
+              (r.end ? '<em>' + esc(r.end) + '</em>' : '') +
+              '</button></li>';
+          }).join('') +
+        '</ul>';
+      set.querySelectorAll('.rec-rail-row').forEach(function (b) {
+        b.addEventListener('click', function () {
+          show_details(i, open_i !== i);
+        });
+      });
+    }
+
+    // the rail reads off the same state the screens do
+    function rail_draw() {
+      if (!flow) return;
+      if (kept[1]) {
+        var said = (role.title || (brief.role || '').split(',')[0] || '')
+          .trim();
+        rail_set(1, 'Board', said ? '1 role' : '', [
+          { say: board_addr(company.who || found_who()), end: 'live' }
+        ].concat(said ? [{ say: said }] : []));
+      }
+      if (kept[2] && role.rounds && role.rounds.length) {
+        rail_set(2, 'Rounds', role.rounds.length,
+          role.rounds.map(function (r, n) {
+            return { n: String(n + 1), say: r.say,
+                     end: r.mins ? r.mins + 'm' : '' };
+          }));
+      }
+    }
+
+    // the company's name, wherever this run keeps it
+    function found_who() {
+      return (company && company.who) || '';
     }
 
     // what a finished step leaves behind, under that step
@@ -5060,6 +5204,7 @@
           // the card keeps the finished screen, not the part on show
           put_mini(2, 'Role details', role.title || 'as read', found.logo,
                    role_html());
+          rail_draw();
           // filed open: the screen it holds is the one on screen
           open_i = 2;
           var mine = flow.querySelector('.rec-done-card[data-for="2"]');
@@ -5143,6 +5288,7 @@
             open_i = null;
             put_mini(1, 'Job board', board_addr(found.who),
                      found.logo, card.innerHTML);
+            rail_draw();
             remember();
             card.innerHTML = '';
             step_busy(2);
@@ -5914,6 +6060,9 @@
         put_mini(2, 'Role details', said || 'as read', was.logo, screens[2]);
         last = 2;
       }
+      if (was.rounds) role.rounds = was.rounds;
+      if (was.role) role.title = String(was.role).split(',')[0].trim();
+      rail_draw();
       at_step(last, true);
     }());
   }());

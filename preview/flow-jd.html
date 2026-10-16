@@ -1628,6 +1628,16 @@
                                   color:#4B3BC8; }
     .rec-role-pick button:focus-visible { outline:2px solid #7C5CF6;
                                           outline-offset:2px; }
+    /* the answer at rest; the choice when it is asked for */
+    .rec-role-pick.is-picked button { display:none; }
+    .rec-role-pick.is-picked button.is-on,
+    .rec-role-pick.is-picked.is-open button { display:inline-block; }
+    .rec-role-pick.is-picked:not(.is-open) button.is-on::after {
+      content:""; display:inline-block; width:5px; height:5px;
+      margin:0 0 1px 7px; border-right:1.5px solid currentColor;
+      border-bottom:1.5px solid currentColor; transform:rotate(45deg);
+      opacity:.65; }
+
     /* the parts of the last screen */
     .rec-part { margin-top:22px; padding-top:18px;
                 border-top:1px solid #F0EDF7; }
@@ -1636,35 +1646,51 @@
                      font-weight:700; color:#1A1430; }
     .rec-part-head span { font-size:12px; font-weight:500; color:#9A93B8; }
     .rec-part-say { margin:10px 0 0; font-size:12.5px; color:#9A93B8; }
+    .rec-part { animation:rec-part-in .34s ease both; }
+    @keyframes rec-part-in { from { opacity:0; transform:translateY(6px); }
+                             to { opacity:1; transform:none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .rec-part { animation:none; }
+    }
+
     .rec-qs, .rec-rounds { margin:0; padding:0; list-style:none;
                            display:flex; flex-direction:column; gap:10px; }
     .rec-qs li, .rec-rounds li { display:flex; align-items:flex-start;
-                                 gap:11px; }
-    .rec-qs b, .rec-rounds b { flex:none; width:22px; height:22px;
-                               margin-top:5px; border-radius:50%;
+                                 gap:12px; border-radius:10px;
+                                 transition:background .14s; }
+    .rec-qs li:hover, .rec-rounds li:hover { background:#FAF9FE; }
+    .rec-qs li:focus-within, .rec-rounds li:focus-within {
+      background:#F7F5FE; }
+    .rec-qs b, .rec-rounds b { flex:none; width:20px; height:20px;
+                               margin:9px 0 0 8px; border-radius:50%;
                                display:grid; place-items:center;
-                               background:#F1EEFA; color:#6B4BE8;
-                               font-size:11px; font-weight:700; }
-    .rec-q-in { flex:1; min-width:0; resize:vertical; overflow-x:hidden;
-                border:1px solid #ECE7F9;
-                border-radius:10px; padding:9px 12px; background:#FFFFFF;
-                font:inherit; font-size:14px; line-height:1.45;
+                               background:#EFEBFC; color:#7C5CF6;
+                               font-size:10.5px; font-weight:700; }
+    /* writing, not a form: no border until it is being changed */
+    .rec-q-in { flex:1; min-width:0; resize:none; overflow:hidden;
+                border:1px solid transparent; border-radius:9px;
+                padding:8px 10px 8px 0; margin-right:8px; background:none;
+                font:inherit; font-size:14.5px; line-height:1.5;
                 color:#2A2440; outline:none; }
-    .rec-q-in:focus { border-color:#7C5CF6; background:#FCFBFF; }
+    .rec-q-in:focus { border-color:#D8CFF8; background:#FFFFFF;
+                      padding-left:10px; margin-right:8px; }
     .rec-rounds li { align-items:center; }
-    .rec-rounds b { margin-top:0; }
-    .rec-r-in { flex:1; min-width:0; border:1px solid #ECE7F9;
-                border-radius:10px; padding:9px 12px; background:#FFFFFF;
-                font:inherit; font-size:14px; font-weight:600; color:#1A1430;
-                outline:none; }
-    .rec-r-in:focus { border-color:#7C5CF6; background:#FCFBFF; }
-    .rec-r-mins { flex:none; display:inline-flex; align-items:center; gap:4px;
-                  font-size:12.5px; color:#9A93B8; }
-    .rec-r-min { width:38px; border:1px solid #ECE7F9; border-radius:8px;
-                 padding:7px 6px; background:#FFFFFF; font:inherit;
-                 font-size:13px; font-weight:600; color:#1A1430;
-                 text-align:center; outline:none; }
-    .rec-r-min:focus { border-color:#7C5CF6; }
+    .rec-rounds b { margin:0 0 0 8px; }
+    .rec-r-in { flex:1; min-width:0; border:1px solid transparent;
+                border-radius:9px; padding:10px 10px 10px 0; background:none;
+                font:inherit; font-size:14.5px; font-weight:600;
+                color:#1A1430; outline:none; }
+    .rec-r-in:focus { border-color:#D8CFF8; background:#FFFFFF;
+                      padding-left:10px; }
+    .rec-r-mins { flex:none; display:inline-flex; align-items:baseline;
+                  gap:3px; margin-right:10px; font-size:12px;
+                  color:#A49CC0; }
+    .rec-r-min { width:30px; border:0; border-bottom:1px solid transparent;
+                 padding:2px 0; background:none; font:inherit;
+                 font-size:14px; font-weight:600; color:#1A1430;
+                 text-align:right; outline:none; }
+    .rec-r-min:hover { border-bottom-color:#E7E2F6; }
+    .rec-r-min:focus { border-bottom-color:#7C5CF6; }
     .rec-jd-see { border:0; padding:0 0 1px; background:none; font:inherit;
                   font-size:inherit; color:#6B4BE8; cursor:pointer;
                   text-decoration:underline; text-underline-offset:3px; }
@@ -1821,10 +1847,14 @@
                              mask-composite:intersect; }
     /* the questions sit over it */
     .rec-flow-card { position:relative; z-index:1; text-align:center; }
+    /* not align-items:center -- a flex item taller than its container
+       overflows both ends and the top of it cannot be scrolled to. An auto
+       margin centres the same way and stops as soon as it does not fit. */
     .rec-flow-body { flex:1; min-height:0; overflow:auto;
-                     display:flex; align-items:center; justify-content:center;
+                     display:flex; align-items:flex-start;
+                     justify-content:flex-start;
                      padding:clamp(24px, 4vw, 56px) clamp(18px, 3vw, 40px); }
-    .rec-flow-card { width:min(680px, 100%); }
+    .rec-flow-card { width:min(680px, 100%); margin:auto; }
     .rec-flow-q { margin:0 0 10px; color:#1A1430;
                   font-size:clamp(24px, 1.8vw + 14px, 40px); font-weight:600;
                   line-height:1.16; letter-spacing:-0.028em; text-wrap:balance; }
@@ -4384,7 +4414,8 @@
 
     // what the last step shows, and what a change to it touches
     var role = { title: '', place: '', mode: '', years: '',
-                 skills: '', pay: '', questions: [], rounds: [] };
+                 skills: '', pay: '', pay_from: '', pay_why: '',
+                 questions: [], rounds: [] };
     var jd_file = null;       // the file itself, to open the original
     var jd_name = '';         // what it was called
 
@@ -4396,9 +4427,15 @@
     ];
     var MODES = ['On-site', 'Hybrid', 'Remote'];
 
-    function role_html() {
+    // how much of the screen exists yet: 0 summary, 1 questions,
+    // 2 rounds, 3 pay and the way out. `tell` is the line saying what is
+    // being written next.
+    function role_html(upto, tell) {
+      var at = (upto === undefined) ? 3 : upto;
       return '<div class="rec-found-col">' +
-        '<h2 class="rec-flow-q">Your role is ready to publish</h2>' +
+        '<h2 class="rec-flow-q">' +
+          (at < 3 ? 'Preparing your role to publish'
+                  : 'Your role is ready to publish') + '</h2>' +
         '<p class="rec-flow-hint">' +
           (jd ? 'Drafted from your job description. Change anything — ' +
                 'none of it is fixed.'
@@ -4411,7 +4448,8 @@
           '<div class="rec-role">' +
             ROLE_ROWS.slice(0, 2).map(role_row).join('') +
             '<div class="rec-role-row"><i>Work mode</i>' +
-              '<span class="rec-role-pick">' +
+              '<span class="rec-role-pick' +
+                (role.mode ? ' is-picked' : '') + '">' +
                 MODES.map(function (m) {
                   return '<button type="button" data-mode="' + esc(m) + '"' +
                     (role.mode === m ? ' class="is-on"' : '') + '>' +
@@ -4421,25 +4459,22 @@
             ROLE_ROWS.slice(2).map(role_row).join('') +
           '</div>' +
 
+          (at >= 1 ?
           '<div class="rec-part">' +
-            '<h3 class="rec-part-head">Screening questions' +
-              '<span>asked before anyone reaches you</span></h3>' +
+            '<h3 class="rec-part-head">Screening questions</h3>' +
             '<ol class="rec-qs">' +
               role.questions.map(function (q, i) {
                 return '<li><b>' + (i + 1) + '</b>' +
-                  // a long question gets the line it needs, not a scrollbar
-                  '<textarea class="rec-q-in" rows="' +
-                    (q.length > 86 ? 3 : 2) + '" data-q="' + i + '">' +
+                  // one row to start: grow() sizes it to its contents
+                  '<textarea class="rec-q-in" rows="1" data-q="' + i + '">' +
                   esc(q) + '</textarea></li>';
               }).join('') +
             '</ol>' +
-          '</div>' +
+          '</div>' : '') +
 
+          (at >= 2 ?
           '<div class="rec-part">' +
-            '<h3 class="rec-part-head">Interview rounds' +
-              '<span>' + esc(family(role.title) === 'any'
-                ? 'a standard three' : 'typical for this kind of role') +
-              '</span></h3>' +
+            '<h3 class="rec-part-head">Interview rounds</h3>' +
             '<ol class="rec-rounds">' +
               role.rounds.map(function (r, i) {
                 return '<li><b>' + (i + 1) + '</b>' +
@@ -4450,24 +4485,32 @@
                       esc(r.mins) + '" inputmode="numeric">min</span></li>';
               }).join('') +
             '</ol>' +
-          '</div>' +
+          '</div>' : '') +
 
+          (at >= 3 ?
           '<div class="rec-part">' +
-            '<h3 class="rec-part-head">Pay' +
-              '<span>' + (role.pay
-                ? 'as the job description states it'
-                : 'the job description does not say') + '</span></h3>' +
+            '<h3 class="rec-part-head">Pay</h3>' +
             '<div class="rec-role-row"><i>Salary</i>' +
               '<input class="rec-role-in" data-k="pay" value="' +
                 esc(role.pay || '') + '" placeholder="' +
                 'Add what you are paying"></div>' +
-            (role.pay ? '' :
-              '<p class="rec-part-say">Mira can estimate this once your own ' +
-              'placement data is behind it. It will not guess one.</p>') +
-          '</div>' +
+            (role.pay_why
+              ? '<p class="rec-part-say">' + esc(role.pay_why) + '</p>'
+              : (role.pay ? '' :
+                '<p class="rec-part-say">No published range for this one ' +
+                'here. Add what you are paying — Mira will not guess ' +
+                'a number.</p>')) +
+          '</div>' : '') +
 
-          '<button type="button" class="rec-flow-next rec-ready-go" ' +
-            'data-login="1">Sign in to your account</button>' +
+          (tell
+            ? '<p class="rec-tell"><i>›</i><span>' + esc(tell) +
+              '…</span><b></b></p>'
+            : '') +
+
+          (at >= 3
+            ? '<button type="button" class="rec-flow-next rec-ready-go" ' +
+              'data-login="1">Sign in to your account</button>'
+            : '') +
         '</div>' +
       '</div>';
     }
@@ -4617,12 +4660,74 @@
       return out.slice(0, 3);
     }
 
+
+    // Published ranges, read 16 October 2026 (Glassdoor India, Payscale,
+    // Levels.fyi and 2026 salary guides). They disagree with each other by
+    // a wide margin; these are the middle of what they say, for product
+    // companies rather than services firms. The screen says as much, and
+    // says to replace them.
+    var BANDS = {
+      design: [
+        { upto: 3, say: '₹7–13 LPA' },
+        { upto: 6, say: '₹14–25 LPA' },
+        { upto: 99, say: '₹22–40 LPA' }
+      ],
+      engineering: [
+        { upto: 3, say: '₹8–18 LPA' },
+        { upto: 6, say: '₹18–32 LPA' },
+        { upto: 99, say: '₹32–55 LPA' }
+      ]
+    };
+
+    var BAND_SRC = 'Glassdoor, Payscale and Levels.fyi, read October 2026';
+
+    // the bands are rupees a year: anywhere else and they say nothing
+    var IN_INDIA = /\b(india|bengaluru|bangalore|mumbai|delhi|gurugram|gurgaon|noida|hyderabad|pune|chennai|kolkata|ahmedabad|jaipur|kochi|indore|chandigarh|trivandrum|thiruvananthapuram|coimbatore)\b/i;
+
+    function years_as_number(said) {
+      var m = String(said || '').match(/(\d{1,2})\s*(?:[-–—]|to)\s*(\d{1,2})/);
+      if (m) return Number(m[2]);
+      m = String(said || '').match(/(\d{1,2})/);
+      return m ? Number(m[1]) : 0;
+    }
+
+    // a range for this family, this experience, this country -- or nothing
+    function market_band() {
+      var where = (role.place || '') + ' ' + ((company && company.based) || '');
+      if (!IN_INDIA.test(where)) return null;
+      var rows = BANDS[family(role.title)];
+      if (!rows) return null;
+      var n = years_as_number(role.years);
+      if (!n) return null;
+      for (var i = 0; i < rows.length; i++) {
+        if (n <= rows[i].upto) {
+          return { say: rows[i].say, n: n,
+                   kind: family(role.title) === 'design' ? 'product design'
+                                                         : 'engineering' };
+        }
+      }
+      return null;
+    }
+
     // what the job description says about pay, which is often nothing
     function draft_pay() {
       var text = (jd && jd.text) || '';
       var m = text.match(
         /(?:₹|INR|Rs\.?|\$|USD)\s?[\d,.]+\s?(?:[-–to]+\s?(?:₹|INR|Rs\.?|\$|USD)?\s?[\d,.]+)?\s*(?:LPA|lakh|lakhs|per annum|a year|\/year|k)?/i);
-      if (m && /\d/.test(m[0])) return m[0].trim();
+      if (m && /\d/.test(m[0])) {
+        role.pay_from = 'said';
+        return m[0].trim();
+      }
+      var band = market_band();
+      if (band) {
+        role.pay_from = 'market';
+        role.pay_why = 'Typical for ' + band.kind + ' at ' +
+          role.years.replace(/\s*years?$/, '') + ' years in India — ' +
+          BAND_SRC + '. Replace it with your own placement data.';
+        return band.say;
+      }
+      role.pay_from = '';
+      role.pay_why = '';
       return '';
     }
 
@@ -4636,6 +4741,11 @@
         box.addEventListener('input', function () {
           var k = box.getAttribute('data-k');
           role[k] = box.value;
+          if (k === 'pay' && role.pay_from === 'market') {
+            // theirs now, not a market range
+            role.pay_from = 'said';
+            role.pay_why = '';
+          }
           if (k === 'title') {
             var said = box.value.split(',')[0].trim();
             brief.role = box.value;
@@ -4648,14 +4758,24 @@
           }
         });
       });
+      var pick = root.querySelector('.rec-role-pick');
       root.querySelectorAll('[data-mode]').forEach(function (b) {
         b.addEventListener('click', function () {
-          var was = role.mode;
-          role.mode = (was === b.getAttribute('data-mode'))
-            ? '' : b.getAttribute('data-mode');
+          var mine = b.getAttribute('data-mode');
+          // the chosen one, pressed while alone: show the others
+          if (pick && role.mode === mine &&
+              !pick.classList.contains('is-open')) {
+            pick.classList.add('is-open');
+            return;
+          }
+          role.mode = mine;
+          if (pick) {
+            pick.classList.remove('is-open');
+            pick.classList.add('is-picked');
+          }
           root.querySelectorAll('[data-mode]').forEach(function (o) {
             o.classList.toggle('is-on',
-              !!role.mode && o.getAttribute('data-mode') === role.mode);
+              o.getAttribute('data-mode') === role.mode);
           });
           kept_again();
         });
@@ -4666,6 +4786,24 @@
           kept_again();
         });
       });
+      // a textarea does not size itself: measure after every change.
+      // Measured twice -- once now, once after the next frame -- because
+      // a measurement taken before the text has been laid out comes back
+      // wrong, and a box kept to a sane height even then.
+      function grow(box) {
+        function fit() {
+          box.style.height = 'auto';
+          var h = box.scrollHeight + 2;
+          box.style.height = (h > 10 && h < 400 ? h : 64) + 'px';
+        }
+        fit();
+        if (window.requestAnimationFrame) window.requestAnimationFrame(fit);
+      }
+      root.querySelectorAll('.rec-q-in').forEach(function (box) {
+        grow(box);
+        box.addEventListener('input', function () { grow(box); });
+      });
+
       root.querySelectorAll('.rec-r-in').forEach(function (box) {
         box.addEventListener('input', function () {
           role.rounds[Number(box.getAttribute('data-r'))].say = box.value;
@@ -4878,59 +5016,48 @@
             ((jd.skills && jd.skills.join(', ')) || '');
         }
 
-        var jobs = [
-          'writing three screening questions',
-          'laying out the interview rounds',
-          'reading the job description for pay'
+        // what is written, in the order it is written, each announced
+        // before it appears
+        var parts = [
+          { say: 'writing three screening questions',
+            work: function () { role.questions = draft_questions(); } },
+          { say: 'laying out the interview rounds',
+            work: function () { role.rounds = draft_rounds(); } },
+          { say: 'working out what this should pay',
+            work: function () { role.pay = draft_pay(); } }
         ];
-        var ran = [];
-        var now = 0;
 
-        function panel() {
-          card.innerHTML =
-            '<h2 class="rec-flow-q is-alone">Preparing your role to ' +
-              'publish</h2>' +
-            '<div class="rec-work" role="status" aria-live="polite">' +
-              '<p class="rec-work-head"><span class="rec-work-dot"></span>' +
-                'Mira is working on step ' + Math.min(now + 1, jobs.length) +
-                ' of ' + jobs.length + '</p>' +
-              ran.map(function (r) {
-                return '<p class="rec-work-line is-done"><i>✓</i>' +
-                  '<span>' + esc(r) + '</span></p>';
-              }).join('') +
-              (now < jobs.length
-                ? '<p class="rec-work-line is-now"><i>›</i><span>' +
-                  esc(jobs[now]) + '…</span><b></b></p>'
-                : '') +
-            '</div>';
+        function show(at, tell) {
+          card.innerHTML = role_html(at, tell);
+          wire_role(card);
         }
 
-        // each line does the thing it says, then rests long enough to read
-        function step(work, then) {
-          var say = jobs[now];
-          work();
-          ran.push(say);
-          now++;
-          panel();
-          window.setTimeout(then, 700);
-        }
-
-        panel();
+        // the summary first: it is the part that was already read
+        show(0, '');
         window.setTimeout(function () {
           if (!flow || flow.hidden) return;
-          step(function () { role.questions = draft_questions(); }, function () {
-            step(function () { role.rounds = draft_rounds(); }, function () {
-              step(function () { role.pay = draft_pay(); }, ready);
-            });
-          });
-        }, 520);
+          next(0);
+        }, 620);
+
+        function next(i) {
+          if (!flow || flow.hidden) return;
+          if (i >= parts.length) { ready(); return; }
+          show(i, parts[i].say);          // the line, then the section
+          window.setTimeout(function () {
+            if (!flow || flow.hidden) return;
+            parts[i].work();
+            show(i + 1, '');
+            window.setTimeout(function () { next(i + 1); }, 520);
+          }, 900);
+        }
 
         function ready() {
           if (!flow || flow.hidden) return;
           at_step(2, true);
           flow.querySelector('.rec-flow-bar span')
               .style.setProperty('--at', '100%');
-          card.innerHTML = role_html();
+          show(3, '');
+          // the card keeps the finished screen, not the part on show
           put_mini(2, 'Role details', role.title || 'as read', found.logo,
                    role_html());
           // filed open: the screen it holds is the one on screen
@@ -4938,7 +5065,6 @@
           var mine = flow.querySelector('.rec-done-card[data-for="2"]');
           if (mine) mine.setAttribute('aria-expanded', 'true');
           remember();
-          wire_role(card);
         }
       }
 

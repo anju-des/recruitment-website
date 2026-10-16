@@ -266,37 +266,34 @@
     /* the hero centres its children, so the field needs a width of its own
        or it shrinks to the placeholder */
     .rec-compose-wrap { width:100%; max-width:820px; margin:48px auto 0; }
-    /* the second door: quieter than the composer on purpose */
-    .rec-drop { margin:14px auto 0; width:100%; max-width:820px;
-                text-align:center; }
-    .rec-drop-go { display:inline-flex; align-items:center; gap:9px;
-                   padding:10px 18px; border-radius:100px; cursor:pointer;
-                   border:1px dashed #CFD6E4; background:rgba(255,255,255,.6);
-                   font:inherit; font-size:14px; color:#5C6779;
-                   transition:border-color .15s, color .15s, background .15s; }
-    .rec-drop-go svg { width:17px; height:17px; flex:none; }
-    .rec-drop-go b { font-weight:600; color:#4B3BC8; }
-    .rec-drop-go:hover { border-color:#A9B4C9; background:#FFFFFF;
-                         color:#3A4556; }
-    .rec-drop-go:focus-visible { outline:2px solid #7C5CF6;
-                                 outline-offset:3px; }
-    .rec-drop-say { margin:9px 0 0; font-size:12px; color:#94a3b8; }
-    .rec-drop.is-over .rec-drop-go { border-style:solid; border-color:#7C5CF6;
-                                     background:#FFFFFF; color:#1A1430; }
-    .rec-drop.is-bad .rec-drop-go { border-color:#E3A0A0; color:#B4443C; }
-    .rec-drop-err { margin:9px 0 0; font-size:12.5px; color:#B4443C; }
+    /* the + attaches a job description */
+    .rec-compose-clip { display:inline-flex; align-items:center;
+                        justify-content:center; width:26px; height:26px;
+                        margin:-4px 0 -4px -5px; padding:0; border:0;
+                        border-radius:50%; background:none; color:inherit;
+                        cursor:pointer; transition:background .14s,
+                                                   color .14s; }
+    .rec-compose-clip svg { width:17px; height:17px; display:block; }
+    .rec-compose-clip:hover { background:#F1F3F8; color:#4B3BC8; }
+    .rec-compose-clip:focus-visible { outline:2px solid #7C5CF6;
+                                      outline-offset:2px; }
+    /* a file is over the field: the field says so */
+    .rec-compose.is-over { border-color:#7C5CF6;
+                           box-shadow:0 8px 28px rgba(124,92,246,.18); }
+    .rec-compose.is-over::after { opacity:1; }
+    .rec-drop-note { margin:10px 0 0; text-align:center; font-size:12.5px;
+                     color:#8A93A6; }
+    .rec-drop-note[hidden] { display:none; }
+    .rec-drop-err { margin:10px 0 0; text-align:center; font-size:12.5px;
+                    color:#B4443C; }
     .rec-drop-err[hidden] { display:none; }
-    /* a long paste is probably a JD, but that is the visitor's call */
     .rec-drop-ask { display:inline-flex; align-items:center; gap:8px;
-                    margin:10px 0 0; padding:8px 14px; border-radius:100px;
+                    margin:10px auto 0; padding:8px 14px; border-radius:100px;
                     border:1px solid #D8CFF8; background:#F6F3FF;
                     font:inherit; font-size:13px; color:#4B3BC8;
                     cursor:pointer; }
     .rec-drop-ask[hidden] { display:none; }
     .rec-drop-ask:hover { background:#EFEAFF; }
-    @media (max-width:640px) {
-      .rec-drop-go { font-size:13px; padding:9px 14px; }
-    }
 
     .rec-compose { position:relative; width:100%; text-align:left;
                    background:#ffffff; border:none; border-radius:14px;
@@ -1631,6 +1628,76 @@
                                   color:#4B3BC8; }
     .rec-role-pick button:focus-visible { outline:2px solid #7C5CF6;
                                           outline-offset:2px; }
+    /* the parts of the last screen */
+    .rec-part { margin-top:22px; padding-top:18px;
+                border-top:1px solid #F0EDF7; }
+    .rec-part-head { display:flex; align-items:baseline; gap:10px;
+                     flex-wrap:wrap; margin:0 0 12px; font-size:14px;
+                     font-weight:700; color:#1A1430; }
+    .rec-part-head span { font-size:12px; font-weight:500; color:#9A93B8; }
+    .rec-part-say { margin:10px 0 0; font-size:12.5px; color:#9A93B8; }
+    .rec-qs, .rec-rounds { margin:0; padding:0; list-style:none;
+                           display:flex; flex-direction:column; gap:10px; }
+    .rec-qs li, .rec-rounds li { display:flex; align-items:flex-start;
+                                 gap:11px; }
+    .rec-qs b, .rec-rounds b { flex:none; width:22px; height:22px;
+                               margin-top:5px; border-radius:50%;
+                               display:grid; place-items:center;
+                               background:#F1EEFA; color:#6B4BE8;
+                               font-size:11px; font-weight:700; }
+    .rec-q-in { flex:1; min-width:0; resize:vertical; overflow-x:hidden;
+                border:1px solid #ECE7F9;
+                border-radius:10px; padding:9px 12px; background:#FFFFFF;
+                font:inherit; font-size:14px; line-height:1.45;
+                color:#2A2440; outline:none; }
+    .rec-q-in:focus { border-color:#7C5CF6; background:#FCFBFF; }
+    .rec-rounds li { align-items:center; }
+    .rec-rounds b { margin-top:0; }
+    .rec-r-in { flex:1; min-width:0; border:1px solid #ECE7F9;
+                border-radius:10px; padding:9px 12px; background:#FFFFFF;
+                font:inherit; font-size:14px; font-weight:600; color:#1A1430;
+                outline:none; }
+    .rec-r-in:focus { border-color:#7C5CF6; background:#FCFBFF; }
+    .rec-r-mins { flex:none; display:inline-flex; align-items:center; gap:4px;
+                  font-size:12.5px; color:#9A93B8; }
+    .rec-r-min { width:38px; border:1px solid #ECE7F9; border-radius:8px;
+                 padding:7px 6px; background:#FFFFFF; font:inherit;
+                 font-size:13px; font-weight:600; color:#1A1430;
+                 text-align:center; outline:none; }
+    .rec-r-min:focus { border-color:#7C5CF6; }
+    .rec-jd-see { border:0; padding:0 0 1px; background:none; font:inherit;
+                  font-size:inherit; color:#6B4BE8; cursor:pointer;
+                  text-decoration:underline; text-underline-offset:3px; }
+    .rec-jd-see:hover { color:#4A32C0; }
+
+    /* the document itself */
+    /* above the flow (300), which is what it is opened from */
+    .rec-jd-ov { position:fixed; inset:0; z-index:320; display:flex;
+                 align-items:center; justify-content:center; padding:24px;
+                 background:rgba(18,16,34,.42); }
+    .rec-jd-sheet { display:flex; flex-direction:column; width:min(680px,100%);
+                    max-height:min(76vh,760px); border-radius:16px;
+                    background:#FFFFFF; overflow:hidden;
+                    box-shadow:0 24px 64px rgba(18,22,32,.24); }
+    .rec-jd-top { display:flex; align-items:center; gap:12px;
+                  padding:14px 18px; border-bottom:1px solid #F0EDF7; }
+    .rec-jd-top b { flex:1; min-width:0; font-size:14px; color:#1A1430;
+                    overflow:hidden; text-overflow:ellipsis;
+                    white-space:nowrap; }
+    .rec-jd-open { flex:none; font-size:12.5px; color:#6B4BE8;
+                   text-decoration:underline; text-underline-offset:3px; }
+    .rec-jd-x { flex:none; width:28px; height:28px; border:0; border-radius:50%;
+                background:#F4F2FB; color:#6B6487; font-size:17px;
+                line-height:1; cursor:pointer; }
+    .rec-jd-x:hover { background:#EAE6F8; color:#1A1430; }
+    .rec-jd-text { margin:0; padding:18px; overflow:auto; font:inherit;
+                   font-size:13px; line-height:1.6; color:#3A3356;
+                   white-space:pre-wrap; word-break:break-word; }
+    @media (max-width:560px) {
+      .rec-rounds li { flex-wrap:wrap; }
+      .rec-r-in { flex-basis:100%; order:2; }
+    }
+
     @media (max-width:560px) {
       .rec-role-row { align-items:flex-start; flex-direction:column; gap:4px; }
       .rec-role-row i { width:auto; }
@@ -2344,12 +2411,18 @@
               <div class="rec-compose-wrap">
               <form class="rec-compose" onsubmit="return false">
                 <textarea class="rec-compose-input" rows="1"
-                          aria-label="Describe the role, paste a link, or add skills"
-                          placeholder="What role are you hiring for?"></textarea>
+                          aria-label="Upload or paste a job description, or describe the role"
+                          placeholder="Upload or paste a JD here"></textarea>
                 <div class="rec-compose-row">
-                  <span class="rec-compose-tools" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-                    <b>@</b>
+                  <span class="rec-compose-tools">
+                    <input type="file" class="rec-drop-in" hidden
+                           accept=".pdf,.txt,.md,.text,application/pdf,text/plain">
+                    <button type="button" class="rec-compose-clip"
+                            aria-label="Attach a job description"
+                            title="Attach a job description &mdash; read in your browser">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                    <b aria-hidden="true">@</b>
                   </span>
                   <span class="rec-compose-send">
                   <span class="rec-compose-mic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0"/><path d="M12 18v3"/></svg></span>
@@ -2358,22 +2431,6 @@
                   </span>
                 </div>
               </form>
-              <div class="rec-drop">
-                <input type="file" class="rec-drop-in" hidden
-                       accept=".pdf,.txt,.md,.text,application/pdf,text/plain">
-                <button type="button" class="rec-drop-go">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                       stroke-width="1.8" stroke-linecap="round"
-                       stroke-linejoin="round" aria-hidden="true">
-                    <path d="M14 3v4a1 1 0 0 0 1 1h4"/>
-                    <path d="M19 8v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7z"/>
-                    <path d="M9 13h6M9 17h4"/>
-                  </svg>
-                  <span>Have a job description? <b>Drop it here</b></span>
-                </button>
-                <p class="rec-drop-say">PDF or text. Read in your browser &mdash;
-                  the file never leaves it.</p>
-              </div>
               </div>
               <ul class="rec-suggest" aria-label="Example roles" hidden>
                   <li><button type="button">Senior backend engineer, Python + Django, 4+ years, remote India</button></li>
@@ -3917,11 +3974,28 @@
 
     // the bullet glyphs and the zero-width joiner Google Docs leaves behind
     function lines(text) {
-      return String(text || '')
+      var out = String(text || '')
         .replace(/​|‍|﻿/g, '')
         .split(/\r?\n/)
         .map(function (l) { return tidy(l.replace(/^[●•▪\-*]\s*/, '')); })
         .filter(function (l) { return l.length > 0; });
+      return knit(out);
+    }
+
+    // a PDF breaks a sentence wherever the column ended. A line starting
+    // lowercase is the end of the one above it -- it is never the start of
+    // a heading or a bullet, which is all lines are read for here.
+    function knit(rows) {
+      var out = [];
+      for (var i = 0; i < rows.length; i++) {
+        if (out.length && /^[a-z]/.test(rows[i]) &&
+            !/[.:;!?]$/.test(out[out.length - 1])) {
+          out[out.length - 1] += ' ' + rows[i];
+        } else {
+          out.push(rows[i]);
+        }
+      }
+      return out;
     }
 
     function first(text, res, pick) {
@@ -4140,8 +4214,12 @@
         kind: kind(flat),
         years: years(flat),
         skills: skills(flat),
+        // the bullets if there are any, the overview only if there are not
         duties: section(ls, ['key responsibilities', 'responsibilities',
-                             'what you(?:\'| wi)ll do', 'the role', 'role overview']),
+                             'what you(?:\'| wi)ll do']).length
+          ? section(ls, ['key responsibilities', 'responsibilities',
+                         'what you(?:\'| wi)ll do'])
+          : section(ls, ['the role', 'role overview']),
         asks: section(ls, ['requirements', 'qualifications',
                            'what we(?:\'re| are) looking for', 'who you are',
                            'skills (?:&|and) experience']),
@@ -4305,7 +4383,10 @@
     }
 
     // what the last step shows, and what a change to it touches
-    var role = { title: '', place: '', mode: '', years: '', skills: '' };
+    var role = { title: '', place: '', mode: '', years: '',
+                 skills: '', pay: '', questions: [], rounds: [] };
+    var jd_file = null;       // the file itself, to open the original
+    var jd_name = '';         // what it was called
 
     var ROLE_ROWS = [
       { k: 'title', say: 'Role', hint: 'What are you hiring for?' },
@@ -4317,13 +4398,14 @@
 
     function role_html() {
       return '<div class="rec-found-col">' +
-        '<h2 class="rec-flow-q">' +
-          (jd ? 'The role, as I read it' : 'The role you are hiring for') +
-        '</h2>' +
+        '<h2 class="rec-flow-q">Your role is ready to publish</h2>' +
         '<p class="rec-flow-hint">' +
-          (jd ? 'Change anything I got wrong — this is what goes on ' +
-                'your board.'
-              : 'Fill in what you know. You can change all of it later.') +
+          (jd ? 'Drafted from your job description. Change anything — ' +
+                'none of it is fixed.'
+              : 'A starting point. Change anything — none of it is ' +
+                'fixed.') +
+          (jd ? ' <button type="button" class="rec-jd-see">View the job ' +
+                'description</button>' : '') +
         '</p>' +
         '<div class="rec-found-card">' +
           '<div class="rec-role">' +
@@ -4338,6 +4420,52 @@
               '</span></div>' +
             ROLE_ROWS.slice(2).map(role_row).join('') +
           '</div>' +
+
+          '<div class="rec-part">' +
+            '<h3 class="rec-part-head">Screening questions' +
+              '<span>asked before anyone reaches you</span></h3>' +
+            '<ol class="rec-qs">' +
+              role.questions.map(function (q, i) {
+                return '<li><b>' + (i + 1) + '</b>' +
+                  // a long question gets the line it needs, not a scrollbar
+                  '<textarea class="rec-q-in" rows="' +
+                    (q.length > 86 ? 3 : 2) + '" data-q="' + i + '">' +
+                  esc(q) + '</textarea></li>';
+              }).join('') +
+            '</ol>' +
+          '</div>' +
+
+          '<div class="rec-part">' +
+            '<h3 class="rec-part-head">Interview rounds' +
+              '<span>' + esc(family(role.title) === 'any'
+                ? 'a standard three' : 'typical for this kind of role') +
+              '</span></h3>' +
+            '<ol class="rec-rounds">' +
+              role.rounds.map(function (r, i) {
+                return '<li><b>' + (i + 1) + '</b>' +
+                  '<input class="rec-r-in" data-r="' + i + '" value="' +
+                    esc(r.say) + '">' +
+                  '<span class="rec-r-mins">' +
+                    '<input class="rec-r-min" data-m="' + i + '" value="' +
+                      esc(r.mins) + '" inputmode="numeric">min</span></li>';
+              }).join('') +
+            '</ol>' +
+          '</div>' +
+
+          '<div class="rec-part">' +
+            '<h3 class="rec-part-head">Pay' +
+              '<span>' + (role.pay
+                ? 'as the job description states it'
+                : 'the job description does not say') + '</span></h3>' +
+            '<div class="rec-role-row"><i>Salary</i>' +
+              '<input class="rec-role-in" data-k="pay" value="' +
+                esc(role.pay || '') + '" placeholder="' +
+                'Add what you are paying"></div>' +
+            (role.pay ? '' :
+              '<p class="rec-part-say">Mira can estimate this once your own ' +
+              'placement data is behind it. It will not guess one.</p>') +
+          '</div>' +
+
           '<button type="button" class="rec-flow-next rec-ready-go" ' +
             'data-login="1">Sign in to your account</button>' +
         '</div>' +
@@ -4365,9 +4493,145 @@
       }
     }
 
+    // ---- what gets drafted from the job description -------------------
+
+    // the family decides the rounds, and a title is what names it
+    var FAMILIES = [
+      { is: /(design|ux|ui|brand|creative)/i, key: 'design' },
+      { is: /(engineer|developer|programmer|architect|devops|sre|data scien)/i,
+        key: 'engineering' },
+      { is: /(sales|account exec|business development|partnership)/i,
+        key: 'sales' },
+      { is: /(market|growth|content|brand manager|seo)/i, key: 'marketing' },
+      { is: /(support|success|operations|ops|recruit|hr|people)/i, key: 'ops' }
+    ];
+
+    var ROUNDS = {
+      design: [
+        { say: 'Portfolio walkthrough', mins: '45' },
+        { say: 'Craft and product sense', mins: '60' },
+        { say: 'Team and founders', mins: '30' }
+      ],
+      engineering: [
+        { say: 'Technical screen', mins: '45' },
+        { say: 'System design and pairing', mins: '60' },
+        { say: 'Team and founders', mins: '30' }
+      ],
+      sales: [
+        { say: 'Discovery conversation', mins: '30' },
+        { say: 'Pitch exercise', mins: '60' },
+        { say: 'Leadership', mins: '30' }
+      ],
+      marketing: [
+        { say: 'Intro and past work', mins: '30' },
+        { say: 'Campaign exercise', mins: '60' },
+        { say: 'Team and founders', mins: '30' }
+      ],
+      ops: [
+        { say: 'Intro and experience', mins: '30' },
+        { say: 'Working session', mins: '45' },
+        { say: 'Team and founders', mins: '30' }
+      ],
+      any: [
+        { say: 'Intro conversation', mins: '30' },
+        { say: 'Skills deep-dive', mins: '60' },
+        { say: 'Team and founders', mins: '30' }
+      ]
+    };
+
+    function family(said) {
+      for (var i = 0; i < FAMILIES.length; i++) {
+        if (FAMILIES[i].is.test(said || '')) return FAMILIES[i].key;
+      }
+      return 'any';
+    }
+
+    function draft_rounds() {
+      return ROUNDS[family(role.title)].map(function (r) {
+        return { say: r.say, mins: r.mins };
+      });
+    }
+
+    // A bullet reads "Own the journey: from user flows to polished UI".
+    // The verb phrase is the label; the gloss is what follows it.
+    function as_duty(line) {
+      var s = String(line || '').replace(/[.\s\u2013\u2014-]+$/, '').trim();
+      if (!s) return null;
+      // the advert talking about itself, not the work
+      if (/^(?:we|our|this role|the role|as a|join)\b/i.test(s)) return null;
+      var head = s;
+      var tail = '';
+      var cut = s.indexOf(':');
+      if (cut > 0 && cut < 44) {
+        head = s.slice(0, cut).trim();
+        tail = s.slice(cut + 1).trim().split(/,|\u2014| and /)[0].trim();
+      }
+      head = head.replace(/^[A-Z]/, function (c) { return c.toLowerCase(); });
+      tail = tail.replace(/^[A-Z]/, function (c) { return c.toLowerCase(); });
+      if (head.length < 8 || head.length > 90) return null;
+      return { head: head, tail: tail.length > 70 ? '' : tail };
+    }
+
+    // every question is assembled out of the document, so every question
+    // can be checked against it
+    function draft_questions() {
+      var out = [];
+      var skills = (role.skills || '').split(',').map(function (s) {
+        return s.trim();
+      }).filter(Boolean);
+
+      if (skills.length >= 2) {
+        out.push('Tell us about something you shipped with ' + skills[0] +
+                 ' and ' + skills[1] + '. What was yours in it?');
+      } else if (skills.length === 1) {
+        out.push('Tell us about something you shipped with ' + skills[0] +
+                 '. What was yours in it?');
+      } else if (role.title) {
+        out.push('Tell us about the piece of work you are proudest of as a ' +
+                 role.title.toLowerCase() + '.');
+      }
+
+      var duties = (jd && jd.duties) || [];
+      for (var i = 0; i < duties.length && out.length < 2; i++) {
+        var d = as_duty(duties[i]);
+        if (!d) continue;
+        out.push('This role asks you to ' + d.head +
+                 (d.tail ? ' \u2014 ' + d.tail : '') +
+                 '. When have you done that, and how did it go?');
+      }
+      if (out.length < 2 && role.years) {
+        out.push('You would be coming in at ' + role.years +
+                 '. What does that experience look like day to day?');
+      }
+
+      if (role.mode && role.place) {
+        out.push('This role is ' + role.mode.toLowerCase() + ' in ' +
+                 role.place + '. Does that work for you?');
+      } else if (role.place) {
+        out.push('This role is based in ' + role.place +
+                 '. Does that work for you?');
+      } else {
+        out.push('What are you looking for in your next role, and when ' +
+                 'could you start?');
+      }
+      return out.slice(0, 3);
+    }
+
+    // what the job description says about pay, which is often nothing
+    function draft_pay() {
+      var text = (jd && jd.text) || '';
+      var m = text.match(
+        /(?:₹|INR|Rs\.?|\$|USD)\s?[\d,.]+\s?(?:[-–to]+\s?(?:₹|INR|Rs\.?|\$|USD)?\s?[\d,.]+)?\s*(?:LPA|lakh|lakhs|per annum|a year|\/year|k)?/i);
+      if (m && /\d/.test(m[0])) return m[0].trim();
+      return '';
+    }
+
     // re-injected HTML brings no listeners, so this runs on every render
     function wire_role(root) {
       if (!root) return;
+
+      function kept_again() { kept[2] = role_html(); remember(); }
+
       root.querySelectorAll('.rec-role-in').forEach(function (box) {
         box.addEventListener('input', function () {
           var k = box.getAttribute('data-k');
@@ -4378,10 +4642,10 @@
             retitle_board(said || 'Your first role');
             put_mini(2, 'Role details', said || 'as read',
                      (company && company.logo) || '', role_html());
+            remember();
           } else {
-            kept[2] = role_html();
+            kept_again();
           }
-          remember();
         });
       });
       root.querySelectorAll('[data-mode]').forEach(function (b) {
@@ -4393,10 +4657,70 @@
             o.classList.toggle('is-on',
               !!role.mode && o.getAttribute('data-mode') === role.mode);
           });
-          kept[2] = role_html();
-          remember();
+          kept_again();
         });
       });
+      root.querySelectorAll('.rec-q-in').forEach(function (box) {
+        box.addEventListener('input', function () {
+          role.questions[Number(box.getAttribute('data-q'))] = box.value;
+          kept_again();
+        });
+      });
+      root.querySelectorAll('.rec-r-in').forEach(function (box) {
+        box.addEventListener('input', function () {
+          role.rounds[Number(box.getAttribute('data-r'))].say = box.value;
+          kept_again();
+        });
+      });
+      root.querySelectorAll('.rec-r-min').forEach(function (box) {
+        box.addEventListener('input', function () {
+          role.rounds[Number(box.getAttribute('data-m'))].mins =
+            box.value.replace(/[^0-9]/g, '');
+          kept_again();
+        });
+      });
+      var see = root.querySelector('.rec-jd-see');
+      if (see) see.addEventListener('click', show_jd);
+      root.querySelectorAll('[data-login]').forEach(function (b) {
+        b.addEventListener('click', open_account);
+      });
+    }
+
+    // the document all of this was read out of, kept one click away
+    function show_jd() {
+      if (!jd) return;
+      var box = document.createElement('div');
+      box.className = 'rec-jd-ov';
+      box.innerHTML =
+        '<div class="rec-jd-sheet" role="dialog" aria-modal="true" ' +
+          'aria-label="The job description">' +
+          '<div class="rec-jd-top"><b>' + esc(jd_name || 'The job ' +
+            'description') + '</b>' +
+            (jd_file ? '<a class="rec-jd-open" target="_blank" rel="noopener">' +
+              'Open the original</a>' : '') +
+            '<button type="button" class="rec-jd-x" aria-label="Close">' +
+              '×</button></div>' +
+          '<pre class="rec-jd-text">' + esc(jd.text || '') + '</pre>' +
+        '</div>';
+      document.body.appendChild(box);
+
+      var url = '';
+      var link = box.querySelector('.rec-jd-open');
+      if (link && jd_file) {
+        url = window.URL.createObjectURL(jd_file);
+        link.href = url;
+      }
+      function shut() {
+        if (url) window.URL.revokeObjectURL(url);
+        box.remove();
+        document.removeEventListener('keydown', esc_shut);
+      }
+      function esc_shut(e) { if (e.key === 'Escape') shut(); }
+      box.querySelector('.rec-jd-x').addEventListener('click', shut);
+      box.addEventListener('click', function (e) {
+        if (e.target === box) shut();
+      });
+      document.addEventListener('keydown', esc_shut);
     }
 
     // what a finished step leaves behind, under that step
@@ -4541,6 +4865,7 @@
         if (!found.who) return;
         flow.classList.remove('is-found');
         open_i = null;
+        step_busy(2);
 
         // seeded from the job description, where there was one
         var said = (brief.role || '').split(',')[0].trim();
@@ -4553,22 +4878,70 @@
             ((jd.skills && jd.skills.join(', ')) || '');
         }
 
-        at_step(2, true);
-        flow.querySelector('.rec-flow-bar span')
-            .style.setProperty('--at', '100%');
-        card.innerHTML = role_html();
-        put_mini(2, 'Role details', role.title || 'as read', found.logo,
-                 role_html());
-        // filed open: the screen it holds is the one on screen
-        open_i = 2;
-        var mine = flow.querySelector('.rec-done-card[data-for="2"]');
-        if (mine) mine.setAttribute('aria-expanded', 'true');
-        remember();
-        wire_role(card);
-        card.querySelectorAll('[data-login]').forEach(function (b) {
-          b.addEventListener('click', open_account);
-        });
+        var jobs = [
+          'writing three screening questions',
+          'laying out the interview rounds',
+          'reading the job description for pay'
+        ];
+        var ran = [];
+        var now = 0;
+
+        function panel() {
+          card.innerHTML =
+            '<h2 class="rec-flow-q is-alone">Preparing your role to ' +
+              'publish</h2>' +
+            '<div class="rec-work" role="status" aria-live="polite">' +
+              '<p class="rec-work-head"><span class="rec-work-dot"></span>' +
+                'Mira is working on step ' + Math.min(now + 1, jobs.length) +
+                ' of ' + jobs.length + '</p>' +
+              ran.map(function (r) {
+                return '<p class="rec-work-line is-done"><i>✓</i>' +
+                  '<span>' + esc(r) + '</span></p>';
+              }).join('') +
+              (now < jobs.length
+                ? '<p class="rec-work-line is-now"><i>›</i><span>' +
+                  esc(jobs[now]) + '…</span><b></b></p>'
+                : '') +
+            '</div>';
+        }
+
+        // each line does the thing it says, then rests long enough to read
+        function step(work, then) {
+          var say = jobs[now];
+          work();
+          ran.push(say);
+          now++;
+          panel();
+          window.setTimeout(then, 700);
+        }
+
+        panel();
+        window.setTimeout(function () {
+          if (!flow || flow.hidden) return;
+          step(function () { role.questions = draft_questions(); }, function () {
+            step(function () { role.rounds = draft_rounds(); }, function () {
+              step(function () { role.pay = draft_pay(); }, ready);
+            });
+          });
+        }, 520);
+
+        function ready() {
+          if (!flow || flow.hidden) return;
+          at_step(2, true);
+          flow.querySelector('.rec-flow-bar span')
+              .style.setProperty('--at', '100%');
+          card.innerHTML = role_html();
+          put_mini(2, 'Role details', role.title || 'as read', found.logo,
+                   role_html());
+          // filed open: the screen it holds is the one on screen
+          open_i = 2;
+          var mine = flow.querySelector('.rec-done-card[data-for="2"]');
+          if (mine) mine.setAttribute('aria-expanded', 'true');
+          remember();
+          wire_role(card);
+        }
       }
+
       function board() {
         if (!found.who) return;
         // step one tucked itself away; step two gets the middle back
@@ -5190,37 +5563,38 @@
     }
 
     // ---- the second way in: a job description ------------------------
+    // It attaches to the composer: the + opens the picker, the field
+    // takes a dropped file, and a long paste is offered rather than taken.
 
-    var drop = document.querySelector('.rec-drop');
-    var drop_go = drop && drop.querySelector('.rec-drop-go');
-    var drop_in = drop && drop.querySelector('.rec-drop-in');
+    var shelf = document.querySelector('.rec-compose-wrap');
+    var clip = shelf && shelf.querySelector('.rec-compose-clip');
+    var drop_in = shelf && shelf.querySelector('.rec-drop-in');
+
+    function under(cls) {
+      if (!shelf) return null;
+      var el = shelf.querySelector('.' + cls);
+      if (!el) {
+        el = document.createElement('p');
+        el.className = cls;
+        el.hidden = true;
+        shelf.appendChild(el);
+      }
+      return el;
+    }
 
     function drop_say(msg) {
-      if (!drop) return;
-      var p = drop.querySelector('.rec-drop-err');
-      if (!p) {
-        p = document.createElement('p');
-        p.className = 'rec-drop-err';
-        drop.appendChild(p);
-      }
+      var p = under('rec-drop-err');
+      if (!p) return;
       p.textContent = msg || '';
       p.hidden = !msg;
-      drop.classList.toggle('is-bad', !!msg);
     }
 
     function drop_busy(on, what) {
-      if (!drop_go) return;
-      var label = drop_go.querySelector('span');
-      if (!label) return;
-      if (on) {
-        drop_go.setAttribute('data-was', label.innerHTML);
-        label.textContent = what || 'Reading…';
-        drop_go.disabled = true;
-      } else {
-        var was = drop_go.getAttribute('data-was');
-        if (was) label.innerHTML = was;
-        drop_go.disabled = false;
-      }
+      var p = under('rec-drop-note');
+      if (!p) return;
+      p.textContent = on ? what : '';
+      p.hidden = !on;
+      if (clip) clip.disabled = !!on;
     }
 
     // a name on the open register, turned into the domain the lookup wants
@@ -5241,7 +5615,7 @@
                 var ent = all[hits[i].id];
                 if (!ent) continue;
                 var c = ent.claims || {};
-                // a country has a website too: offer for something only a
+                // a country has a website too: ask for something only a
                 // company carries
                 if (!(c.P452 || c.P2088 || c.P4264)) continue;
                 var w = c.P856 && c.P856[0].mainsnak.datavalue;
@@ -5284,7 +5658,7 @@
                              : 'reading what it asks for');
 
       if (got.site) { straight_to_lookup(got.site); return; }
-      if (!got.company) { open(); return; }   // offer for the website as usual
+      if (!got.company) { open(); return; }   // ask for the website as usual
 
       drop_busy(true, 'Looking up ' + got.company + '…');
       find_site(got.company).then(function (host) {
@@ -5298,9 +5672,12 @@
     function take_file(file) {
       if (!file) return;
       drop_say('');
-      drop_busy(true, 'Reading ' + (file.name || 'the file') + '…');
+      drop_busy(true, 'Reading ' + (file.name || 'the file') +
+                      ' — here, in your browser.');
       read_jd(file).then(function (text) {
         drop_busy(false);
+        jd_file = file;
+        jd_name = file.name || '';
         from_jd(text, file.name || 'the file');
       }, function (err) {
         drop_busy(false);
@@ -5308,46 +5685,49 @@
       });
     }
 
-    if (drop_go && drop_in) {
-      drop_go.addEventListener('click', function () { drop_in.click(); });
+    if (clip && drop_in) {
+      clip.addEventListener('click', function () { drop_in.click(); });
       drop_in.addEventListener('change', function () {
         take_file(drop_in.files && drop_in.files[0]);
         drop_in.value = '';
       });
 
-      // the whole hero is the target: aiming at a 40px pill is not a
-      // thing anyone should have to do with a file in hand
-      var zone = drop.closest('.rec-compose-wrap') || drop;
+      // the field is the target, and the whole composer lights up
       var deep = 0;
-      zone.addEventListener('dragenter', function (e) {
-        e.preventDefault(); deep++; drop.classList.add('is-over');
+      form.addEventListener('dragenter', function (e) {
+        e.preventDefault(); deep++; form.classList.add('is-over');
       });
-      zone.addEventListener('dragover', function (e) { e.preventDefault(); });
-      zone.addEventListener('dragleave', function () {
+      form.addEventListener('dragover', function (e) { e.preventDefault(); });
+      form.addEventListener('dragleave', function () {
         deep = Math.max(0, deep - 1);
-        if (!deep) drop.classList.remove('is-over');
+        if (!deep) form.classList.remove('is-over');
       });
-      zone.addEventListener('drop', function (e) {
+      form.addEventListener('drop', function (e) {
         e.preventDefault();
         deep = 0;
-        drop.classList.remove('is-over');
+        form.classList.remove('is-over');
         var dt = e.dataTransfer;
         if (dt && dt.files && dt.files.length) { take_file(dt.files[0]); return; }
         var text = dt && dt.getData && dt.getData('text/plain');
-        if (text && text.length > 200) from_jd(text, 'the text you dropped');
+        if (text && text.length > 200) {
+          jd_file = null;
+          jd_name = 'The job description you dropped';
+          from_jd(text, 'the text you dropped');
+        }
       });
 
       // a long paste is probably a JD. Probably is not certain, so it
       // offers rather than takes over.
-      // not `ask`: that name builds a question screen one scope out
       var offer = document.createElement('button');
       offer.type = 'button';
       offer.className = 'rec-drop-ask';
       offer.hidden = true;
       offer.textContent = 'That looks like a job description — read it';
-      drop.appendChild(offer);
+      if (shelf) shelf.appendChild(offer);
       offer.addEventListener('click', function () {
         offer.hidden = true;
+        jd_file = null;
+        jd_name = 'The job description you pasted';
         from_jd(field.value, 'the text you pasted');
       });
       field.addEventListener('paste', function (e) {

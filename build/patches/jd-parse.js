@@ -21,11 +21,28 @@
 
   // the bullet glyphs and the zero-width joiner Google Docs leaves behind
   function lines(text) {
-    return String(text || '')
+    var out = String(text || '')
       .replace(/​|‍|﻿/g, '')
       .split(/\r?\n/)
       .map(function (l) { return tidy(l.replace(/^[●•▪\-*]\s*/, '')); })
       .filter(function (l) { return l.length > 0; });
+    return knit(out);
+  }
+
+  // a PDF breaks a sentence wherever the column ended. A line starting
+  // lowercase is the end of the one above it -- it is never the start of
+  // a heading or a bullet, which is all lines are read for here.
+  function knit(rows) {
+    var out = [];
+    for (var i = 0; i < rows.length; i++) {
+      if (out.length && /^[a-z]/.test(rows[i]) &&
+          !/[.:;!?]$/.test(out[out.length - 1])) {
+        out[out.length - 1] += ' ' + rows[i];
+      } else {
+        out.push(rows[i]);
+      }
+    }
+    return out;
   }
 
   function first(text, res, pick) {
@@ -244,8 +261,12 @@
       kind: kind(flat),
       years: years(flat),
       skills: skills(flat),
+      // the bullets if there are any, the overview only if there are not
       duties: section(ls, ['key responsibilities', 'responsibilities',
-                           'what you(?:\'| wi)ll do', 'the role', 'role overview']),
+                           'what you(?:\'| wi)ll do']).length
+        ? section(ls, ['key responsibilities', 'responsibilities',
+                       'what you(?:\'| wi)ll do'])
+        : section(ls, ['the role', 'role overview']),
       asks: section(ls, ['requirements', 'qualifications',
                          'what we(?:\'re| are) looking for', 'who you are',
                          'skills (?:&|and) experience']),

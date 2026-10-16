@@ -1683,6 +1683,76 @@
                      font-weight:700; color:#1A1430; }
     .rec-part-head span { font-size:12px; font-weight:500; color:#9A93B8; }
     .rec-part-say { margin:10px 0 0; font-size:12.5px; color:#9A93B8; }
+    .rec-tabs { display:flex; gap:4px; margin:18px 0 0;
+                border-bottom:1px solid #EDE9F8; }
+    .rec-tab { position:relative; padding:9px 14px; border:0;
+               background:none; font:inherit; font-size:13.5px;
+               font-weight:600; color:#8A82A8; cursor:pointer;
+               transition:color .14s; }
+    .rec-tab:hover { color:#4E4766; }
+    .rec-tab.is-on { color:#1A1430; }
+    .rec-tab.is-on::after { content:""; position:absolute; left:10px;
+                            right:10px; bottom:-1px; height:2px;
+                            border-radius:2px; background:#7C5CF6; }
+    .rec-tab:focus-visible { outline:2px solid #7C5CF6; outline-offset:-2px;
+                             border-radius:8px; }
+    .rec-jd-panel { display:flex; flex-direction:column; gap:10px; }
+    .rec-jd-name { display:flex; align-items:baseline; gap:12px; margin:0; }
+    .rec-jd-name b { flex:1; min-width:0; font-size:13px; color:#1A1430;
+                     overflow:hidden; text-overflow:ellipsis;
+                     white-space:nowrap; }
+    .rec-jd-open { flex:none; font-size:12.5px; color:#6B4BE8;
+                   text-decoration:underline; text-underline-offset:3px; }
+    .rec-jd-text { margin:0; max-height:52vh; overflow:auto; font:inherit;
+                   font-size:13px; line-height:1.65; color:#3A3356;
+                   white-space:pre-wrap; word-break:break-word; }
+    .rec-invite { margin-left:auto; flex:none; display:inline-flex;
+                  align-items:center; gap:6px; padding:6px 12px;
+                  border-radius:8px; border:1px solid #E7E2F6;
+                  background:#F7F5FE; color:#6B4BE8; font:inherit;
+                  font-size:12.5px; font-weight:600; cursor:pointer;
+                  transition:background .14s, border-color .14s; }
+    .rec-invite svg { width:15px; height:15px; }
+    .rec-invite:hover { background:#EFEAFF; border-color:#BCAEF0; }
+    .rec-invite:focus-visible { outline:2px solid #7C5CF6;
+                                outline-offset:2px; }
+    .rec-team { margin:0; padding:0; list-style:none; display:flex;
+                flex-direction:column; gap:3px; }
+    .rec-team li { display:flex; align-items:center; gap:8px;
+                   border-radius:10px; transition:background .14s; }
+    .rec-team li:hover, .rec-team li:focus-within { background:#FAF9FE; }
+    .rec-team-in { flex:1; min-width:0; border:1px solid transparent;
+                   border-radius:9px; padding:9px 10px 9px 0; background:none;
+                   font:inherit; font-size:14px; color:#2A2440; outline:none; }
+    .rec-team-in::placeholder { color:#B4AECB; }
+    .rec-team-in:focus { border-color:#D8CFF8; background:#FFFFFF;
+                         padding-left:10px; }
+    .rec-part-add { margin-left:auto; flex:none; width:24px; height:24px;
+                    display:grid; place-items:center; border-radius:7px;
+                    border:1px solid #ECE7F9; background:#FFFFFF;
+                    color:#6B4BE8; font:inherit; font-size:16px;
+                    line-height:1; cursor:pointer;
+                    transition:background .14s, border-color .14s; }
+    .rec-part-add:hover { background:#F7F5FE; border-color:#BCAEF0; }
+    .rec-part-add:focus-visible { outline:2px solid #7C5CF6;
+                                  outline-offset:2px; }
+    /* destructive, and there are six of them: not until it is wanted */
+    .rec-row-x { flex:none; width:22px; height:22px; margin:0 8px 0 0;
+                 display:grid; place-items:center; border:0; border-radius:50%;
+                 background:none; color:#A49CC0; font:inherit; font-size:15px;
+                 line-height:1; cursor:pointer; opacity:0;
+                 transition:opacity .14s, background .14s, color .14s; }
+    .rec-qs .rec-row-x { margin-top:7px; }
+    .rec-qs li:hover .rec-row-x, .rec-qs li:focus-within .rec-row-x,
+    .rec-rounds li:hover .rec-row-x,
+    .rec-rounds li:focus-within .rec-row-x { opacity:1; }
+    .rec-row-x:hover { background:#FFF1F0; color:#B4443C; }
+    .rec-row-x:focus-visible { opacity:1; outline:2px solid #7C5CF6;
+                               outline-offset:1px; }
+    @media (hover: none) {
+      .rec-row-x { opacity:1; }
+    }
+
     /* a row straight under a part heading needs no rule above it:
        the heading is already the separation */
     .rec-part-head + .rec-role-row { border-top:0; padding-top:2px; }
@@ -1742,38 +1812,7 @@
                  text-align:right; outline:none; }
     .rec-r-min:hover { border-bottom-color:#E7E2F6; }
     .rec-r-min:focus { border-bottom-color:#7C5CF6; }
-    .rec-jd-see { border:0; padding:0 0 1px; background:none; font:inherit;
-                  font-size:inherit; color:#6B4BE8; cursor:pointer;
-                  text-decoration:underline; text-underline-offset:3px; }
-    .rec-jd-see:hover { color:#4A32C0; }
 
-    /* the document itself */
-    /* above the flow (300), which is what it is opened from */
-    .rec-jd-ov { position:fixed; inset:0; z-index:320; display:flex;
-                 align-items:center; justify-content:center; padding:24px;
-                 background:rgba(18,16,34,.42); }
-    .rec-jd-sheet { display:flex; flex-direction:column; width:min(680px,100%);
-                    max-height:min(76vh,760px); border-radius:16px;
-                    background:#FFFFFF; overflow:hidden;
-                    box-shadow:0 24px 64px rgba(18,22,32,.24); }
-    .rec-jd-top { display:flex; align-items:center; gap:12px;
-                  padding:14px 18px; border-bottom:1px solid #F0EDF7; }
-    .rec-jd-top b { flex:1; min-width:0; font-size:14px; color:#1A1430;
-                    overflow:hidden; text-overflow:ellipsis;
-                    white-space:nowrap; }
-    .rec-jd-open { flex:none; font-size:12.5px; color:#6B4BE8;
-                   text-decoration:underline; text-underline-offset:3px; }
-    .rec-jd-x { flex:none; width:28px; height:28px; border:0; border-radius:50%;
-                background:#F4F2FB; color:#6B6487; font-size:17px;
-                line-height:1; cursor:pointer; }
-    .rec-jd-x:hover { background:#EAE6F8; color:#1A1430; }
-    .rec-jd-text { margin:0; padding:18px; overflow:auto; font:inherit;
-                   font-size:13px; line-height:1.6; color:#3A3356;
-                   white-space:pre-wrap; word-break:break-word; }
-    @media (max-width:560px) {
-      .rec-rounds li { flex-wrap:wrap; }
-      .rec-r-in { flex-basis:100%; order:2; }
-    }
 
     @media (max-width:560px) {
       .rec-role-row { align-items:flex-start; flex-direction:column; gap:4px; }
@@ -4440,7 +4479,7 @@
           v: FLOW_V,
           role: brief.role, website: brief.website,
           who: company.who, logo: company.logo, based: company.based || '',
-          rounds: role.rounds,
+          people: company.people || '', rounds: role.rounds,
           screens: kept
         }));
       } catch (e) {}
@@ -4481,7 +4520,9 @@
     // what the last step shows, and what a change to it touches
     var role = { title: '', place: '', mode: '', years: '',
                  skills: '', pay: '', pay_from: '', pay_for: '',
-                 pay_refs: [], questions: [], rounds: [] };
+                 pay_refs: [], questions: [], rounds: [], team: [],
+                 tab: 'role' };
+    var jd_url = '';          // the original, once, for the link
     var jd_file = null;       // the file itself, to open the original
     var jd_name = '';         // what it was called
 
@@ -4507,10 +4548,21 @@
                 'none of it is fixed.'
               : 'A starting point. Change anything — none of it is ' +
                 'fixed.') +
-          (jd ? ' <button type="button" class="rec-jd-see">View the job ' +
-                'description</button>' : '') +
         '</p>' +
+        (at >= 3 && jd
+          ? '<div class="rec-tabs" role="tablist">' +
+              [['role', 'Role details'], ['jd', 'Job description']]
+                .map(function (t) {
+                  return '<button type="button" class="rec-tab' +
+                    (role.tab === t[0] ? ' is-on' : '') + '" role="tab" ' +
+                    'aria-selected="' + (role.tab === t[0]) + '" ' +
+                    'data-tab="' + t[0] + '">' + esc(t[1]) + '</button>';
+                }).join('') +
+            '</div>'
+          : '') +
         '<div class="rec-found-card">' +
+          (role.tab === 'jd' && jd ? jd_panel() : '') +
+          (role.tab === 'jd' && jd ? '' :
           '<div class="rec-role">' +
             ROLE_ROWS.slice(0, 2).map(role_row).join('') +
             '<div class="rec-role-row"><i>Work mode</i>' +
@@ -4523,24 +4575,28 @@
                 }).join('') +
               '</span></div>' +
             ROLE_ROWS.slice(2).map(role_row).join('') +
-          '</div>' +
+          '</div>') +
 
-          (at >= 1 ?
+          (at >= 1 && role.tab === 'role' ?
           '<div class="rec-part">' +
-            '<h3 class="rec-part-head">Screening questions</h3>' +
+            '<h3 class="rec-part-head">Screening questions' +
+              '<button type="button" class="rec-part-add" data-add="qs" ' +
+                'aria-label="Add a question">+</button></h3>' +
             '<ol class="rec-qs">' +
               role.questions.map(function (q, i) {
                 return '<li><b>' + (i + 1) + '</b>' +
                   // one row to start: grow() sizes it to its contents
                   '<textarea class="rec-q-in" rows="1" data-q="' + i + '">' +
-                  esc(q) + '</textarea></li>';
+                  esc(q) + '</textarea>' + row_x('qs', i) + '</li>';
               }).join('') +
             '</ol>' +
           '</div>' : '') +
 
-          (at >= 2 ?
+          (at >= 2 && role.tab === 'role' ?
           '<div class="rec-part">' +
-            '<h3 class="rec-part-head">Interview rounds</h3>' +
+            '<h3 class="rec-part-head">Interview rounds' +
+              '<button type="button" class="rec-part-add" data-add="rounds" ' +
+                'aria-label="Add a round">+</button></h3>' +
             '<ol class="rec-rounds">' +
               role.rounds.map(function (r, i) {
                 return '<li><b>' + (i + 1) + '</b>' +
@@ -4548,12 +4604,13 @@
                     esc(r.say) + '">' +
                   '<span class="rec-r-mins">' +
                     '<input class="rec-r-min" data-m="' + i + '" value="' +
-                      esc(r.mins) + '" inputmode="numeric">min</span></li>';
+                      esc(r.mins) + '" inputmode="numeric">min</span>' +
+                  row_x('rounds', i) + '</li>';
               }).join('') +
             '</ol>' +
           '</div>' : '') +
 
-          (at >= 3 ?
+          (at >= 3 && role.tab === 'role' ?
           '<div class="rec-part">' +
             '<h3 class="rec-part-head">Pay</h3>' +
             '<div class="rec-role-row"><i>Salary</i>' +
@@ -4580,11 +4637,64 @@
               '…</span><b></b></p>'
             : '') +
 
+          (at >= 3 && role.tab === 'role' ?
+          '<div class="rec-part">' +
+            '<h3 class="rec-part-head">Hiring team' +
+              '<button type="button" class="rec-invite" data-invite="1">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                  'stroke-width="1.9" stroke-linecap="round" ' +
+                  'stroke-linejoin="round" aria-hidden="true">' +
+                  '<circle cx="9" cy="8" r="3.2"/>' +
+                  '<path d="M3.5 19a5.5 5.5 0 0 1 11 0"/>' +
+                  '<path d="M18 8.5v5M20.5 11h-5"/></svg>Invite</button>' +
+            '</h3>' +
+            (role.team.length
+              ? '<ul class="rec-team">' +
+                  role.team.map(function (who, i) {
+                    return '<li><input class="rec-team-in" type="email" ' +
+                      'data-t="' + i + '" value="' + esc(who) + '" ' +
+                      'placeholder="name@' +
+                      esc(board_addr((company && company.who) || '')
+                            .replace('.mira.jobs', '.com')) + '">' +
+                      row_x('team', i) + '</li>';
+                  }).join('') +
+                '</ul>' +
+                '<p class="rec-part-say">They get access when you open the ' +
+                  'account. Nothing is sent from this page.</p>'
+              : '<p class="rec-part-say">Whoever is interviewing can read ' +
+                'every application as it lands' +
+                ((company && company.people)
+                  ? ' \u2014 ' + esc(company.people) + ' people at ' +
+                    esc(company.who)
+                  : '') + '.</p>') +
+          '</div>' : '') +
+
           (at >= 3
             ? '<button type="button" class="rec-flow-next rec-ready-go" ' +
               'data-login="1">Sign in to your account</button>'
             : '') +
         '</div>' +
+      '</div>';
+    }
+
+    // the way out of a row, kept quiet until the row is pointed at
+    function row_x(key, i) {
+      return '<button type="button" class="rec-row-x" data-drop="' + key +
+        '" data-i="' + i + '" aria-label="Remove this one">\u00d7</button>';
+    }
+
+    // the document itself, under the second tab
+    function jd_panel() {
+      var link = '';
+      if (jd_file) {
+        if (!jd_url) jd_url = window.URL.createObjectURL(jd_file);
+        link = '<a class="rec-jd-open" href="' + esc(jd_url) + '" ' +
+          'target="_blank" rel="noopener">Open the original</a>';
+      }
+      return '<div class="rec-jd-panel">' +
+        '<p class="rec-jd-name"><b>' + esc(jd_name || 'The job ' +
+          'description') + '</b>' + link + '</p>' +
+        '<pre class="rec-jd-text">' + esc(jd.text || '') + '</pre>' +
       '</div>';
     }
 
@@ -4913,48 +5023,68 @@
           kept_again();
         });
       });
-      var see = root.querySelector('.rec-jd-see');
-      if (see) see.addEventListener('click', show_jd);
+
+      // adding and removing redraw the screen from the same state the
+      // rest of it reads, so nothing has to be told what changed
+      function again(focus_k) {
+        root.innerHTML = role_html();
+        wire_role(root);
+        kept[2] = role_html();
+        rail_draw();
+        remember();
+        if (focus_k) {
+          var box = root.querySelector(focus_k);
+          if (box) box.focus();
+        }
+      }
+
+      root.querySelectorAll('[data-add]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          if (b.getAttribute('data-add') === 'qs') {
+            role.questions.push('');
+            again('.rec-q-in[data-q="' + (role.questions.length - 1) + '"]');
+          } else {
+            role.rounds.push({ say: '', mins: '30' });
+            again('.rec-r-in[data-r="' + (role.rounds.length - 1) + '"]');
+          }
+        });
+      });
+
+      root.querySelectorAll('[data-drop]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var at = Number(b.getAttribute('data-i'));
+          var which = b.getAttribute('data-drop');
+          var list = which === 'qs' ? role.questions
+            : which === 'team' ? role.team : role.rounds;
+          list.splice(at, 1);
+          again('');
+        });
+      });
+
+
+      root.querySelectorAll('[data-tab]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          role.tab = b.getAttribute('data-tab');
+          again('');
+        });
+      });
+
+      root.querySelectorAll('[data-invite]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          role.team.push('');
+          again('.rec-team-in[data-t="' + (role.team.length - 1) + '"]');
+        });
+      });
+      root.querySelectorAll('.rec-team-in').forEach(function (box) {
+        box.addEventListener('input', function () {
+          role.team[Number(box.getAttribute('data-t'))] = box.value;
+          kept_again();
+        });
+      });
+
       root.querySelectorAll('[data-login]').forEach(function (b) {
         b.addEventListener('click', open_account);
       });
-    }
-
-    // the document all of this was read out of, kept one click away
-    function show_jd() {
-      if (!jd) return;
-      var box = document.createElement('div');
-      box.className = 'rec-jd-ov';
-      box.innerHTML =
-        '<div class="rec-jd-sheet" role="dialog" aria-modal="true" ' +
-          'aria-label="The job description">' +
-          '<div class="rec-jd-top"><b>' + esc(jd_name || 'The job ' +
-            'description') + '</b>' +
-            (jd_file ? '<a class="rec-jd-open" target="_blank" rel="noopener">' +
-              'Open the original</a>' : '') +
-            '<button type="button" class="rec-jd-x" aria-label="Close">' +
-              '×</button></div>' +
-          '<pre class="rec-jd-text">' + esc(jd.text || '') + '</pre>' +
-        '</div>';
-      document.body.appendChild(box);
-
-      var url = '';
-      var link = box.querySelector('.rec-jd-open');
-      if (link && jd_file) {
-        url = window.URL.createObjectURL(jd_file);
-        link.href = url;
-      }
-      function shut() {
-        if (url) window.URL.revokeObjectURL(url);
-        box.remove();
-        document.removeEventListener('keydown', esc_shut);
-      }
-      function esc_shut(e) { if (e.key === 'Escape') shut(); }
-      box.querySelector('.rec-jd-x').addEventListener('click', shut);
-      box.addEventListener('click', function (e) {
-        if (e.target === box) shut();
-      });
-      document.addEventListener('keydown', esc_shut);
     }
 
     // ---- what a step made, under that step --------------------------
@@ -5026,8 +5156,12 @@
         : []);
 
       rail_set(2, 'jd', 'Job description', '', jd
-        ? [{ say: jd_name || 'The job description', end: 'open',
-             go: show_jd }]
+        ? [{ say: jd_name || 'The job description', end: 'read',
+             go: function () {
+               role.tab = 'jd';
+               kept[2] = role_html();
+               show_details(2, true);
+             } }]
         : []);
 
       // a set that was empty once and filled later was appended last, so
@@ -5483,7 +5617,8 @@
           // let it be read at full size before it becomes a card
           window.setTimeout(function () {
             if (!flow || flow.hidden) return;
-            found = { who: who, logo: logo, based: vals.Based || '' };
+            found = { who: who, logo: logo, based: vals.Based || '',
+                      people: vals.People || '' };
             company = found;
             flow.classList.add('is-found');
             open_i = null;
@@ -5977,6 +6112,7 @@
                       ' — here, in your browser.');
       read_jd(file).then(function (text) {
         drop_busy(false);
+        if (jd_url) { window.URL.revokeObjectURL(jd_url); jd_url = ''; }
         jd_file = file;
         jd_name = file.name || '';
         from_jd(text, file.name || 'the file');
@@ -6076,7 +6212,8 @@
       flow.classList.add('is-working');
       flow.classList.add('is-found');
       flow.querySelector('.rec-flow-card').innerHTML = '';
-      company = { who: was.who, logo: was.logo, based: was.based || '' };
+      company = { who: was.who, logo: was.logo, based: was.based || '',
+                  people: was.people || '' };
       put_mini(0, was.who, was.website || '', was.logo, screens[0]);
       var last = 0;
       if (screens[1]) { put_mini(1, 'Job board', board_addr(was.who),

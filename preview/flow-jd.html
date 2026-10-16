@@ -281,9 +281,6 @@
     .rec-compose.is-over { border-color:#7C5CF6;
                            box-shadow:0 8px 28px rgba(124,92,246,.18); }
     .rec-compose.is-over::after { opacity:1; }
-    .rec-drop-note { margin:10px 0 0; text-align:center; font-size:12.5px;
-                     color:#8A93A6; }
-    .rec-drop-note[hidden] { display:none; }
     .rec-drop-err { margin:10px 0 0; text-align:center; font-size:12.5px;
                     color:#B4443C; }
     .rec-drop-err[hidden] { display:none; }
@@ -1683,8 +1680,7 @@
                      font-weight:700; color:#1A1430; }
     .rec-part-head span { font-size:12px; font-weight:500; color:#9A93B8; }
     .rec-part-say { margin:10px 0 0; font-size:12.5px; color:#9A93B8; }
-    .rec-tabs { display:flex; gap:4px; margin:18px 0 0;
-                border-bottom:1px solid #EDE9F8; }
+    .rec-tabs { display:flex; gap:4px; margin:18px 0 10px; }
     .rec-tab { position:relative; padding:9px 14px; border:0;
                background:none; font:inherit; font-size:13.5px;
                font-weight:600; color:#8A82A8; cursor:pointer;
@@ -1692,7 +1688,7 @@
     .rec-tab:hover { color:#4E4766; }
     .rec-tab.is-on { color:#1A1430; }
     .rec-tab.is-on::after { content:""; position:absolute; left:10px;
-                            right:10px; bottom:-1px; height:2px;
+                            right:10px; bottom:2px; height:2px;
                             border-radius:2px; background:#7C5CF6; }
     .rec-tab:focus-visible { outline:2px solid #7C5CF6; outline-offset:-2px;
                              border-radius:8px; }
@@ -1729,11 +1725,10 @@
                          padding-left:10px; }
     .rec-part-add { margin-left:auto; flex:none; width:24px; height:24px;
                     display:grid; place-items:center; border-radius:7px;
-                    border:1px solid #ECE7F9; background:#FFFFFF;
-                    color:#6B4BE8; font:inherit; font-size:16px;
-                    line-height:1; cursor:pointer;
-                    transition:background .14s, border-color .14s; }
-    .rec-part-add:hover { background:#F7F5FE; border-color:#BCAEF0; }
+                    border:0; background:none; color:#A49CC0; font:inherit;
+                    font-size:17px; line-height:1; cursor:pointer;
+                    transition:background .14s, color .14s; }
+    .rec-part-add:hover { background:#F4F2FB; color:#6B4BE8; }
     .rec-part-add:focus-visible { outline:2px solid #7C5CF6;
                                   outline-offset:2px; }
     /* destructive, and there are six of them: not until it is wanted */
@@ -1908,6 +1903,11 @@
       .rec-step-row b { display:none; }
       .rec-step + .rec-step { flex:1; }
     }
+    .rec-flow-acts { display:inline-flex; align-items:center; gap:10px; }
+    .rec-invite-top[hidden] { display:none; }
+    .rec-invite-n { font-style:normal; font-weight:600; color:#A49CC0; }
+    .rec-invite-n:not(:empty)::before { content:" b7"; margin:0 5px 0 2px;
+                                        color:#CFC7E8; }
     .rec-flow-cta { padding:9px 16px; border:0; border-radius:8px;
                     background:#1A1430; color:#FFFFFF; font:inherit;
                     font-size:13.5px; font-weight:600; cursor:pointer;
@@ -1947,9 +1947,9 @@
                      display:flex; align-items:flex-start;
                      justify-content:flex-start;
                      padding:clamp(24px, 4vw, 56px) clamp(18px, 3vw, 40px); }
-    /* auto across, nothing down: centred in the column, top of the
-       window, and still scrollable when it is taller than one */
-    .rec-flow-card { width:min(680px, 100%); margin:0 auto; }
+    /* no margin either way: beside the panel, at the top of the window,
+       and still scrollable when it is taller than one */
+    .rec-flow-card { width:min(680px, 100%); margin:0; }
     .rec-flow-q { margin:0 0 10px; color:#1A1430;
                   font-size:clamp(24px, 1.8vw + 14px, 40px); font-weight:600;
                   line-height:1.16; letter-spacing:-0.028em; text-wrap:balance; }
@@ -2269,6 +2269,7 @@
                                         justify-content:flex-start; }
     .rec-flow.is-found .rec-flow-card { width:min(520px, 100%); }
     /* content first; the card draws itself once the facts have landed */
+    .rec-tabs + .rec-found-card { margin-top:14px; }
     .rec-found-card { padding:0; border-radius:18px;
                       border:1px solid transparent; background:transparent;
                       box-shadow:0 2px 18px rgba(18,22,32,0);
@@ -4033,24 +4034,34 @@
   var JD_MAX = 8 * 1024 * 1024;
   var JD_PAGES = 12;
 
+  // what is wrong with this file, said in one line, or '' if nothing is.
+  // Answerable without reading it, which is why the flow can wait on it.
+  function jd_why_not(file) {
+    if (!file) return 'No file there.';
+    if (file.size > JD_MAX) {
+      return 'That file is over 8MB \u2014 try the text, or a smaller ' +
+        'export.';
+    }
+    var name = (file.name || '').toLowerCase();
+    if (/\.(txt|md|text)$/.test(name) || file.type === 'text/plain') return '';
+    if (/\.docx?$/.test(name)) {
+      return 'I can\u2019t read Word files yet \u2014 paste the text, or ' +
+        'export it as a PDF.';
+    }
+    if (!/\.pdf$/.test(name) && file.type !== 'application/pdf') {
+      return 'That looks like a ' + (name.split('.').pop() || 'file') +
+        '. I can read a PDF or text.';
+    }
+    return '';
+  }
+
   // resolves to text, or rejects with something worth showing a person
   function read_jd(file) {
-    if (!file) return Promise.reject(new Error('no file'));
-    if (file.size > JD_MAX) {
-      return Promise.reject(new Error('That file is over 8MB — try the ' +
-        'text, or a smaller export.'));
-    }
+    var no = jd_why_not(file);
+    if (no) return Promise.reject(new Error(no));
     var name = (file.name || '').toLowerCase();
     if (/\.(txt|md|text)$/.test(name) || file.type === 'text/plain') {
       return file.text();
-    }
-    if (/\.docx?$/.test(name)) {
-      return Promise.reject(new Error('I can’t read Word files yet — ' +
-        'paste the text, or export it as a PDF.'));
-    }
-    if (!/\.pdf$/.test(name) && file.type !== 'application/pdf') {
-      return Promise.reject(new Error('That looks like a ' +
-        (name.split('.').pop() || 'file') + '. I can read a PDF or text.'));
     }
     return file.arrayBuffer().then(function (buf) {
       return pdfjs().then(function (lib) {
@@ -4416,8 +4427,19 @@
       flow.innerHTML =
         '<div class="rec-flow-head">' +
           '<img src="mira-logo.svg" width="1152" height="365" alt="Mira">' +
-          '<button type="button" class="rec-flow-cta" data-login="1">' +
-            'Publish role for free</button>' +
+          '<span class="rec-flow-acts">' +
+            '<button type="button" class="rec-invite rec-invite-top" ' +
+              'data-invite-top="1" hidden>' +
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+                'stroke-width="1.9" stroke-linecap="round" ' +
+                'stroke-linejoin="round" aria-hidden="true">' +
+                '<circle cx="9" cy="8" r="3.2"/>' +
+                '<path d="M3.5 19a5.5 5.5 0 0 1 11 0"/>' +
+                '<path d="M18 8.5v5M20.5 11h-5"/></svg>Invite' +
+              '<em class="rec-invite-n"></em></button>' +
+            '<button type="button" class="rec-flow-cta" data-login="1">' +
+              'Publish role for free</button>' +
+          '</span>' +
         '</div>' +
         '<div class="rec-flow-bar" aria-hidden="true">' +
           '<i></i><i></i><i></i></div>' +
@@ -4436,6 +4458,8 @@
 
       flow.querySelector('.rec-flow-cta')
           .addEventListener('click', open_account);
+      flow.querySelector('[data-invite-top]')
+          .addEventListener('click', invite_one);
       // the page behind is scroll-driven; it should stay where it was
       flow.addEventListener('wheel', function (e) {
         if (!flow.querySelector('.rec-flow-body').contains(e.target)) e.preventDefault();
@@ -4479,7 +4503,10 @@
           v: FLOW_V,
           role: brief.role, website: brief.website,
           who: company.who, logo: company.logo, based: company.based || '',
-          people: company.people || '', rounds: role.rounds,
+          people: company.people || '',
+          // the whole of it: a panel that comes back with one section is
+          // worse than one that comes back empty
+          rs: role, jd: jd, jd_name: jd_name,
           screens: kept
         }));
       } catch (e) {}
@@ -4489,6 +4516,30 @@
     function board_addr(who) {
       return String(who || '').toLowerCase().replace(/[^a-z0-9]/g, '') +
              '.mira.jobs';
+    }
+
+    // the header's invite: open the role, add a line, put the cursor in it
+    function invite_one() {
+      if (!kept[2]) return;
+      role.tab = 'role';
+      role.team.push('');
+      kept[2] = role_html();
+      show_details(2, true);
+      var face = flow.querySelector('.rec-flow-card');
+      var box = face && face.querySelector('.rec-team-in[data-t="' +
+        (role.team.length - 1) + '"]');
+      if (box) box.focus();
+    }
+
+    // it has somewhere to point once the role exists
+    function invite_ready() {
+      var b = flow && flow.querySelector('[data-invite-top]');
+      if (!b) return;
+      b.hidden = !kept[2];
+      // the headcount from the open register, where there is one. It was
+      // in the section's empty state, which no longer exists.
+      var n = b.querySelector('.rec-invite-n');
+      if (n) n.textContent = (company && company.people) || '';
     }
 
     // the account screen's one action, defined where a reopen can find it
@@ -4637,19 +4688,10 @@
               '…</span><b></b></p>'
             : '') +
 
-          (at >= 3 && role.tab === 'role' ?
+          (at >= 3 && role.tab === 'role' && role.team.length ?
           '<div class="rec-part">' +
-            '<h3 class="rec-part-head">Hiring team' +
-              '<button type="button" class="rec-invite" data-invite="1">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
-                  'stroke-width="1.9" stroke-linecap="round" ' +
-                  'stroke-linejoin="round" aria-hidden="true">' +
-                  '<circle cx="9" cy="8" r="3.2"/>' +
-                  '<path d="M3.5 19a5.5 5.5 0 0 1 11 0"/>' +
-                  '<path d="M18 8.5v5M20.5 11h-5"/></svg>Invite</button>' +
-            '</h3>' +
-            (role.team.length
-              ? '<ul class="rec-team">' +
+            '<h3 class="rec-part-head">Hiring team</h3>' +
+            ('<ul class="rec-team">' +
                   role.team.map(function (who, i) {
                     return '<li><input class="rec-team-in" type="email" ' +
                       'data-t="' + i + '" value="' + esc(who) + '" ' +
@@ -4661,12 +4703,7 @@
                 '</ul>' +
                 '<p class="rec-part-say">They get access when you open the ' +
                   'account. Nothing is sent from this page.</p>'
-              : '<p class="rec-part-say">Whoever is interviewing can read ' +
-                'every application as it lands' +
-                ((company && company.people)
-                  ? ' \u2014 ' + esc(company.people) + ' people at ' +
-                    esc(company.who)
-                  : '') + '.</p>') +
+            ) +
           '</div>' : '') +
 
           (at >= 3
@@ -4686,7 +4723,7 @@
     // the document itself, under the second tab
     function jd_panel() {
       var link = '';
-      if (jd_file) {
+      if (jd_file) {   // a refresh leaves the text without the file
         if (!jd_url) jd_url = window.URL.createObjectURL(jd_file);
         link = '<a class="rec-jd-open" href="' + esc(jd_url) + '" ' +
           'target="_blank" rel="noopener">Open the original</a>';
@@ -5069,12 +5106,6 @@
         });
       });
 
-      root.querySelectorAll('[data-invite]').forEach(function (b) {
-        b.addEventListener('click', function () {
-          role.team.push('');
-          again('.rec-team-in[data-t="' + (role.team.length - 1) + '"]');
-        });
-      });
       root.querySelectorAll('.rec-team-in').forEach(function (box) {
         box.addEventListener('input', function () {
           role.team[Number(box.getAttribute('data-t'))] = box.value;
@@ -5370,6 +5401,7 @@
           put_mini(2, 'Role details', role.title || 'as read', found.logo,
                    role_html());
           rail_draw();
+          invite_ready();
           // filed open: the screen it holds is the one on screen
           open_i = 2;
           var mine = flow.querySelector('.rec-done-card[data-for="2"]');
@@ -6025,12 +6057,61 @@
       p.hidden = !msg;
     }
 
-    function drop_busy(on, what) {
-      var p = under('rec-drop-note');
-      if (!p) return;
-      p.textContent = on ? what : '';
-      p.hidden = !on;
-      if (clip) clip.disabled = !!on;
+    // ---- the reader's three lines, on screen while they happen -------
+
+    var jd_jobs = [];
+    var jd_now = 0;
+    // 2 reader steps and 3 lookup ones, or 3 and 3 when the company has
+    // to be looked up. Which it is cannot be known until the document has
+    // been read, so until then the panel counts without a total rather
+    // than naming one it may have to take back.
+    var jd_total = 0;
+
+    function jd_paint() {
+      if (!flow || flow.hidden) return;
+      var card = flow.querySelector('.rec-flow-card');
+      if (!card) return;
+      card.innerHTML =
+        '<h2 class="rec-flow-q is-alone">Reading your job description</h2>' +
+        '<div class="rec-work" role="status" aria-live="polite">' +
+          '<p class="rec-work-head"><span class="rec-work-dot"></span>' +
+            'Mira is working on step ' + Math.min(jd_now + 1, jd_jobs.length) +
+            (jd_total ? ' of ' + jd_total : '') + '</p>' +
+          jd_jobs.slice(0, jd_now).map(function (say) {
+            return '<p class="rec-work-line is-done"><i>✓</i><span>' +
+              esc(say) + '</span></p>';
+          }).join('') +
+          (jd_now < jd_jobs.length
+            ? '<p class="rec-work-line is-now"><i>›</i><span>' +
+              esc(jd_jobs[jd_now]) + '…</span><b></b></p>'
+            : '') +
+        '</div>';
+    }
+
+    // open on step one: the question screen is drawn and replaced in the
+    // same tick, so it is never painted
+    function jd_begin(label) {
+      jd_jobs = [label];
+      jd_now = 0;
+      jd_total = 0;
+      open();
+      step_busy(0);
+      jd_paint();
+    }
+
+    // the line that was current is done; `say` renames it to what it found
+    function jd_tick(say, next) {
+      if (say) jd_jobs[jd_now] = say;
+      jd_now++;
+      if (next) jd_jobs.push(next);
+      jd_paint();
+    }
+
+    function jd_stop(why) {
+      jd_jobs = [];
+      jd_now = 0;
+      close();
+      drop_say(why);
     }
 
     // a name on the open register, turned into the domain the lookup wants
@@ -6079,47 +6160,99 @@
       on.click();
     }
 
-    function from_jd(text, label) {
+    // what the lookup's panel shows as already done, in its own words
+    function jd_done_lines() {
+      return jd_jobs.slice(0, jd_now);
+    }
+
+    function from_jd(text) {
       var got = window.jdParse(text);
       if (!got.title && !got.company && !got.site) {
-        drop_say('I couldn’t find a role or a company in that one. ' +
-                 'Paste the text instead?');
+        jd_stop('I couldn’t find a role or a company in that one. ' +
+                'Paste the text instead?');
         return;
       }
-      drop_say('');
       jd = got;
       if (got.title && !field.value.trim()) field.value = got.title;
-      jd_head = ['reading ' + label];
-      jd_head.push(got.title ? 'finding the role: ' + got.title
-                             : 'reading what it asks for');
 
-      if (got.site) { straight_to_lookup(got.site); return; }
-      if (!got.company) { open(); return; }   // ask for the website as usual
+      // known now: a domain in the document saves a step
+      jd_total = (got.site ? 2 : 3) + 3;
+      jd_tick(got.title ? 'finding the role: ' + got.title
+                        : 'reading what it asks for');
 
-      drop_busy(true, 'Looking up ' + got.company + '…');
-      find_site(got.company).then(function (host) {
-        drop_busy(false);
-        if (!host) { jd_head = []; open(); return; }
-        jd_head.push('looking up ' + got.company + ': ' + host);
-        straight_to_lookup(host);
+      if (got.site) {
+        jd_head = jd_done_lines();
+        window.setTimeout(function () { straight_to_lookup(got.site); }, 520);
+        return;
+      }
+      if (!got.company) {          // ask for the website as usual
+        jd_jobs = []; jd_now = 0;
+        open();
+        return;
+      }
+
+      // the parse is instant, so its line would be ticked in the same
+      // frame it appeared: let it stand before the next one starts
+      window.setTimeout(function () {
+        if (!flow || flow.hidden) return;
+        jd_jobs.push('looking up ' + got.company);
+        jd_paint();
+        go_find();
+      }, 520);
+      return;
+
+      function go_find() {
+      not_before(520, find_site(got.company)).then(function (host) {
+        if (!host) {               // nothing on the register: ask
+          jd_jobs = []; jd_now = 0;
+          jd_head = [];
+          open();
+          return;
+        }
+        jd_tick('looking up ' + got.company + ': ' + host);
+        jd_head = jd_done_lines();
+        window.setTimeout(function () { straight_to_lookup(host); }, 520);
       });
+      }
+    }
+
+    // the reading can be quicker than a line can be read. The work is
+    // real either way; this only stops it going by unseen.
+    function not_before(ms, work) {
+      return Promise.all([work, new Promise(function (ok) {
+        window.setTimeout(ok, ms);
+      })]).then(function (both) { return both[0]; });
     }
 
     function take_file(file) {
       if (!file) return;
       drop_say('');
-      drop_busy(true, 'Reading ' + (file.name || 'the file') +
-                      ' — here, in your browser.');
-      read_jd(file).then(function (text) {
-        drop_busy(false);
-        if (jd_url) { window.URL.revokeObjectURL(jd_url); jd_url = ''; }
-        jd_file = file;
-        jd_name = file.name || '';
-        from_jd(text, file.name || 'the file');
+      var no = jd_why_not(file);   // answerable now: nothing need open
+      if (no) { drop_say(no); return; }
+
+      jd_file = file;
+      jd_name = file.name || '';
+      jd_begin('reading ' + (file.name || 'the file'));
+      not_before(620, read_jd(file)).then(function (text) {
+        jd_tick('reading ' + (file.name || 'the file'),
+                'finding the role in it');
+        from_jd(text);
       }, function (err) {
-        drop_busy(false);
-        drop_say((err && err.message) || 'I couldn’t read that one.');
+        jd_stop((err && err.message) || 'I couldn’t read that one.');
       });
+    }
+
+    function take_text(text, label) {
+      drop_say('');
+      jd_file = null;
+      jd_name = label;
+      jd_begin('reading ' + label.toLowerCase());
+      // the text is already here, so this line is true for as long as it
+      // takes to read it, which is no time at all
+      window.setTimeout(function () {
+        jd_tick('reading ' + label.toLowerCase(), 'finding the role in it');
+        from_jd(text);
+      }, 480);
     }
 
     if (clip && drop_in) {
@@ -6147,9 +6280,7 @@
         if (dt && dt.files && dt.files.length) { take_file(dt.files[0]); return; }
         var text = dt && dt.getData && dt.getData('text/plain');
         if (text && text.length > 200) {
-          jd_file = null;
-          jd_name = 'The job description you dropped';
-          from_jd(text, 'the text you dropped');
+          take_text(text, 'The job description you dropped');
         }
       });
 
@@ -6163,9 +6294,7 @@
       if (shelf) shelf.appendChild(offer);
       offer.addEventListener('click', function () {
         offer.hidden = true;
-        jd_file = null;
-        jd_name = 'The job description you pasted';
-        from_jd(field.value, 'the text you pasted');
+        take_text(field.value, 'The job description you pasted');
       });
       field.addEventListener('paste', function (e) {
         var text = e.clipboardData && e.clipboardData.getData('text/plain');
@@ -6224,10 +6353,26 @@
         put_mini(2, 'Role details', said || 'as read', was.logo, screens[2]);
         last = 2;
       }
-      if (was.rounds) role.rounds = was.rounds;
-      if (was.role) role.title = String(was.role).split(',')[0].trim();
+      if (was.jd) { jd = was.jd; jd_name = was.jd_name || ''; }
+      if (was.rs) {
+        for (var key in was.rs) {
+          if (Object.prototype.hasOwnProperty.call(was.rs, key)) {
+            role[key] = was.rs[key];
+          }
+        }
+      }
+      // the file itself is not JSON, so there is no original to open
+      jd_file = null;
+      jd_url = '';
+      if (!role.title) role.title = String(was.role || '').split(',')[0].trim();
       rail_draw();
+      invite_ready();
       at_step(last, true);
+      // the last thing seen was a screen being edited, not a tucked rail
+      if (screens[2]) {
+        kept[2] = role_html();
+        show_details(2, true);
+      }
     }());
   }());
 

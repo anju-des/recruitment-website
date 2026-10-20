@@ -4416,7 +4416,7 @@
 
         '<div class="rec-flow-main">' +
           '<ol class="rec-steps">' +
-            ['Company details', 'Job board', 'Role details']
+            ['Company details', 'Career site', 'Role details']
               .map(function (s, i) {
                 return '<li class="rec-step">' +
                   '<span class="rec-step-row"><b>' + s + '</b></span></li>';
@@ -5125,7 +5125,7 @@
       if (kept[1]) {
         var said = (role.title || (brief.role || '').split(',')[0] || '')
           .trim();
-        rail_set(1, 'board', 'Board', said ? '1 role' : '', [
+        rail_set(1, 'board', 'Career site', said ? '1 role' : '', [
           { say: board_addr((company && company.who) || ''), end: 'live' }
         ].concat(said ? [{ say: said }] : []));
       }
@@ -5393,7 +5393,8 @@
 
         function panel() {
           card.innerHTML =
-            '<h2 class="rec-flow-q is-alone">Building your job board</h2>' +
+            '<h2 class="rec-flow-q is-alone">Building your career ' +
+              'site</h2>' +
             '<div class="rec-work" role="status" aria-live="polite">' +
               '<p class="rec-work-head"><span class="rec-work-dot"></span>' +
                 'Mira is working on step ' + Math.min(now + 1, jobs.length) +
@@ -5419,7 +5420,7 @@
         function made() {
           card.innerHTML =
             '<div class="rec-found-col">' +
-              '<h2 class="rec-flow-q">Your custom job board is ready' +
+              '<h2 class="rec-flow-q">Your career site is ready' +
                 '</h2>' +
               '<p class="rec-flow-hint">Built from your logo, your name and ' +
                 'the role you described. It goes live with your account.</p>' +
@@ -5446,7 +5447,7 @@
             if (!flow || flow.hidden) return;
             flow.classList.add('is-found');
             open_i = null;
-            put_mini(1, 'Job board', board_addr(found.who),
+            put_mini(1, 'Career site', board_addr(found.who),
                      found.logo, card.innerHTML);
             rail_draw();
             remember();
@@ -6308,7 +6309,7 @@
                   people: was.people || '' };
       put_mini(0, was.who, was.website || '', was.logo, screens[0]);
       var last = 0;
-      if (screens[1]) { put_mini(1, 'Job board', board_addr(was.who),
+      if (screens[1]) { put_mini(1, 'Career site', board_addr(was.who),
                                  was.logo, screens[1]);
                         last = 1; }
       if (screens[2]) {

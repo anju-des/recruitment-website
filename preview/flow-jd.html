@@ -4508,9 +4508,19 @@
     // the account screen's one action, defined where a reopen can find it
     function open_account() {
       close();
-      var login = document.querySelector('.rec-head .rec-login');
-      if (login) window.setTimeout(function () { login.click(); }, 200);
+      window.setTimeout(function () {
+        if (window.recAuthOpen) window.recAuthOpen();
+      }, 200);
     }
+
+    // Log in asks this first: true means the flow took the click, which
+    // it does whenever the company is still unknown
+    window.recAskCompany = function () {
+      if (company && company.who) return false;
+      if (flow && !flow.hidden) return false;
+      open();
+      return true;
+    };
 
     function show_details(i, on) {
       if (on && !kept[i]) return;
@@ -6273,6 +6283,8 @@
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
+      // nothing to go on: the field is the answer, not a screen
+      if (!field.value.trim()) { field.focus(); return; }
       open();
     });
 
@@ -6436,8 +6448,9 @@
       if (panel && !panel.hidden) hide();
     });
 
-    opener.addEventListener('click', function (e) {
-      e.preventDefault();
+    // opened by the account screen at the end of the flow, which cannot
+    // click the link any more: that leads back into the flow
+    function show_panel() {
       if (!panel) build();
       panel.classList.remove('is-out');
       panel.hidden = false;
@@ -6445,6 +6458,14 @@
       try {
         window.history.pushState({ recAuth: 1 }, '', '#login');
       } catch (err) {}
+    }
+    window.recAuthOpen = show_panel;
+
+    opener.addEventListener('click', function (e) {
+      e.preventDefault();
+      // the flow asks which company first, unless it already knows
+      if (window.recAskCompany && window.recAskCompany()) return;
+      show_panel();
     });
   }());
 
